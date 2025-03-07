@@ -81,7 +81,7 @@ export default function Admin() {
             {pendingProjects?.map((project) => (
               <div key={project.id} className="relative">
                 <ProjectCard project={project} />
-                <div className="absolute bottom-4 right-4 z-10">
+                <div className="absolute inset-x-0 bottom-4 flex justify-center">
                   <Button 
                     onClick={() => approveProject(project.id)}
                     className="bg-blue-500 hover:bg-blue-600 text-white"
