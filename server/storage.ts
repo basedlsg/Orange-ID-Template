@@ -2,7 +2,7 @@ import {
   users, type User, type InsertUser,
   projects, type Project, type InsertProject 
 } from "@shared/schema";
-import { db } from "./db";
+import { db, sql } from "./db";
 import { eq } from "drizzle-orm";
 
 export interface IStorage {
@@ -50,7 +50,11 @@ export class DatabaseStorage implements IStorage {
   async createProject(insertProject: InsertProject, userId: number): Promise<Project> {
     const [project] = await db
       .insert(projects)
-      .values({ ...insertProject, userId })
+      .values({
+        ...insertProject,
+        userId,
+        aiTools: sql`${insertProject.aiTools}::text[]`,
+      })
       .returning();
     return project;
   }
@@ -68,7 +72,9 @@ export class DatabaseStorage implements IStorage {
   async incrementViews(id: number): Promise<void> {
     await db
       .update(projects)
-      .set({ views: projects.views + 1 })
+      .set({
+        views: sql`${projects.views} + 1`,
+      })
       .where(eq(projects.id, id));
   }
 }
