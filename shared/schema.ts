@@ -52,7 +52,7 @@ export const insertProjectSchema = createInsertSchema(projects)
     description: z.string().max(100),
     url: z.string().url(),
     xHandle: z.string().optional(),
-    aiTools: z.array(z.enum(PREDEFINED_AI_TOOLS)).min(1, "Select at least one AI tool"),
+    aiTools: z.array(z.string()).min(1, "Select at least one AI tool"),
     customAiTools: z.array(z.string()).optional(),
   });
 
