@@ -40,6 +40,8 @@ export default function Submit() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {
+      let projectData = { ...data };
+
       // Handle file upload if a file is selected
       if (data.thumbnailFile instanceof File) {
         const formData = new FormData();
@@ -48,10 +50,17 @@ export default function Submit() {
           method: "POST",
           body: formData,
         });
+        if (!uploadRes.ok) {
+          throw new Error("Failed to upload thumbnail");
+        }
         const { url } = await uploadRes.json();
-        data.thumbnail = url;
+        projectData.thumbnail = url;
       }
-      await apiRequest("POST", "/api/projects", data);
+
+      // Remove thumbnailFile from data before sending to API
+      delete projectData.thumbnailFile;
+
+      await apiRequest("POST", "/api/projects", projectData);
     },
     onSuccess: () => {
       toast({
@@ -60,10 +69,10 @@ export default function Submit() {
       });
       setLocation("/");
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to submit project",
+        description: error instanceof Error ? error.message : "Failed to submit project",
         variant: "destructive",
       });
     },
