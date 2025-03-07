@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useState } from "react";
+import { SiX } from "react-icons/si";
 
 export default function Submit() {
   const [, setLocation] = useLocation();
@@ -122,6 +123,14 @@ export default function Submit() {
   const handleGoToExplore = () => {
     setShowSuccessModal(false);
     setLocation("/");
+  };
+
+  const handleConnectX = async () => {
+    // For now, we'll show a toast indicating this feature is coming soon
+    toast({
+      title: "Coming Soon",
+      description: "X authentication will be available shortly!",
+    });
   };
 
   return (
@@ -262,9 +271,20 @@ export default function Submit() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-zinc-400">X Handle (optional)</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
-                      </FormControl>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleConnectX}
+                          className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 flex items-center gap-2"
+                        >
+                          <SiX className="h-4 w-4" />
+                          Connect X
+                        </Button>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
