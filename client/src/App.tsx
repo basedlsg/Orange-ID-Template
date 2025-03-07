@@ -94,12 +94,43 @@ function ProtectedRoute({
   const [isDialogOpen, setIsDialogOpen] = useState(true);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!isDialogOpen) {
       setLocation("/");
     }
   }, [isDialogOpen, setLocation]);
+
+  // Check admin status when user is logged in
+  useEffect(() => {
+    if (isLoggedIn && user && (user.sub || user.id)) {
+      fetch(`/api/users/check-admin?orangeId=${user.sub || user.id}`)
+        .then(response => response.json())
+        .then(data => {
+          setIsAdmin(data.isAdmin);
+          if (requiresAdmin && !data.isAdmin) {
+            toast({
+              variant: "destructive",
+              title: "Access Denied",
+              description: "You need admin privileges to access this page.",
+            });
+            setLocation("/");
+          }
+        })
+        .catch(error => {
+          console.error("Error checking admin status:", error);
+          if (requiresAdmin) {
+            toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Could not verify admin privileges.",
+            });
+            setLocation("/");
+          }
+        });
+    }
+  }, [isLoggedIn, user, requiresAdmin]);
 
   if (!isLoggedIn && !loading) {
     sessionStorage.setItem("returnPath", location);
@@ -152,42 +183,7 @@ function ProtectedRoute({
     );
   }
 
-  // Check if user exists and has admin privileges (only check database isAdmin flag)
-  if (requiresAdmin) {
-    if (!user) {
-      toast({
-        variant: "destructive",
-        title: "Access Denied",
-        description: "User information not available.",
-      });
-      setLocation("/");
-      return null;
-    }
-
-    // Get the user data from our database to check admin status
-    fetch(`/api/users/check-admin?orangeId=${user.sub || user.id}`)
-      .then(response => response.json())
-      .then(data => {
-        if (!data.isAdmin) {
-          toast({
-            variant: "destructive",
-            title: "Access Denied",
-            description: "You need admin privileges to access this page.",
-          });
-          setLocation("/");
-        }
-      })
-      .catch(error => {
-        console.error("Error checking admin status:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Could not verify admin privileges.",
-        });
-        setLocation("/");
-      });
-  }
-
+  // Return the protected component if all checks pass
   return <Component />;
 }
 
