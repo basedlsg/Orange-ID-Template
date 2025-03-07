@@ -45,16 +45,6 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
               {tool}
             </Badge>
           ))}
-          {project.openForSponsorship && (
-            <Badge variant="secondary" className="bg-green-500/10 text-green-400 cursor-pointer" onClick={(e) => {
-              e.stopPropagation();
-              if (project.sponsorshipUrl) {
-                window.open(project.sponsorshipUrl, "_blank");
-              }
-            }}>
-              💎 Open for Sponsorship
-            </Badge>
-          )}
         </div>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 text-sm text-zinc-400">
@@ -63,9 +53,9 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
               <span>{project.views}</span>
             </div>
             {project.xHandle && (
-              <Button
-                variant="ghost"
-                size="sm"
+              <Button 
+                variant="ghost" 
+                size="sm" 
                 onClick={handleXClick}
                 className="text-zinc-400 hover:text-blue-400 p-0 h-auto"
               >
@@ -73,9 +63,9 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
               </Button>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
+          <Button 
+            variant="ghost" 
+            size="sm" 
             onClick={handleClick}
             className="text-zinc-400 hover:text-white hover:bg-zinc-800"
           >
