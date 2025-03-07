@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Eye } from "lucide-react";
+import { ExternalLink, Eye, Sparkles } from "lucide-react";
 import { SiX } from "react-icons/si";
 import type { Project } from "@shared/schema";
 
@@ -23,8 +23,15 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
     window.open(`https://x.com/${project.xHandle}`, "_blank");
   };
 
+  const handleSponsorshipClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (project.sponsorshipUrl) {
+      window.open(project.sponsorshipUrl, "_blank");
+    }
+  };
+
   return (
-    <Card className="group overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800">
+    <Card className="group relative overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800">
       <div className="aspect-video overflow-hidden bg-zinc-900">
         <img
           src={project.thumbnail || "https://images.unsplash.com/photo-1531297484001-80022131f5a1"}
@@ -40,6 +47,16 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
       <CardContent className="p-4 pt-0">
         <p className="mb-4 text-sm text-zinc-400">{project.description}</p>
         <div className="flex flex-wrap gap-2 mb-4">
+          {project.sponsorshipEnabled && (
+            <Badge 
+              variant="secondary" 
+              className="bg-purple-500/10 text-purple-400 cursor-pointer"
+              onClick={handleSponsorshipClick}
+            >
+              <Sparkles className="mr-1 h-3 w-3" />
+              Open for Sponsorship
+            </Badge>
+          )}
           {project.aiTools.map((tool) => (
             <Badge key={tool} variant="secondary" className="bg-blue-500/10 text-blue-400">
               {tool}

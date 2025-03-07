@@ -12,6 +12,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useState } from "react";
+import { Switch } from "@/components/ui/switch";
 
 export default function Submit() {
   const [, setLocation] = useLocation();
@@ -37,6 +39,8 @@ export default function Submit() {
       aiTools: [PREDEFINED_AI_TOOLS[0]], // Set default to first predefined tool
       thumbnail: "",
       xHandle: "",
+      sponsorshipEnabled: false, //Added default value
+      sponsorshipUrl: "", //Added default value
     },
   });
 
@@ -265,6 +269,52 @@ export default function Submit() {
                       <FormControl>
                         <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="sponsorshipEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border border-zinc-800 p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base text-zinc-400">
+                          Open for Sponsorship
+                        </FormLabel>
+                        <FormDescription className="text-sm text-zinc-500">
+                          Enable if your project accepts sponsors
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="sponsorshipUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-zinc-400">Sponsorship URL (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="url"
+                          disabled={!form.watch("sponsorshipEnabled")}
+                          className="bg-zinc-900 border-zinc-700 text-white"
+                          placeholder="https://..."
+                        />
+                      </FormControl>
+                      <FormDescription className="text-sm text-zinc-500">
+                        Link to your sponsorship or pricing page
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
