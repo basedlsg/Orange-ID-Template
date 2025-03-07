@@ -54,18 +54,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProject(insertProject: InsertProject, userId: number): Promise<Project> {
-    // Get default user if userId is not provided
     if (!userId) {
-      const [defaultUser] = await db
-        .select()
-        .from(users)
-        .where(eq(users.username, 'default'))
-        .limit(1);
-
-      if (!defaultUser) {
-        throw new Error("Default user not found");
-      }
-      userId = defaultUser.id;
+      throw new Error("User ID is required to create a project");
     }
 
     // Convert aiTools array to PostgreSQL array literal format
