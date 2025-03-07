@@ -38,7 +38,7 @@ export function Logo({ className, ...props }: LogoProps) {
           strokeLinejoin="round"
         />
       </svg>
-      <span className="text-xl font-bold">VibeCodingList</span>
+      <span className="text-xl font-bold">VibeCodingList.com</span>
     </div>
   );
 }
