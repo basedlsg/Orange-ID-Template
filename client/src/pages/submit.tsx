@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProjectSchema, type InsertProject } from "@shared/schema";
+import { insertProjectSchema, type InsertProject, PREDEFINED_AI_TOOLS } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -33,7 +33,6 @@ export default function Submit() {
       description: "",
       url: "",
       aiTools: [],
-      customAiTools: [],
       thumbnail: "",
       xHandle: "",
     },
@@ -164,12 +163,25 @@ export default function Submit() {
                           </Badge>
                         ))}
                       </div>
+                      <div className="grid grid-cols-2 gap-2 mb-2">
+                        {PREDEFINED_AI_TOOLS.map((tool) => (
+                          <Button
+                            key={tool}
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleAddTool(tool)}
+                            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
+                          >
+                            {tool}
+                          </Button>
+                        ))}
+                      </div>
                       <div className="flex gap-2">
                         <Input
                           value={newTool}
                           onChange={(e) => setNewTool(e.target.value)}
                           onKeyPress={handleKeyPress}
-                          placeholder="Type and press Enter to add AI tool"
+                          placeholder="Type and press Enter to add custom AI tool"
                           className="bg-zinc-900 border-zinc-700 text-white"
                         />
                         <Button
@@ -182,23 +194,6 @@ export default function Submit() {
                         </Button>
                       </div>
                     </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="customAiTools"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-zinc-400">Other AI Tools (comma-separated)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        {...field}
-                        className="bg-zinc-900 border-zinc-700 text-white"
-                        onChange={(e) => field.onChange(e.target.value.split(',').map(s => s.trim()))}
-                      />
-                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
