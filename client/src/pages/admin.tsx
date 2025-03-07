@@ -8,13 +8,25 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 export default function Admin() {
   const { toast } = useToast();
 
-  // Use explicit URLs with query parameters
+  // Use explicit queryFn for debugging
   const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
-    queryKey: ["/api/projects?approved=false"],
+    queryKey: ["/api/projects", { approved: false }],
+    queryFn: async () => {
+      const response = await fetch("/api/projects?approved=false");
+      const data = await response.json();
+      console.log("Pending projects data:", data); // Debug log
+      return data;
+    },
   });
 
   const { data: approvedProjects, isLoading: isApprovedLoading } = useQuery<Project[]>({
-    queryKey: ["/api/projects?approved=true"],
+    queryKey: ["/api/projects", { approved: true }],
+    queryFn: async () => {
+      const response = await fetch("/api/projects?approved=true");
+      const data = await response.json();
+      console.log("Approved projects data:", data); // Debug log
+      return data;
+    },
   });
 
   const { mutate: approveProject } = useMutation({
@@ -23,8 +35,8 @@ export default function Admin() {
     },
     onSuccess: () => {
       // Invalidate both queries to refresh the lists
-      queryClient.invalidateQueries({ queryKey: ["/api/projects?approved=false"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects?approved=true"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", { approved: false }] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", { approved: true }] });
       toast({
         title: "Success",
         description: "Project approved",
@@ -42,6 +54,9 @@ export default function Admin() {
   if (isPendingLoading || isApprovedLoading) {
     return <div className="text-white">Loading...</div>;
   }
+
+  console.log("Rendering with pending projects:", pendingProjects); // Debug log
+  console.log("Rendering with approved projects:", approvedProjects); // Debug log
 
   return (
     <div className="min-h-screen bg-black">
