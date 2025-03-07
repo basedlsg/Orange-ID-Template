@@ -48,9 +48,9 @@ export const insertProjectSchema = createInsertSchema(projects)
   .extend({
     description: z.string().max(100),
     url: z.string().url(),
-    xHandle: z.string().optional(),
     aiTools: z.array(z.string()).min(1, "Select at least one AI tool"),
-    thumbnailFile: z.any().optional(), // Allow file upload
+    thumbnailFile: z.any().optional(),
+    xHandle: z.string().optional(),
   });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
