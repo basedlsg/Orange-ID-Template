@@ -51,10 +51,14 @@ export class DatabaseStorage implements IStorage {
     const [project] = await db
       .insert(projects)
       .values({
-        ...insertProject,
+        name: insertProject.name,
+        description: insertProject.description,
+        url: insertProject.url,
+        thumbnail: insertProject.thumbnail,
+        xHandle: insertProject.xHandle,
         userId,
-        // Format aiTools as a proper PostgreSQL array
-        aiTools: sql`ARRAY[${insertProject.aiTools}]::text[]`,
+        // Convert array to PostgreSQL array format
+        aiTools: sql`ARRAY[${sql.join(insertProject.aiTools.map(tool => sql`${tool}`))}]`,
       })
       .returning();
     return project;
