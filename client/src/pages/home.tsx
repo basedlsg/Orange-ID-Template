@@ -8,11 +8,11 @@ import { queryClient } from "@/lib/queryClient";
 export default function Home() {
   const [sortBy, setSortBy] = useState("newest");
 
-  // Only fetch approved projects for the home page
+  // Include sortBy in the queryKey to trigger refetch when it changes
   const { data: projects, isLoading } = useQuery<Project[]>({
-    queryKey: ["/api/projects", { approved: true }],
+    queryKey: ["/api/projects", { approved: true, sortBy }],
     queryFn: async () => {
-      const response = await fetch(`/api/projects?approved=true${sortBy ? `&sortBy=${sortBy}` : ''}`);
+      const response = await fetch(`/api/projects?approved=true&sortBy=${sortBy}`);
       if (!response.ok) {
         throw new Error("Failed to fetch projects");
       }
@@ -22,7 +22,7 @@ export default function Home() {
 
   const handleProjectView = (id: number) => {
     queryClient.setQueryData<Project[]>(
-      ["/api/projects", { approved: true }],
+      ["/api/projects", { approved: true, sortBy }],
       (old) =>
         old?.map((p) =>
           p.id === id ? { ...p, views: p.views + 1 } : p
