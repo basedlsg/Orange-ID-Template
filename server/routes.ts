@@ -40,10 +40,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Projects API
   app.get("/api/projects", async (req, res) => {
     try {
+      // Explicitly parse the approved parameter
+      // undefined means get all projects
+      // true means get only approved projects
+      // false means get only unapproved projects
       const approved = req.query.approved === "true" ? true : 
                       req.query.approved === "false" ? false : undefined;
       const sortBy = req.query.sortBy as string;
 
+      console.log("Fetching projects with approved:", approved);
       let projects = await storage.getProjects(approved);
 
       // Apply sorting
@@ -55,6 +60,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
       }
 
+      console.log(`Returning ${projects.length} projects`);
       res.json(projects);
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -91,9 +97,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/projects/:id/approve", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      console.log(`Approving project ${id}`);
       const project = await storage.approveProject(id);
+      console.log("Project approved:", project);
       res.json(project);
     } catch (error) {
+      console.error("Error approving project:", error);
       res.status(404).json({ error: "Project not found" });
     }
   });

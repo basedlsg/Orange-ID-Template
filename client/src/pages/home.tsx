@@ -8,6 +8,7 @@ import { queryClient } from "@/lib/queryClient";
 export default function Home() {
   const [sortBy, setSortBy] = useState("newest");
 
+  // Explicitly request only approved projects
   const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: true, sortBy }],
   });
