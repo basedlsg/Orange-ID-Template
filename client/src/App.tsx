@@ -83,8 +83,10 @@ function StoreUserData() {
 
 function ProtectedRoute({
   component: Component,
+  requiresAdmin = false,
 }: {
   component: React.ComponentType;
+  requiresAdmin?: boolean;
 }) {
   const [location] = useLocation();
   const { isLoggedIn, loading, signOut, user } = useBedrockPassport();
@@ -142,12 +144,7 @@ function ProtectedRoute({
             </button>
             <div className="bg-gradient-to-br from-orange-900/90 to-black/95 p-4 rounded-t-lg border-b border-orange-500/20 text-center">
               <p className="text-sm sm:text-base font-medium text-orange-200 leading-relaxed">
-                To qualify for{" "}
-                <span className="text-orange-400 font-semibold">$TOWN</span>{" "}
-                airdrops, please connect one of your socials and verify your
-                wallet holding your{" "}
-                <span className="text-orange-400 font-semibold">$TOWN</span>{" "}
-                tokens.
+                Please log in to {requiresAdmin ? "access admin features" : "submit your project"}.
               </p>
             </div>
             <LoginPanel
@@ -166,27 +163,29 @@ function ProtectedRoute({
               separatorClass="bg-orange-500/20"
               separatorText="or"
             />
-            {isLoggedIn && (
-              <div className="bg-black/95 p-4 mt-4 rounded-lg border border-orange-500/20">
-                <Button
-                  variant="ghost"
-                  className="w-full text-orange-400 hover:text-orange-300 hover:bg-orange-900/30"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </Button>
-              </div>
-            )}
           </div>
         </DialogContent>
       </Dialog>
     );
   }
 
+  // Check for admin requirement
+  if (requiresAdmin && (!user || user.role !== 'admin')) {
+    toast({
+      variant: "destructive",
+      title: "Access Denied",
+      description: "You need admin privileges to access this page.",
+    });
+    setLocation("/");
+    return null;
+  }
+
   return <Component />;
 }
 
 function Navigation() {
+  const { isLoggedIn, user } = useBedrockPassport();
+
   return (
     <nav className="border-b">
       <div className="container mx-auto flex h-16 items-center px-4">
@@ -196,16 +195,20 @@ function Navigation() {
           </span>
         </Link>
         <div className="ml-auto space-x-4">
-          <Link href="/submit">
-            <span className="text-sm font-medium hover:text-primary cursor-pointer">
-              Submit Project
-            </span>
-          </Link>
-          <Link href="/admin">
-            <span className="text-sm font-medium hover:text-primary cursor-pointer">
-              Admin
-            </span>
-          </Link>
+          {isLoggedIn && (
+            <Link href="/submit">
+              <span className="text-sm font-medium hover:text-primary cursor-pointer">
+                Submit Project
+              </span>
+            </Link>
+          )}
+          {isLoggedIn && user?.role === 'admin' && (
+            <Link href="/admin">
+              <span className="text-sm font-medium hover:text-primary cursor-pointer">
+                Admin
+              </span>
+            </Link>
+          )}
         </div>
       </div>
     </nav>
@@ -216,8 +219,12 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/submit" component={Submit} />
-      <Route path="/admin" component={Admin} />
+      <Route path="/submit">
+        <ProtectedRoute component={Submit} />
+      </Route>
+      <Route path="/admin">
+        <ProtectedRoute component={Admin} requiresAdmin={true} />
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
