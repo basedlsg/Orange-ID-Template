@@ -24,9 +24,7 @@ export const projects = pgTable("projects", {
   description: text("description").notNull(),
   url: text("url").notNull(),
   aiTools: text("ai_tools").array().notNull(),
-  customAiTools: text("custom_ai_tools").array(),
   thumbnail: text("thumbnail"),
-  thumbnailFile: text("thumbnail_file"),
   xHandle: text("x_handle"),
   userId: integer("user_id").references(() => users.id),
   approved: boolean("approved").notNull().default(false),
@@ -46,14 +44,13 @@ export const insertProjectSchema = createInsertSchema(projects)
     approved: true,
     views: true,
     createdAt: true,
-    thumbnailFile: true,
   })
   .extend({
     description: z.string().max(100),
     url: z.string().url(),
     xHandle: z.string().optional(),
     aiTools: z.array(z.string()).min(1, "Select at least one AI tool"),
-    customAiTools: z.array(z.string()).optional(),
+    thumbnailFile: z.any().optional(), // Allow file upload
   });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
