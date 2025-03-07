@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Eye } from "lucide-react";
+import { ExternalLink, Eye, Twitter } from "lucide-react";
 import type { Project } from "@shared/schema";
 
 interface ProjectCardProps {
@@ -15,6 +15,11 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
       onView();
     }
     window.open(project.url, "_blank");
+  };
+
+  const handleXClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.open(`https://x.com/${project.xHandle}`, "_blank");
   };
 
   return (
@@ -41,9 +46,21 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
           ))}
         </div>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-zinc-400">
-            <Eye className="h-4 w-4" />
-            <span>{project.views}</span>
+          <div className="flex items-center gap-4 text-sm text-zinc-400">
+            <div className="flex items-center gap-2">
+              <Eye className="h-4 w-4" />
+              <span>{project.views}</span>
+            </div>
+            {project.xHandle && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleXClick}
+                className="text-zinc-400 hover:text-blue-400 p-0 h-auto"
+              >
+                <Twitter className="h-4 w-4" />
+              </Button>
+            )}
           </div>
           <Button 
             variant="ghost" 

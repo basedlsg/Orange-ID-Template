@@ -185,16 +185,6 @@ function Navigation() {
         <div className="ml-auto flex items-center space-x-4">
           {isLoggedIn ? (
             <>
-              <Link href="/submit">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-sm font-medium hover:text-primary"
-                >
-                  <Plus className="mr-1 h-4 w-4" />
-                  Submit Project
-                </Button>
-              </Link>
               <Button 
                 variant="ghost" 
                 size="sm"
