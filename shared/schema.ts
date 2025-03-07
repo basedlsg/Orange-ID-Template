@@ -72,7 +72,14 @@ export const insertProjectSchema = createInsertSchema(projects)
     thumbnailFile: z.any().optional(),
     xHandle: z.string().optional(),
     sponsorshipEnabled: z.boolean().optional(),
-    sponsorshipUrl: z.string().url().optional(),
+    sponsorshipUrl: z.string().url().optional().superRefine((val, ctx) => {
+      if (ctx.parent.sponsorshipEnabled && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Sponsorship URL is required when sponsorship is enabled",
+        });
+      }
+    }),
   });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
