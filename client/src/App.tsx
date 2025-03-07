@@ -96,28 +96,19 @@ function ProtectedRoute({
   const { toast } = useToast();
 
   useEffect(() => {
+    // Debug log to check user object structure
+    if (isLoggedIn && user) {
+      console.log("BedrockPassport user:", user);
+      console.log("User role:", user.role);
+      console.log("User isAdmin:", user.isAdmin);
+    }
+  }, [isLoggedIn, user]);
+
+  useEffect(() => {
     if (!isDialogOpen) {
       setLocation("/");
     }
   }, [isDialogOpen, setLocation]);
-
-  const handleLogout = async () => {
-    try {
-      await signOut?.();
-      toast({
-        title: "Logged out successfully",
-        description: "Come back soon!",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error logging out",
-        description: error instanceof Error ? error.message : "Please try again",
-      });
-    } finally {
-      setIsDialogOpen(true);
-    }
-  };
 
   if (!isLoggedIn && !loading) {
     sessionStorage.setItem("returnPath", location);
@@ -172,9 +163,11 @@ function ProtectedRoute({
 
   // Check if user exists and has the required role
   if (requiresAdmin) {
-    console.log("Checking admin access:", user);
-    // Check both role and isAdmin flag from our database
+    // Debug log the admin check
+    console.log("Admin check - User object:", user);
     const hasAdminAccess = user?.role === "admin" || user?.isAdmin === true;
+    console.log("Has admin access:", hasAdminAccess);
+
     if (!hasAdminAccess) {
       toast({
         variant: "destructive",
@@ -190,7 +183,24 @@ function ProtectedRoute({
 }
 
 function Navigation() {
-  const { isLoggedIn, user } = useBedrockPassport();
+  const { isLoggedIn, user, signOut } = useBedrockPassport();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await signOut?.();
+      toast({
+        title: "Logged out successfully",
+        description: "Come back soon!",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error logging out",
+        description: error instanceof Error ? error.message : "Please try again",
+      });
+    }
+  };
 
   return (
     <nav className="border-b">
@@ -200,20 +210,30 @@ function Navigation() {
             VibeCodingList
           </span>
         </Link>
-        <div className="ml-auto space-x-4">
+        <div className="ml-auto flex items-center space-x-4">
           {isLoggedIn && (
-            <Link href="/submit">
-              <span className="text-sm font-medium hover:text-primary cursor-pointer">
-                Submit Project
-              </span>
-            </Link>
-          )}
-          {isLoggedIn && (user?.role === "admin" || user?.isAdmin === true) && (
-            <Link href="/admin">
-              <span className="text-sm font-medium hover:text-primary cursor-pointer">
-                Admin
-              </span>
-            </Link>
+            <>
+              <Link href="/submit">
+                <span className="text-sm font-medium hover:text-primary cursor-pointer">
+                  Submit Project
+                </span>
+              </Link>
+              {(user?.role === "admin" || user?.isAdmin === true) && (
+                <Link href="/admin">
+                  <span className="text-sm font-medium hover:text-primary cursor-pointer">
+                    Admin
+                  </span>
+                </Link>
+              )}
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={handleLogout}
+                className="text-sm font-medium hover:text-destructive"
+              >
+                Logout
+              </Button>
+            </>
           )}
         </div>
       </div>
