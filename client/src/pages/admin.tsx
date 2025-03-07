@@ -8,8 +8,12 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 export default function Admin() {
   const { toast } = useToast();
 
-  const { data: projects, isLoading } = useQuery<Project[]>({
+  const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: false }],
+  });
+
+  const { data: approvedProjects, isLoading: isApprovedLoading } = useQuery<Project[]>({
+    queryKey: ["/api/projects", { approved: true }],
   });
 
   const { mutate: approveProject } = useMutation({
@@ -17,7 +21,6 @@ export default function Admin() {
       await apiRequest("POST", `/api/projects/${id}/approve`);
     },
     onSuccess: () => {
-      // Invalidate both approved and unapproved project queries
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       toast({
         title: "Success",
@@ -33,28 +36,49 @@ export default function Admin() {
     },
   });
 
-  if (isLoading) {
+  if (isPendingLoading || isApprovedLoading) {
     return <div className="text-white">Loading...</div>;
   }
 
   return (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
-        <h2 className="mb-8 text-2xl font-bold text-white">Pending Approvals</h2>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {projects?.map((project) => (
-            <div key={project.id} className="relative">
-              <ProjectCard project={project} />
-              <div className="absolute bottom-4 right-4">
-                <Button 
-                  onClick={() => approveProject(project.id)}
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
-                >
-                  Approve
-                </Button>
+        <h2 className="mb-8 text-2xl font-bold text-white">Admin Dashboard</h2>
+
+        {/* Pending Approvals Section */}
+        <div className="mb-12">
+          <h3 className="mb-4 text-xl font-semibold text-white">Pending Approvals</h3>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {pendingProjects?.map((project) => (
+              <div key={project.id} className="relative">
+                <ProjectCard project={project} />
+                <div className="absolute bottom-4 right-4">
+                  <Button 
+                    onClick={() => approveProject(project.id)}
+                    className="bg-blue-500 hover:bg-blue-600 text-white"
+                  >
+                    Approve
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+            {(!pendingProjects || pendingProjects.length === 0) && (
+              <p className="text-zinc-400">No pending projects</p>
+            )}
+          </div>
+        </div>
+
+        {/* Approved Projects Section */}
+        <div>
+          <h3 className="mb-4 text-xl font-semibold text-white">Approved Projects</h3>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {approvedProjects?.map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
+            {(!approvedProjects || approvedProjects.length === 0) && (
+              <p className="text-zinc-400">No approved projects</p>
+            )}
+          </div>
         </div>
       </div>
     </div>
