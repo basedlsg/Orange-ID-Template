@@ -13,9 +13,13 @@ export const PREDEFINED_AI_TOOLS = [
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  orangeId: text("orange_id").notNull().unique(),
+  username: text("username").notNull(),
+  email: text("email"),
+  role: text("role").notNull().default("user"),
+  authToken: text("auth_token"),
   isAdmin: boolean("is_admin").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const projects = pgTable("projects", {
@@ -32,10 +36,15 @@ export const projects = pgTable("projects", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  isAdmin: true,
-});
+export const insertUserSchema = createInsertSchema(users)
+  .omit({
+    id: true,
+    isAdmin: true,
+    createdAt: true,
+  })
+  .extend({
+    role: z.enum(["user", "admin"]).default("user"),
+  });
 
 export const insertProjectSchema = createInsertSchema(projects)
   .omit({

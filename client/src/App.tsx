@@ -1,43 +1,38 @@
-import { Switch, Route, Link } from "wouter";
+import { Switch, Route, Link, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { OrangeAuthProvider } from "@/components/OrangeAuthProvider";
+import { useToast } from "@/hooks/use-toast";
+import { useBedrockPassport, LoginPanel } from "@bedrock_org/passport";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Loader2, X } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Submit from "@/pages/submit";
 import Admin from "@/pages/admin";
 
 async function storeUserInDB(user: any) {
-  // Log the complete user object to understand its structure
   console.log("Complete BedrockPassport user object:", user);
 
-  // Validate required fields with more detailed error messages
   if (!user) {
     throw new Error("No user data provided");
   }
 
-  // Check for Orange ID in either sub or id field
   const orangeId = user.sub || user.id;
   if (!orangeId) {
     throw new Error("Missing Orange ID (sub or id)");
   }
 
-  // // Check other required fields
-  // if (!user.name && !user.displayName) {
-  //   throw new Error("Missing user name");
-  // }
-  // if (!user.email) {
-  //   throw new Error("Missing user email");
-  // }
-
-  const token = JSON.parse(localStorage.getItem("passport-token")!).state
-    .accessToken;
+  const token = JSON.parse(localStorage.getItem("passport-token")!).state.accessToken;
   if (!token) throw new Error("Missing access token");
 
   try {
     const userData = {
-      customId: orangeId,
-      name: user.name || user.displayName || "",
+      orangeId,
+      username: user.name || user.displayName || orangeId,
       role: user.role || "user",
       email: user.email || "",
       authToken: token,
@@ -45,7 +40,7 @@ async function storeUserInDB(user: any) {
 
     console.log("Sending user data to API:", userData);
 
-    const response = await fetch("/api/orangeidusers", {
+    const response = await fetch("/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(userData),
@@ -77,8 +72,7 @@ function StoreUserData() {
         toast({
           variant: "destructive",
           title: "Error storing user data",
-          description:
-            err instanceof Error ? err.message : "Please try again later",
+          description: err instanceof Error ? err.message : "Please try again later",
         });
       });
     }
@@ -93,7 +87,7 @@ function ProtectedRoute({
   component: React.ComponentType;
 }) {
   const [location] = useLocation();
-  const { isLoggedIn, isLoading, signOut, user } = useBedrockPassport();
+  const { isLoggedIn, loading, signOut, user } = useBedrockPassport();
   const [isDialogOpen, setIsDialogOpen] = useState(true);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -115,19 +109,18 @@ function ProtectedRoute({
       toast({
         variant: "destructive",
         title: "Error logging out",
-        description:
-          error instanceof Error ? error.message : "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
       });
     } finally {
       setIsDialogOpen(true);
     }
   };
 
-  if (!isLoggedIn && !isLoading) {
+  if (!isLoggedIn && !loading) {
     sessionStorage.setItem("returnPath", location);
   }
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
@@ -233,9 +226,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Navigation />
-      <Router />
-      <Toaster />
+      <OrangeAuthProvider>
+        <Navigation />
+        <Router />
+        <Toaster />
+        <StoreUserData />
+      </OrangeAuthProvider>
     </QueryClientProvider>
   );
 }
