@@ -13,7 +13,6 @@ export default function Home() {
   });
 
   const handleProjectView = (id: number) => {
-    // Optimistically update the view count
     queryClient.setQueryData<Project[]>(
       ["/api/projects", { approved: true, sortBy }],
       (old) =>
@@ -24,16 +23,18 @@ export default function Home() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="text-white">Loading...</div>;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <FilterBar sortBy={sortBy} onSortChange={setSortBy} />
-      <ProjectGrid
-        projects={projects || []}
-        onProjectView={handleProjectView}
-      />
+    <div className="min-h-screen bg-black">
+      <div className="container mx-auto px-4 py-8">
+        <FilterBar sortBy={sortBy} onSortChange={setSortBy} />
+        <ProjectGrid
+          projects={projects || []}
+          onProjectView={handleProjectView}
+        />
+      </div>
     </div>
   );
 }

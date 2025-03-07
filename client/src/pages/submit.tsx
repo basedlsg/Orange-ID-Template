@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProjectSchema, type InsertProject } from "@shared/schema";
+import { insertProjectSchema, type InsertProject, PREDEFINED_AI_TOOLS } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Submit() {
   const [, setLocation] = useLocation();
@@ -28,7 +29,7 @@ export default function Submit() {
       name: "",
       description: "",
       url: "",
-      aiTool: "",
+      aiTool: "Other",
       thumbnail: "",
       xHandle: "",
     },
@@ -56,9 +57,9 @@ export default function Submit() {
 
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8">
-      <Card>
+      <Card className="bg-black border-zinc-800">
         <CardHeader>
-          <CardTitle>Submit a Project</CardTitle>
+          <CardTitle className="text-white">Submit a Project</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -68,9 +69,9 @@ export default function Submit() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project Name</FormLabel>
+                    <FormLabel className="text-zinc-400">Project Name</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -81,9 +82,9 @@ export default function Submit() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description (max 100 characters)</FormLabel>
+                    <FormLabel className="text-zinc-400">Description (max 100 characters)</FormLabel>
                     <FormControl>
-                      <Textarea {...field} />
+                      <Textarea {...field} className="bg-zinc-900 border-zinc-700 text-white" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -94,9 +95,9 @@ export default function Submit() {
                 name="url"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project URL</FormLabel>
+                    <FormLabel className="text-zinc-400">Project URL</FormLabel>
                     <FormControl>
-                      <Input {...field} type="url" />
+                      <Input {...field} type="url" className="bg-zinc-900 border-zinc-700 text-white" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -107,22 +108,48 @@ export default function Submit() {
                 name="aiTool"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>AI Tool Used</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
+                    <FormLabel className="text-zinc-400">AI Tool Used</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white">
+                          <SelectValue placeholder="Select AI Tool" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-zinc-900 border-zinc-700">
+                        {PREDEFINED_AI_TOOLS.map((tool) => (
+                          <SelectItem key={tool} value={tool} className="text-white hover:bg-zinc-800">
+                            {tool}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              {form.watch("aiTool") === "Other" && (
+                <FormField
+                  control={form.control}
+                  name="customAiTool"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-zinc-400">Specify AI Tool</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <FormField
                 control={form.control}
                 name="thumbnail"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Thumbnail URL (optional)</FormLabel>
+                    <FormLabel className="text-zinc-400">Thumbnail URL</FormLabel>
                     <FormControl>
-                      <Input {...field} type="url" />
+                      <Input {...field} type="url" className="bg-zinc-900 border-zinc-700 text-white" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -133,15 +160,15 @@ export default function Submit() {
                 name="xHandle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>X Handle (optional)</FormLabel>
+                    <FormLabel className="text-zinc-400">X Handle (optional)</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending} className="bg-blue-500 hover:bg-blue-600 text-white">
                 Submit Project
               </Button>
             </form>

@@ -18,8 +18,8 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
   };
 
   return (
-    <Card className="group overflow-hidden transition-all hover:shadow-lg">
-      <div className="aspect-video overflow-hidden">
+    <Card className="group overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800">
+      <div className="aspect-video overflow-hidden bg-zinc-900">
         <img
           src={project.thumbnail || "https://images.unsplash.com/photo-1531297484001-80022131f5a1"}
           alt={project.name}
@@ -28,18 +28,25 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
       </div>
       <CardHeader className="p-4">
         <div className="flex items-start justify-between">
-          <CardTitle className="text-lg">{project.name}</CardTitle>
-          <Badge variant="secondary">{project.aiTool}</Badge>
+          <CardTitle className="text-lg text-white">{project.name}</CardTitle>
+          <Badge variant="secondary" className="bg-blue-500/10 text-blue-400">
+            {project.aiTool}
+          </Badge>
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0">
-        <p className="mb-4 text-sm text-muted-foreground">{project.description}</p>
+        <p className="mb-4 text-sm text-zinc-400">{project.description}</p>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-zinc-400">
             <Eye className="h-4 w-4" />
             <span>{project.views}</span>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleClick}>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleClick}
+            className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+          >
             <ExternalLink className="mr-2 h-4 w-4" />
             Visit
           </Button>
