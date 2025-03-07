@@ -54,6 +54,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add this endpoint after the existing /api/users endpoint
+  app.get("/api/users/check-admin", async (req, res) => {
+    try {
+      const { orangeId } = req.query;
+
+      if (!orangeId) {
+        return res.status(400).json({ error: "orangeId is required" });
+      }
+
+      const user = await storage.getUserByOrangeId(orangeId as string);
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      return res.json({ isAdmin: user.isAdmin });
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+      res.status(500).json({ error: "Failed to check admin status" });
+    }
+  });
+
+
   // File upload endpoint
   app.post("/api/upload", upload.single('thumbnail'), (req, res) => {
     if (!req.file) {
