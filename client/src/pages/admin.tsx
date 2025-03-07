@@ -84,7 +84,7 @@ export default function Admin() {
                 <div className="absolute inset-x-0 bottom-4 flex justify-center">
                   <Button 
                     onClick={() => approveProject(project.id)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white"
+                    className="bg-blue-500 hover:bg-blue-600 text-white z-10"
                   >
                     Approve
                   </Button>
