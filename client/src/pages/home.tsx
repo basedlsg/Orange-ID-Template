@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { ProjectGrid } from "@/components/project-grid";
 import { FilterBar } from "@/components/filter-bar";
-import { ProjectCardSkeleton } from "@/components/project-card-skeleton";
 import { useState } from "react";
 import type { Project } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
@@ -9,6 +8,7 @@ import { queryClient } from "@/lib/queryClient";
 export default function Home() {
   const [sortBy, setSortBy] = useState("newest");
 
+  // Only fetch approved projects for the home page
   const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: true }],
     queryFn: async () => {
@@ -30,22 +30,18 @@ export default function Home() {
     );
   };
 
+  if (isLoading) {
+    return <div className="text-white">Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
         <FilterBar sortBy={sortBy} onSortChange={setSortBy} />
-        {isLoading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
-              <ProjectCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : (
-          <ProjectGrid
-            projects={projects || []}
-            onProjectView={handleProjectView}
-          />
-        )}
+        <ProjectGrid
+          projects={projects || []}
+          onProjectView={handleProjectView}
+        />
       </div>
     </div>
   );

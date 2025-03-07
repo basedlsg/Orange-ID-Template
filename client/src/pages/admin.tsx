@@ -4,7 +4,6 @@ import type { Project } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ProjectCardSkeleton } from "@/components/project-card-skeleton";
 
 export default function Admin() {
   const { toast } = useToast();
@@ -40,6 +39,7 @@ export default function Admin() {
       return response.json();
     },
     onSuccess: (approvedProject) => {
+      // Remove from pending projects and add to approved projects
       queryClient.setQueryData<Project[]>(
         ["/api/projects", { approved: false }],
         (old) => old?.filter((p) => p.id !== approvedProject.id) || []
@@ -65,29 +65,7 @@ export default function Admin() {
   });
 
   if (isPendingLoading || isApprovedLoading) {
-    return (
-      <div className="min-h-screen bg-black">
-        <div className="container mx-auto px-4 py-8">
-          <h2 className="mb-8 text-2xl font-bold text-white">Admin Dashboard</h2>
-          <div className="mb-12">
-            <h3 className="mb-4 text-xl font-semibold text-white">Pending Approvals</h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(3)].map((_, i) => (
-                <ProjectCardSkeleton key={`pending-${i}`} />
-              ))}
-            </div>
-          </div>
-          <div>
-            <h3 className="mb-4 text-xl font-semibold text-white">Approved Projects</h3>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(3)].map((_, i) => (
-                <ProjectCardSkeleton key={`approved-${i}`} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <div className="text-white">Loading...</div>;
   }
 
   return (
@@ -103,7 +81,7 @@ export default function Admin() {
               <div key={project.id} className="relative">
                 <ProjectCard project={project} />
                 <div className="absolute bottom-4 right-4">
-                  <Button
+                  <Button 
                     onClick={() => approveProject(project.id)}
                     className="bg-blue-500 hover:bg-blue-600 text-white"
                   >
