@@ -39,21 +39,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Projects API
   app.get("/api/projects", async (req, res) => {
-    const approved = req.query.approved === "true";
-    const sortBy = req.query.sortBy as string;
+    try {
+      const approved = req.query.approved === "true" ? true : 
+                      req.query.approved === "false" ? false : undefined;
+      const sortBy = req.query.sortBy as string;
 
-    let projects = await storage.getProjects(approved);
+      let projects = await storage.getProjects(approved);
 
-    // Apply sorting
-    if (sortBy === "views") {
-      projects = projects.sort((a, b) => b.views - a.views);
-    } else if (sortBy === "newest") {
-      projects = projects.sort((a, b) => 
-        b.createdAt.getTime() - a.createdAt.getTime()
-      );
+      // Apply sorting
+      if (sortBy === "views") {
+        projects = projects.sort((a, b) => b.views - a.views);
+      } else if (sortBy === "newest") {
+        projects = projects.sort((a, b) => 
+          b.createdAt.getTime() - a.createdAt.getTime()
+        );
+      }
+
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      res.status(500).json({ error: "Failed to fetch projects" });
     }
-
-    res.json(projects);
   });
 
   app.post("/api/projects", async (req, res) => {

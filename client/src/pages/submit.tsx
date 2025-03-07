@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useState } from "react";
 
@@ -25,6 +26,7 @@ export default function Submit() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [newTool, setNewTool] = useState("");
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const form = useForm<InsertProject>({
     resolver: zodResolver(insertProjectSchema),
@@ -71,32 +73,7 @@ export default function Submit() {
       return response.json();
     },
     onSuccess: () => {
-      // Show success toast with CTAs
-      toast({
-        title: "Success",
-        description: (
-          <div className="space-y-4">
-            <p>Project submitted successfully! It will be reviewed and approved soon.</p>
-            <div className="flex gap-4">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  form.reset();
-                  window.scrollTo(0, 0);
-                }}
-              >
-                Submit Another Project
-              </Button>
-              <Button
-                onClick={() => setLocation("/")}
-              >
-                Go to Explore Page
-              </Button>
-            </div>
-          </div>
-        ),
-        duration: 10000, // Show for 10 seconds to give time to read and click
-      });
+      setShowSuccessModal(true);
     },
     onError: (error) => {
       toast({
@@ -136,152 +113,197 @@ export default function Submit() {
     }
   };
 
+  const handleSubmitAnother = () => {
+    setShowSuccessModal(false);
+    form.reset();
+    window.scrollTo(0, 0);
+  };
+
+  const handleGoToExplore = () => {
+    setShowSuccessModal(false);
+    setLocation("/");
+  };
+
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-8">
-      <Card className="bg-black border-zinc-800">
-        <CardHeader>
-          <CardTitle className="text-white">Submit a Project</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit((data) => mutate(data))} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-zinc-400">Project Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-zinc-400">Description (max 100 characters)</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} className="bg-zinc-900 border-zinc-700 text-white" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-zinc-400">Project URL</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="url" className="bg-zinc-900 border-zinc-700 text-white" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="aiTools"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-zinc-400">AI Tools Used</FormLabel>
-                    <div className="space-y-4">
-                      <div className="flex flex-wrap gap-2 min-h-[2.5rem] p-2 bg-zinc-900 border border-zinc-700 rounded-md">
-                        {field.value?.map((tool) => (
-                          <Badge
-                            key={tool}
-                            variant="secondary"
-                            className="bg-blue-500/10 text-blue-400 flex items-center gap-1"
-                          >
-                            {tool}
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveTool(tool)}
-                              className="hover:text-blue-200"
+    <>
+      <div className="container mx-auto max-w-2xl px-4 py-8">
+        <Card className="bg-black border-zinc-800">
+          <CardHeader>
+            <CardTitle className="text-white">Submit a Project</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit((data) => mutate(data))} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-zinc-400">Project Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-zinc-400">Description (max 100 characters)</FormLabel>
+                      <FormControl>
+                        <Textarea {...field} className="bg-zinc-900 border-zinc-700 text-white" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="url"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-zinc-400">Project URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="url" className="bg-zinc-900 border-zinc-700 text-white" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="aiTools"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-zinc-400">AI Tools Used</FormLabel>
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap gap-2 min-h-[2.5rem] p-2 bg-zinc-900 border border-zinc-700 rounded-md">
+                          {field.value?.map((tool) => (
+                            <Badge
+                              key={tool}
+                              variant="secondary"
+                              className="bg-blue-500/10 text-blue-400 flex items-center gap-1"
                             >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 mb-2">
-                        {PREDEFINED_AI_TOOLS.map((tool) => (
+                              {tool}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveTool(tool)}
+                                className="hover:text-blue-200"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 mb-2">
+                          {PREDEFINED_AI_TOOLS.map((tool) => (
+                            <Button
+                              key={tool}
+                              type="button"
+                              variant="outline"
+                              onClick={() => handleAddTool(tool)}
+                              className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
+                            >
+                              {tool}
+                            </Button>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <Input
+                            value={newTool}
+                            onChange={(e) => setNewTool(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            placeholder="Type and press Enter to add custom AI tool"
+                            className="bg-zinc-900 border-zinc-700 text-white"
+                          />
                           <Button
-                            key={tool}
                             type="button"
                             variant="outline"
-                            onClick={() => handleAddTool(tool)}
+                            onClick={() => handleAddTool(newTool)}
                             className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
                           >
-                            {tool}
+                            Add
                           </Button>
-                        ))}
+                        </div>
                       </div>
-                      <div className="flex gap-2">
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="thumbnailFile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-zinc-400">Thumbnail Image</FormLabel>
+                      <FormControl>
                         <Input
-                          value={newTool}
-                          onChange={(e) => setNewTool(e.target.value)}
-                          onKeyPress={handleKeyPress}
-                          placeholder="Type and press Enter to add custom AI tool"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => field.onChange(e.target.files?.[0])}
                           className="bg-zinc-900 border-zinc-700 text-white"
                         />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => handleAddTool(newTool)}
-                          className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
-                        >
-                          Add
-                        </Button>
-                      </div>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="thumbnailFile"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-zinc-400">Thumbnail Image</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => field.onChange(e.target.files?.[0])}
-                        className="bg-zinc-900 border-zinc-700 text-white"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="xHandle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-zinc-400">X Handle (optional)</FormLabel>
-                    <FormControl>
-                      <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isPending} className="bg-blue-500 hover:bg-blue-600 text-white">
-                Submit Project
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="xHandle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-zinc-400">X Handle (optional)</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button type="submit" disabled={isPending} className="bg-blue-500 hover:bg-blue-600 text-white">
+                  Submit Project
+                </Button>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent className="bg-black border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-white">Project Submitted Successfully!</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-zinc-400 mb-6">Your project has been submitted and will be reviewed soon.</p>
+            <div className="flex gap-4">
+              <Button
+                variant="outline"
+                onClick={handleSubmitAnother}
+                className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
+              >
+                Submit Another Project
               </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
+              <Button
+                onClick={handleGoToExplore}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                Go to Explore Page
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
