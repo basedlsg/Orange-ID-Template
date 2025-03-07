@@ -48,6 +48,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProject(insertProject: InsertProject, userId: number): Promise<Project> {
+    // Convert aiTools array to PostgreSQL array literal format
+    const aiToolsArray = `{${insertProject.aiTools.map(tool => `"${tool}"`).join(',')}}`;
+
     const [project] = await db
       .insert(projects)
       .values({
@@ -57,8 +60,7 @@ export class DatabaseStorage implements IStorage {
         thumbnail: insertProject.thumbnail,
         xHandle: insertProject.xHandle,
         userId,
-        // Convert array to PostgreSQL array format
-        aiTools: sql`ARRAY[${sql.join(insertProject.aiTools.map(tool => sql`${tool}`))}]`,
+        aiTools: sql`${aiToolsArray}::text[]`,
       })
       .returning();
     return project;
