@@ -1,4 +1,11 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -8,7 +15,7 @@ export const PREDEFINED_AI_TOOLS = [
   "ChatGPT",
   "Claude",
   "GitHub Copilot",
-  "Other"
+  "Grok",
 ] as const;
 
 export const users = pgTable("users", {
@@ -57,7 +64,9 @@ export const insertProjectSchema = createInsertSchema(projects)
     createdAt: true,
   })
   .extend({
-    description: z.string().max(200, "Description must be 200 characters or less"),
+    description: z
+      .string()
+      .max(200, "Description must be 200 characters or less"),
     url: z.string().url(),
     aiTools: z.array(z.string()).min(1, "Select at least one AI tool"),
     thumbnailFile: z.any().optional(),
