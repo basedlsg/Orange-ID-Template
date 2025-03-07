@@ -2,6 +2,10 @@ import { ProjectCard } from "./project-card";
 import type { Project } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useBedrockPassport } from "@bedrock_org/passport";
+import { Link } from "wouter";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus } from "lucide-react";
 
 interface ProjectGridProps {
   projects: Project[];
@@ -10,6 +14,7 @@ interface ProjectGridProps {
 
 export function ProjectGrid({ projects, onProjectView }: ProjectGridProps) {
   const { toast } = useToast();
+  const { isLoggedIn } = useBedrockPassport();
 
   const handleView = async (project: Project) => {
     try {
@@ -28,6 +33,19 @@ export function ProjectGrid({ projects, onProjectView }: ProjectGridProps) {
 
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {isLoggedIn && (
+        <Link href="/submit">
+          <Card className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 border-dashed h-full">
+            <CardContent className="flex flex-col items-center justify-center h-full p-8 text-center">
+              <div className="rounded-full bg-blue-500/10 p-4 mb-4">
+                <Plus className="h-8 w-8 text-blue-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-blue-400 mb-2">Submit Project</h3>
+              <p className="text-sm text-zinc-400">Share your AI-powered project with the community</p>
+            </CardContent>
+          </Card>
+        </Link>
+      )}
       {projects.map((project) => (
         <ProjectCard
           key={project.id}
