@@ -5,7 +5,6 @@ export function OrangeAuthProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  // Get the origin but handle potential undefined window during SSR
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
   return (
@@ -14,9 +13,12 @@ export function OrangeAuthProvider({
       authCallbackUrl={`${origin}/auth/callback`}
       tenantId="juice-town"
       walletConnectId={import.meta.env.VITE_WALLETCONNECT_PROJECT_ID}
-      disableWidget={true}
       widgetConfig={{
         enabled: false,
+        disableWidget: true,
+      }}
+      config={{
+        disableWidget: true,
       }}
     >
       {children}

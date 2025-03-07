@@ -156,9 +156,8 @@ function ProtectedRoute({
     return <LoginButton />;
   }
 
-  // Check admin status only if this is an admin route
+  // Only check admin status when accessing /admin route
   if (requiresAdmin && user) {
-    // Get the user data from our database to check admin status
     fetch(`/api/users/check-admin?orangeId=${user.sub || user.id}`)
       .then(response => response.json())
       .then(data => {
@@ -219,11 +218,6 @@ function Navigation() {
               <Link href="/submit">
                 <span className="text-sm font-medium hover:text-primary cursor-pointer">
                   Submit Project
-                </span>
-              </Link>
-              <Link href="/admin">
-                <span className="text-sm font-medium hover:text-primary cursor-pointer">
-                  Admin
                 </span>
               </Link>
               <Button 
