@@ -96,15 +96,6 @@ function ProtectedRoute({
   const { toast } = useToast();
 
   useEffect(() => {
-    // Debug log to check user object structure
-    if (isLoggedIn && user) {
-      console.log("BedrockPassport user:", user);
-      console.log("User role:", user.role);
-      console.log("User isAdmin:", user.isAdmin);
-    }
-  }, [isLoggedIn, user]);
-
-  useEffect(() => {
     if (!isDialogOpen) {
       setLocation("/");
     }
@@ -161,22 +152,40 @@ function ProtectedRoute({
     );
   }
 
-  // Check if user exists and has the required role
+  // Check if user exists and has admin privileges (only check database isAdmin flag)
   if (requiresAdmin) {
-    // Debug log the admin check
-    console.log("Admin check - User object:", user);
-    const hasAdminAccess = user?.role === "admin" || user?.isAdmin === true;
-    console.log("Has admin access:", hasAdminAccess);
-
-    if (!hasAdminAccess) {
+    if (!user) {
       toast({
         variant: "destructive",
         title: "Access Denied",
-        description: "You need admin privileges to access this page.",
+        description: "User information not available.",
       });
       setLocation("/");
       return null;
     }
+
+    // Get the user data from our database to check admin status
+    fetch(`/api/users/check-admin?orangeId=${user.sub || user.id}`)
+      .then(response => response.json())
+      .then(data => {
+        if (!data.isAdmin) {
+          toast({
+            variant: "destructive",
+            title: "Access Denied",
+            description: "You need admin privileges to access this page.",
+          });
+          setLocation("/");
+        }
+      })
+      .catch(error => {
+        console.error("Error checking admin status:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Could not verify admin privileges.",
+        });
+        setLocation("/");
+      });
   }
 
   return <Component />;
@@ -185,6 +194,17 @@ function ProtectedRoute({
 function Navigation() {
   const { isLoggedIn, user, signOut } = useBedrockPassport();
   const { toast } = useToast();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    // Check admin status when user is logged in
+    if (isLoggedIn && user) {
+      fetch(`/api/users/check-admin?orangeId=${user.sub || user.id}`)
+        .then(response => response.json())
+        .then(data => setIsAdmin(data.isAdmin))
+        .catch(console.error);
+    }
+  }, [isLoggedIn, user]);
 
   const handleLogout = async () => {
     try {
@@ -218,7 +238,7 @@ function Navigation() {
                   Submit Project
                 </span>
               </Link>
-              {(user?.role === "admin" || user?.isAdmin === true) && (
+              {isAdmin && (
                 <Link href="/admin">
                   <span className="text-sm font-medium hover:text-primary cursor-pointer">
                     Admin
