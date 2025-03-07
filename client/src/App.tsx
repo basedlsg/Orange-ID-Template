@@ -8,7 +8,7 @@ import { useBedrockPassport, LoginPanel } from "@bedrock_org/passport";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Loader2, X } from "lucide-react";
+import { X } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Submit from "@/pages/submit";
@@ -16,8 +16,6 @@ import Admin from "@/pages/admin";
 import AuthCallback from "@/pages/AuthCallback";
 
 async function storeUserInDB(user: any) {
-  console.log("Complete BedrockPassport user object:", user);
-
   if (!user) {
     throw new Error("No user data provided");
   }
@@ -39,8 +37,6 @@ async function storeUserInDB(user: any) {
       authToken: token,
     };
 
-    console.log("Sending user data to API:", userData);
-
     const response = await fetch("/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -52,9 +48,7 @@ async function storeUserInDB(user: any) {
       throw new Error(error.error || "Failed to store user data");
     }
 
-    const data = await response.json();
-    console.log("User stored successfully:", data);
-    return data;
+    return response.json();
   } catch (error) {
     console.error("Error storing user:", error);
     throw error;
@@ -67,7 +61,6 @@ function StoreUserData() {
 
   useEffect(() => {
     if (isLoggedIn && user) {
-      console.log("BedrockPassport user data:", user);
       storeUserInDB(user).catch((err) => {
         console.error("Failed to store user:", err);
         toast({
@@ -82,70 +75,25 @@ function StoreUserData() {
   return null;
 }
 
-function ProtectedRoute({
-  component: Component,
-  requiresAdmin = false,
-}: {
-  component: React.ComponentType;
-  requiresAdmin?: boolean;
-}) {
+function LoginButton() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [location] = useLocation();
-  const { isLoggedIn, loading, signOut, user } = useBedrockPassport();
-  const [isDialogOpen, setIsDialogOpen] = useState(true);
-  const [, setLocation] = useLocation();
-  const { toast } = useToast();
-  const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    if (!isDialogOpen) {
-      setLocation("/");
-    }
-  }, [isDialogOpen, setLocation]);
-
-  // Check admin status when user is logged in
-  useEffect(() => {
-    if (isLoggedIn && user && (user.sub || user.id)) {
-      fetch(`/api/users/check-admin?orangeId=${user.sub || user.id}`)
-        .then(response => response.json())
-        .then(data => {
-          setIsAdmin(data.isAdmin);
-          if (requiresAdmin && !data.isAdmin) {
-            toast({
-              variant: "destructive",
-              title: "Access Denied",
-              description: "You need admin privileges to access this page.",
-            });
-            setLocation("/");
-          }
-        })
-        .catch(error => {
-          console.error("Error checking admin status:", error);
-          if (requiresAdmin) {
-            toast({
-              variant: "destructive",
-              title: "Error",
-              description: "Could not verify admin privileges.",
-            });
-            setLocation("/");
-          }
-        });
-    }
-  }, [isLoggedIn, user, requiresAdmin]);
-
-  if (!isLoggedIn && !loading) {
+  const handleOpenLogin = () => {
     sessionStorage.setItem("returnPath", location);
-  }
+    setIsDialogOpen(true);
+  };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-      </div>
-    );
-  }
+  return (
+    <>
+      <Button 
+        variant="outline" 
+        onClick={handleOpenLogin}
+        className="text-sm font-medium hover:text-primary"
+      >
+        Login
+      </Button>
 
-  if (!isLoggedIn) {
-    return (
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="p-0 border-none bg-transparent shadow-2xl mx-auto max-w-[90vw] sm:max-w-none">
           <div className="flex flex-col relative mx-auto w-[280px] sm:w-[380px]">
@@ -158,7 +106,7 @@ function ProtectedRoute({
             </button>
             <div className="bg-gradient-to-br from-orange-900/90 to-black/95 p-4 rounded-t-lg border-b border-orange-500/20 text-center">
               <p className="text-sm sm:text-base font-medium text-orange-200 leading-relaxed">
-                Please log in to {requiresAdmin ? "access admin features" : "submit your project"}.
+                Please log in to continue
               </p>
             </div>
             <LoginPanel
@@ -180,27 +128,66 @@ function ProtectedRoute({
           </div>
         </DialogContent>
       </Dialog>
+    </>
+  );
+}
+
+function ProtectedRoute({
+  component: Component,
+  requiresAdmin = false,
+}: {
+  component: React.ComponentType;
+  requiresAdmin?: boolean;
+}) {
+  const { isLoggedIn, loading, user } = useBedrockPassport();
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-orange-400">Loading...</div>
+      </div>
     );
   }
 
-  // Return the protected component if all checks pass
+  if (!isLoggedIn) {
+    sessionStorage.setItem("returnPath", window.location.pathname);
+    return <LoginButton />;
+  }
+
+  // Check admin status only if this is an admin route
+  if (requiresAdmin && user) {
+    // Get the user data from our database to check admin status
+    fetch(`/api/users/check-admin?orangeId=${user.sub || user.id}`)
+      .then(response => response.json())
+      .then(data => {
+        if (!data.isAdmin) {
+          toast({
+            variant: "destructive",
+            title: "Access Denied",
+            description: "You need admin privileges to access this page.",
+          });
+          setLocation("/");
+        }
+      })
+      .catch(error => {
+        console.error("Error checking admin status:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Could not verify admin privileges.",
+        });
+        setLocation("/");
+      });
+  }
+
   return <Component />;
 }
 
 function Navigation() {
   const { isLoggedIn, user, signOut } = useBedrockPassport();
   const { toast } = useToast();
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    // Check admin status when user is logged in
-    if (isLoggedIn && user) {
-      fetch(`/api/users/check-admin?orangeId=${user.sub || user.id}`)
-        .then(response => response.json())
-        .then(data => setIsAdmin(data.isAdmin))
-        .catch(console.error);
-    }
-  }, [isLoggedIn, user]);
 
   const handleLogout = async () => {
     try {
@@ -227,20 +214,18 @@ function Navigation() {
           </span>
         </Link>
         <div className="ml-auto flex items-center space-x-4">
-          {isLoggedIn && (
+          {isLoggedIn ? (
             <>
               <Link href="/submit">
                 <span className="text-sm font-medium hover:text-primary cursor-pointer">
                   Submit Project
                 </span>
               </Link>
-              {isAdmin && (
-                <Link href="/admin">
-                  <span className="text-sm font-medium hover:text-primary cursor-pointer">
-                    Admin
-                  </span>
-                </Link>
-              )}
+              <Link href="/admin">
+                <span className="text-sm font-medium hover:text-primary cursor-pointer">
+                  Admin
+                </span>
+              </Link>
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -250,6 +235,8 @@ function Navigation() {
                 Logout
               </Button>
             </>
+          ) : (
+            <LoginButton />
           )}
         </div>
       </div>
