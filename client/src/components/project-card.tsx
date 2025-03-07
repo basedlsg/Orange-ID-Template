@@ -41,7 +41,7 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
       </div>
       <CardHeader className="p-4">
         <div className="flex items-start justify-between">
-          <CardTitle className="text-lg text-white">{project.name}</CardTitle>
+          <CardTitle className="text-white">{project.name}</CardTitle>
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0">
@@ -84,7 +84,7 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
             variant="ghost" 
             size="sm" 
             onClick={handleClick}
-            className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+            className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
           >
             <ExternalLink className="mr-2 h-4 w-4" />
             Visit

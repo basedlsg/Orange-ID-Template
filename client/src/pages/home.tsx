@@ -7,6 +7,8 @@ import { queryClient } from "@/lib/queryClient";
 
 export default function Home() {
   const [sortBy, setSortBy] = useState("newest");
+  const [aiTool, setAiTool] = useState("all");
+  const [sponsorshipFilter, setSponsorshipFilter] = useState(false);
 
   // Include sortBy in the queryKey to trigger refetch when it changes
   const { data: projects, isLoading } = useQuery<Project[]>({
@@ -30,6 +32,13 @@ export default function Home() {
     );
   };
 
+  // Filter projects based on selected criteria
+  const filteredProjects = projects?.filter((project) => {
+    if (sponsorshipFilter && !project.sponsorshipEnabled) return false;
+    if (aiTool !== "all" && !project.aiTools.includes(aiTool)) return false;
+    return true;
+  });
+
   if (isLoading) {
     return <div className="text-white">Loading...</div>;
   }
@@ -37,9 +46,16 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
-        <FilterBar sortBy={sortBy} onSortChange={setSortBy} />
+        <FilterBar 
+          sortBy={sortBy} 
+          aiTool={aiTool}
+          sponsorshipFilter={sponsorshipFilter}
+          onSortChange={setSortBy}
+          onAiToolChange={setAiTool}
+          onSponsorshipFilterChange={setSponsorshipFilter}
+        />
         <ProjectGrid
-          projects={projects || []}
+          projects={filteredProjects || []}
           onProjectView={handleProjectView}
         />
       </div>
