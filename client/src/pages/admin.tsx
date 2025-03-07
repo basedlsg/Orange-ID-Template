@@ -8,12 +8,13 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 export default function Admin() {
   const { toast } = useToast();
 
+  // Use explicit URLs with query parameters
   const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
-    queryKey: ["/api/projects", { approved: false }],
+    queryKey: ["/api/projects?approved=false"],
   });
 
   const { data: approvedProjects, isLoading: isApprovedLoading } = useQuery<Project[]>({
-    queryKey: ["/api/projects", { approved: true }],
+    queryKey: ["/api/projects?approved=true"],
   });
 
   const { mutate: approveProject } = useMutation({
@@ -21,7 +22,9 @@ export default function Admin() {
       await apiRequest("POST", `/api/projects/${id}/approve`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      // Invalidate both queries to refresh the lists
+      queryClient.invalidateQueries({ queryKey: ["/api/projects?approved=false"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects?approved=true"] });
       toast({
         title: "Success",
         description: "Project approved",

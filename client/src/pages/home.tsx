@@ -8,14 +8,14 @@ import { queryClient } from "@/lib/queryClient";
 export default function Home() {
   const [sortBy, setSortBy] = useState("newest");
 
-  // Explicitly request only approved projects
+  // Only fetch approved projects for the home page
   const { data: projects, isLoading } = useQuery<Project[]>({
-    queryKey: ["/api/projects", { approved: true, sortBy }],
+    queryKey: ["/api/projects?approved=true", { sortBy }],
   });
 
   const handleProjectView = (id: number) => {
     queryClient.setQueryData<Project[]>(
-      ["/api/projects", { approved: true, sortBy }],
+      ["/api/projects?approved=true", { sortBy }],
       (old) =>
         old?.map((p) =>
           p.id === id ? { ...p, views: p.views + 1 } : p
