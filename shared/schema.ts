@@ -34,6 +34,8 @@ export const projects = pgTable("projects", {
   approved: boolean("approved").notNull().default(false),
   views: integer("views").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  openForSponsorship: boolean("open_for_sponsorship").default(false),
+  sponsorshipUrl: text("sponsorship_url"),
 });
 
 export const insertUserSchema = createInsertSchema(users)
@@ -60,6 +62,8 @@ export const insertProjectSchema = createInsertSchema(projects)
     aiTools: z.array(z.string()).min(1, "Select at least one AI tool"),
     thumbnailFile: z.any().optional(),
     xHandle: z.string().optional(),
+    openForSponsorship: z.boolean().optional(),
+    sponsorshipUrl: z.string().url().optional(),
   });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
