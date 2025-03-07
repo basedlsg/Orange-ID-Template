@@ -39,11 +39,6 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
               {tool}
             </Badge>
           ))}
-          {project.customAiTools?.map((tool) => (
-            <Badge key={tool} variant="secondary" className="bg-purple-500/10 text-purple-400">
-              {tool}
-            </Badge>
-          ))}
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-zinc-400">
