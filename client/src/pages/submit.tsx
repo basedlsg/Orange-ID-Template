@@ -32,7 +32,7 @@ export default function Submit() {
       name: "",
       description: "",
       url: "",
-      aiTools: [],
+      aiTools: [PREDEFINED_AI_TOOLS[0]], // Set default to first predefined tool
       thumbnail: "",
       xHandle: "",
     },
@@ -41,18 +41,22 @@ export default function Submit() {
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {
       let projectData = { ...data };
+      console.log("Submitting data:", projectData);
 
       // Handle file upload if a file is selected
       if (data.thumbnailFile instanceof File) {
         const formData = new FormData();
         formData.append("thumbnail", data.thumbnailFile);
+
         const uploadRes = await fetch("/api/upload", {
           method: "POST",
           body: formData,
         });
+
         if (!uploadRes.ok) {
           throw new Error("Failed to upload thumbnail");
         }
+
         const { url } = await uploadRes.json();
         projectData.thumbnail = url;
       }
@@ -60,7 +64,14 @@ export default function Submit() {
       // Remove thumbnailFile from data before sending to API
       delete projectData.thumbnailFile;
 
-      await apiRequest("POST", "/api/projects", projectData);
+      console.log("Final project data:", projectData);
+
+      const response = await apiRequest("POST", "/api/projects", projectData);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to submit project");
+      }
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -89,6 +100,14 @@ export default function Submit() {
 
   const handleRemoveTool = (tool: string) => {
     const currentTools = form.getValues("aiTools") || [];
+    if (currentTools.length <= 1) {
+      toast({
+        title: "Warning",
+        description: "At least one AI tool must be selected",
+        variant: "destructive",
+      });
+      return;
+    }
     form.setValue("aiTools", currentTools.filter((t) => t !== tool));
   };
 

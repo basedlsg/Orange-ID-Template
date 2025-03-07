@@ -4,7 +4,14 @@ import { storage } from "./storage";
 import { insertProjectSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
-import express from 'express'; // Added import for express.static
+import express from 'express';
+import { fromZodError } from "zod-validation-error";
+import fs from 'fs';
+
+// Ensure uploads directory exists
+if (!fs.existsSync('./uploads')) {
+  fs.mkdirSync('./uploads', { recursive: true });
+}
 
 // Configure multer for handling file uploads
 const upload = multer({
@@ -51,12 +58,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/projects", async (req, res) => {
     try {
-      const projectData = insertProjectSchema.parse(req.body);
+      console.log("Received project data:", JSON.stringify(req.body, null, 2));
+
+      // Validate the project data
+      const validatedData = insertProjectSchema.parse({
+        name: req.body.name,
+        description: req.body.description,
+        url: req.body.url,
+        aiTools: req.body.aiTools,
+        thumbnail: req.body.thumbnail || undefined,
+        xHandle: req.body.xHandle || undefined,
+      });
+
+      console.log("Validated project data:", JSON.stringify(validatedData, null, 2));
+
       // For demo, use userId 1 since we don't have auth yet
-      const project = await storage.createProject(projectData, 1);
+      const project = await storage.createProject(validatedData, 1);
       res.json(project);
     } catch (error) {
-      res.status(400).json({ error: "Invalid project data" });
+      console.error("Project validation error:", error);
+      const validationError = fromZodError(error as any);
+      res.status(400).json({ error: validationError.message });
     }
   });
 
