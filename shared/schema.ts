@@ -71,15 +71,12 @@ export const insertProjectSchema = createInsertSchema(projects)
     aiTools: z.array(z.string()).min(1, "Select at least one AI tool"),
     thumbnailFile: z.any().optional(),
     xHandle: z.string().optional(),
-    sponsorshipEnabled: z.boolean().optional(),
-    sponsorshipUrl: z.string().url().optional().superRefine((val, ctx) => {
-      if (ctx.parent.sponsorshipEnabled && !val) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Sponsorship URL is required when sponsorship is enabled",
-        });
-      }
-    }),
+    sponsorshipEnabled: z.boolean().default(false),
+    sponsorshipUrl: z.union([
+      z.string().url(),
+      z.string().length(0),
+      z.undefined()
+    ]).transform(val => val || undefined),
   });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
