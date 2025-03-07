@@ -55,7 +55,7 @@ export const insertProjectSchema = createInsertSchema(projects)
     createdAt: true,
   })
   .extend({
-    description: z.string().max(100),
+    description: z.string().max(200, "Description must be 200 characters or less"),
     url: z.string().url(),
     aiTools: z.array(z.string()).min(1, "Select at least one AI tool"),
     thumbnailFile: z.any().optional(),
