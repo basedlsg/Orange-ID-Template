@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, Eye, Sparkles } from "lucide-react";
 import { SiX } from "react-icons/si";
 import type { Project } from "@shared/schema";
+import defaultThumbnail from "../default-thumbnail.svg";
 
 interface ProjectCardProps {
   project: Project;
@@ -34,7 +35,7 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
     <Card className="group relative overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800">
       <div className="aspect-video overflow-hidden bg-zinc-900">
         <img
-          src={project.thumbnail || "https://images.unsplash.com/photo-1531297484001-80022131f5a1"}
+          src={project.thumbnail || defaultThumbnail}
           alt={project.name}
           className="h-full w-full object-cover transition-transform group-hover:scale-105"
         />
