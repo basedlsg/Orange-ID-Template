@@ -2,6 +2,15 @@ import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const PREDEFINED_AI_TOOLS = [
+  "Replit AI",
+  "Cursor",
+  "ChatGPT",
+  "Claude",
+  "GitHub Copilot",
+  "Other"
+] as const;
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -15,6 +24,7 @@ export const projects = pgTable("projects", {
   description: text("description").notNull(),
   url: text("url").notNull(),
   aiTool: text("ai_tool").notNull(),
+  customAiTool: text("custom_ai_tool"),
   thumbnail: text("thumbnail"),
   xHandle: text("x_handle"),
   userId: integer("user_id").references(() => users.id),
@@ -35,11 +45,14 @@ export const insertProjectSchema = createInsertSchema(projects)
     approved: true,
     views: true,
     createdAt: true,
+    customAiTool: true,
   })
   .extend({
     description: z.string().max(100),
     url: z.string().url(),
     xHandle: z.string().optional(),
+    aiTool: z.enum(PREDEFINED_AI_TOOLS),
+    customAiTool: z.string().optional(),
   });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
