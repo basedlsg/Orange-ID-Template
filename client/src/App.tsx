@@ -4,10 +4,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { OrangeAuthProvider } from "@/components/OrangeAuthProvider";
 import { useToast } from "@/hooks/use-toast";
-import { useBedrockPassport } from "@bedrock_org/passport";
+import { useBedrockPassport, LoginPanel } from "@bedrock_org/passport";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { X } from "lucide-react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Submit from "@/pages/submit";
@@ -75,22 +76,59 @@ function StoreUserData() {
 }
 
 function LoginButton() {
-  const { signIn } = useBedrockPassport();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [location] = useLocation();
 
-  const handleLogin = () => {
+  const handleOpenLogin = () => {
     sessionStorage.setItem("returnPath", location);
-    signIn?.();
+    setIsDialogOpen(true);
   };
 
   return (
-    <Button 
-      variant="outline" 
-      onClick={handleLogin}
-      className="text-sm font-medium hover:text-primary"
-    >
-      Login
-    </Button>
+    <>
+      <Button 
+        variant="outline" 
+        onClick={handleOpenLogin}
+        className="text-sm font-medium hover:text-primary"
+      >
+        Login
+      </Button>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="p-0 border-none bg-transparent shadow-2xl mx-auto max-w-[90vw] sm:max-w-none">
+          <div className="flex flex-col relative mx-auto w-[280px] sm:w-[380px]">
+            <button
+              onClick={() => setIsDialogOpen(false)}
+              className="absolute right-2 top-2 z-50 rounded-full p-1.5 text-orange-400 opacity-70 hover:bg-orange-900/30 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 bg-black/95"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
+            <div className="bg-gradient-to-br from-orange-900/90 to-black/95 p-4 rounded-t-lg border-b border-orange-500/20 text-center">
+              <p className="text-sm sm:text-base font-medium text-orange-200 leading-relaxed">
+                Please log in to continue
+              </p>
+            </div>
+            <LoginPanel
+              panelClass="bg-black/95 text-white w-full backdrop-blur-lg border border-orange-500/20 rounded-b-lg shadow-lg"
+              buttonClass="w-full bg-black hover:bg-black/80 border border-orange-500/50 text-orange-400 hover:text-orange-300 transition-all duration-200"
+              headerClass="justify-center pb-6"
+              logo="https://irp.cdn-website.com/e81c109a/dms3rep/multi/orange-web3-logo-v2a-20241018.svg"
+              title=""
+              titleClass="text-xl font-semibold text-orange-400"
+              logoAlt="Based Town"
+              logoClass="ml-2 h-8"
+              showConnectWallet={true}
+              walletButtonClass="w-full border border-orange-500/50 hover:bg-orange-900/30 transition-all duration-200"
+              walletButtonText="Connect Wallet"
+              separatorTextClass="bg-black/95 text-orange-400 px-2"
+              separatorClass="bg-orange-500/20"
+              separatorText="or"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -101,11 +139,19 @@ function ProtectedRoute({
   component: React.ComponentType;
   requiresAdmin?: boolean;
 }) {
-  const { isLoggedIn, user } = useBedrockPassport();
+  const { isLoggedIn, loading, user } = useBedrockPassport();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  if (isLoggedIn === false) {
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-orange-400">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isLoggedIn) {
     sessionStorage.setItem("returnPath", window.location.pathname);
     return <LoginButton />;
   }
@@ -140,7 +186,7 @@ function ProtectedRoute({
 }
 
 function Navigation() {
-  const { isLoggedIn, signOut } = useBedrockPassport();
+  const { isLoggedIn, user, signOut } = useBedrockPassport();
   const { toast } = useToast();
 
   const handleLogout = async () => {
@@ -162,9 +208,8 @@ function Navigation() {
   return (
     <nav className="border-b">
       <div className="container mx-auto flex h-16 items-center px-4">
-        <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.svg" alt="VibeCodingList" className="h-8 w-8" />
-          <span className="text-xl font-bold">
+        <Link href="/">
+          <span className="text-xl font-bold cursor-pointer">
             VibeCodingList
           </span>
         </Link>
@@ -172,14 +217,9 @@ function Navigation() {
           {isLoggedIn ? (
             <>
               <Link href="/submit">
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="bg-blue-500 hover:bg-blue-600 text-white gap-2"
-                >
-                  <Plus className="h-4 w-4" />
+                <span className="text-sm font-medium hover:text-primary cursor-pointer">
                   Submit Project
-                </Button>
+                </span>
               </Link>
               <Button 
                 variant="ghost" 
