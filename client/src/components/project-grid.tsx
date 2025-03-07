@@ -6,6 +6,8 @@ import { useBedrockPassport } from "@bedrock_org/passport";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
+import { useState } from "react";
+import { LoginDialog } from "./login-dialog";
 
 interface ProjectGridProps {
   projects: Project[];
@@ -16,6 +18,7 @@ export function ProjectGrid({ projects, onProjectView }: ProjectGridProps) {
   const { toast } = useToast();
   const { isLoggedIn } = useBedrockPassport();
   const [, setLocation] = useLocation();
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   const handleView = async (project: Project) => {
     try {
@@ -35,8 +38,10 @@ export function ProjectGrid({ projects, onProjectView }: ProjectGridProps) {
   const handleSubmitClick = () => {
     if (!isLoggedIn) {
       sessionStorage.setItem("returnPath", "/submit");
+      setShowLoginDialog(true);
+    } else {
+      setLocation("/submit");
     }
-    setLocation("/submit");
   };
 
   return (
@@ -60,6 +65,11 @@ export function ProjectGrid({ projects, onProjectView }: ProjectGridProps) {
           onView={() => handleView(project)}
         />
       ))}
+      <LoginDialog 
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+        message="Please log in to submit your project"
+      />
     </div>
   );
 }
