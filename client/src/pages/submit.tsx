@@ -1,6 +1,10 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertProjectSchema, type InsertProject, PREDEFINED_AI_TOOLS } from "@shared/schema";
+import {
+  insertProjectSchema,
+  type InsertProject,
+  PREDEFINED_AI_TOOLS,
+} from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -19,7 +23,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
@@ -82,7 +91,8 @@ export default function Submit() {
     onError: (error) => {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to submit project",
+        description:
+          error instanceof Error ? error.message : "Failed to submit project",
         variant: "destructive",
       });
     },
@@ -107,11 +117,14 @@ export default function Submit() {
       });
       return;
     }
-    form.setValue("aiTools", currentTools.filter((t) => t !== tool));
+    form.setValue(
+      "aiTools",
+      currentTools.filter((t) => t !== tool),
+    );
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleAddTool(newTool);
     }
@@ -137,15 +150,23 @@ export default function Submit() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit((data) => mutate(data))} className="space-y-6">
+              <form
+                onSubmit={form.handleSubmit((data) => mutate(data))}
+                className="space-y-6"
+              >
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-400">Project Name</FormLabel>
+                      <FormLabel className="text-zinc-400">
+                        Project Name
+                      </FormLabel>
                       <FormControl>
-                        <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
+                        <Input
+                          {...field}
+                          className="bg-zinc-900 border-zinc-700 text-white"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -157,9 +178,14 @@ export default function Submit() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-400">Description (max 100 characters)</FormLabel>
+                      <FormLabel className="text-zinc-400">
+                        Description (max 100 characters)
+                      </FormLabel>
                       <FormControl>
-                        <Textarea {...field} className="bg-zinc-900 border-zinc-700 text-white" />
+                        <Textarea
+                          {...field}
+                          className="bg-zinc-900 border-zinc-700 text-white"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -171,9 +197,15 @@ export default function Submit() {
                   name="url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-400">Project URL</FormLabel>
+                      <FormLabel className="text-zinc-400">
+                        Project URL
+                      </FormLabel>
                       <FormControl>
-                        <Input {...field} type="url" className="bg-zinc-900 border-zinc-700 text-white" />
+                        <Input
+                          {...field}
+                          type="url"
+                          className="bg-zinc-900 border-zinc-700 text-white"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -185,7 +217,9 @@ export default function Submit() {
                   name="aiTools"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-400">AI Tools Used</FormLabel>
+                      <FormLabel className="text-zinc-400">
+                        AI Tools Used
+                      </FormLabel>
                       <div className="space-y-4">
                         <div className="flex flex-wrap gap-2 min-h-[2.5rem] p-2 bg-zinc-900 border border-zinc-700 rounded-md">
                           {field.value?.map((tool) => (
@@ -246,7 +280,9 @@ export default function Submit() {
                   name="thumbnailFile"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-400">Thumbnail Image</FormLabel>
+                      <FormLabel className="text-zinc-400">
+                        Thumbnail Image
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type="file"
@@ -265,9 +301,14 @@ export default function Submit() {
                   name="xHandle"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-400">X Handle (optional)</FormLabel>
+                      <FormLabel className="text-zinc-400">
+                        X Handle (optional)
+                      </FormLabel>
                       <FormControl>
-                        <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
+                        <Input
+                          {...field}
+                          className="bg-zinc-900 border-zinc-700 text-white"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -291,7 +332,7 @@ export default function Submit() {
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
-                          className="data-[state=unchecked]:bg-black data-[state=unchecked]:border-blue-500"
+                          className="data-[state=unchecked]:bg-gray-800 data-[state=unchecked]:border-blue-400 hover:data-[state=unchecked]:border-blue-600"
                         />
                       </FormControl>
                     </FormItem>
@@ -303,7 +344,9 @@ export default function Submit() {
                   name="sponsorshipUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-400">Sponsorship URL (optional)</FormLabel>
+                      <FormLabel className="text-zinc-400">
+                        Sponsorship URL (optional)
+                      </FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -321,7 +364,11 @@ export default function Submit() {
                   )}
                 />
 
-                <Button type="submit" disabled={isPending} className="bg-blue-500 hover:bg-blue-600 text-white">
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
                   Submit Project
                 </Button>
               </form>
@@ -333,10 +380,14 @@ export default function Submit() {
       <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
         <DialogContent className="bg-black border-zinc-800">
           <DialogHeader>
-            <DialogTitle className="text-white">Project Submitted Successfully!</DialogTitle>
+            <DialogTitle className="text-white">
+              Project Submitted Successfully!
+            </DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-zinc-400 mb-6">Your project has been submitted and will be reviewed soon.</p>
+            <p className="text-zinc-400 mb-6">
+              Your project has been submitted and will be reviewed soon.
+            </p>
             <div className="flex gap-4">
               <Button
                 variant="outline"
