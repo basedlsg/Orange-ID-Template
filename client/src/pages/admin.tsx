@@ -39,15 +39,16 @@ export default function Admin() {
       return response.json();
     },
     onSuccess: (approvedProject) => {
-      // Remove from pending projects and add to approved projects
+      // Remove from pending projects
       queryClient.setQueryData<Project[]>(
         ["/api/projects", { approved: false }],
         (old) => old?.filter((p) => p.id !== approvedProject.id) || []
       );
 
+      // Add to approved projects
       queryClient.setQueryData<Project[]>(
         ["/api/projects", { approved: true }],
-        (old) => [...(old || []), approvedProject]
+        (old) => [approvedProject, ...(old || [])]
       );
 
       toast({
@@ -80,7 +81,7 @@ export default function Admin() {
             {pendingProjects?.map((project) => (
               <div key={project.id} className="relative">
                 <ProjectCard project={project} />
-                <div className="absolute bottom-4 right-4">
+                <div className="absolute bottom-4 right-4 z-10">
                   <Button 
                     onClick={() => approveProject(project.id)}
                     className="bg-blue-500 hover:bg-blue-600 text-white"
