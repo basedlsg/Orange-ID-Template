@@ -221,11 +221,6 @@ function Navigation() {
                   Submit Project
                 </span>
               </Link>
-              <Link href="/admin">
-                <span className="text-sm font-medium hover:text-primary cursor-pointer">
-                  Admin
-                </span>
-              </Link>
               <Button 
                 variant="ghost" 
                 size="sm"
