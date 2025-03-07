@@ -27,8 +27,7 @@ export default function AuthCallback() {
         toast({
           variant: "destructive",
           title: "Authentication failed",
-          description:
-            error instanceof Error ? error.message : "Please try again",
+          description: error instanceof Error ? error.message : "Please try again",
         });
         setLocation("/");
       }
