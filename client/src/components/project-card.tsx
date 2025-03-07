@@ -1,0 +1,50 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ExternalLink, Eye } from "lucide-react";
+import type { Project } from "@shared/schema";
+
+interface ProjectCardProps {
+  project: Project;
+  onView?: () => void;
+}
+
+export function ProjectCard({ project, onView }: ProjectCardProps) {
+  const handleClick = async () => {
+    if (onView) {
+      onView();
+    }
+    window.open(project.url, "_blank");
+  };
+
+  return (
+    <Card className="group overflow-hidden transition-all hover:shadow-lg">
+      <div className="aspect-video overflow-hidden">
+        <img
+          src={project.thumbnail || "https://images.unsplash.com/photo-1531297484001-80022131f5a1"}
+          alt={project.name}
+          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+        />
+      </div>
+      <CardHeader className="p-4">
+        <div className="flex items-start justify-between">
+          <CardTitle className="text-lg">{project.name}</CardTitle>
+          <Badge variant="secondary">{project.aiTool}</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="p-4 pt-0">
+        <p className="mb-4 text-sm text-muted-foreground">{project.description}</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Eye className="h-4 w-4" />
+            <span>{project.views}</span>
+          </div>
+          <Button variant="ghost" size="sm" onClick={handleClick}>
+            <ExternalLink className="mr-2 h-4 w-4" />
+            Visit
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
