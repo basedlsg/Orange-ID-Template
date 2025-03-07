@@ -170,15 +170,20 @@ function ProtectedRoute({
     );
   }
 
-  // Check for admin requirement
-  if (requiresAdmin && (!user || user.role !== 'admin')) {
-    toast({
-      variant: "destructive",
-      title: "Access Denied",
-      description: "You need admin privileges to access this page.",
-    });
-    setLocation("/");
-    return null;
+  // Check if user exists and has the required role
+  if (requiresAdmin) {
+    console.log("Checking admin access:", user);
+    // Check both role and isAdmin flag from our database
+    const hasAdminAccess = user?.role === "admin" || user?.isAdmin === true;
+    if (!hasAdminAccess) {
+      toast({
+        variant: "destructive",
+        title: "Access Denied",
+        description: "You need admin privileges to access this page.",
+      });
+      setLocation("/");
+      return null;
+    }
   }
 
   return <Component />;
@@ -203,7 +208,7 @@ function Navigation() {
               </span>
             </Link>
           )}
-          {isLoggedIn && user?.role === 'admin' && (
+          {isLoggedIn && (user?.role === "admin" || user?.isAdmin === true) && (
             <Link href="/admin">
               <span className="text-sm font-medium hover:text-primary cursor-pointer">
                 Admin
