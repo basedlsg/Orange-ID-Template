@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink, Eye, Sparkles } from "lucide-react";
 import { SiX } from "react-icons/si";
 import type { Project } from "@shared/schema";
-import defaultThumbnail from "../default-thumbnail.svg";
+import defaultThumbnail from "../logocode.png";
 
 interface ProjectCardProps {
   project: Project;
@@ -49,8 +49,8 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
         <p className="mb-4 text-sm text-zinc-400">{project.description}</p>
         <div className="flex flex-wrap gap-2 mb-4">
           {project.sponsorshipEnabled && (
-            <Badge 
-              variant="secondary" 
+            <Badge
+              variant="secondary"
               className="bg-purple-500/10 text-purple-400 cursor-pointer"
               onClick={handleSponsorshipClick}
             >
@@ -59,7 +59,11 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
             </Badge>
           )}
           {project.aiTools.map((tool) => (
-            <Badge key={tool} variant="secondary" className="bg-blue-500/10 text-blue-400">
+            <Badge
+              key={tool}
+              variant="secondary"
+              className="bg-blue-500/10 text-blue-400"
+            >
               {tool}
             </Badge>
           ))}
@@ -71,9 +75,9 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
               <span>{project.views}</span>
             </div>
             {project.xHandle && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleXClick}
                 className="text-zinc-400 hover:text-blue-400 p-0 h-auto z-30"
               >
@@ -81,9 +85,9 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
               </Button>
             )}
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={handleClick}
             className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
           >

@@ -48,8 +48,8 @@ export default function Submit() {
       aiTools: [PREDEFINED_AI_TOOLS[0]], // Set default to first predefined tool
       thumbnail: "",
       xHandle: "",
-      sponsorshipEnabled: false,
-      sponsorshipUrl: "",
+      sponsorshipEnabled: false, //Added default value
+      sponsorshipUrl: "", //Added default value
     },
   });
 
@@ -75,11 +75,8 @@ export default function Submit() {
         projectData.thumbnail = url;
       }
 
-      // Remove thumbnailFile and empty sponsorshipUrl from data before sending to API
+      // Remove thumbnailFile from data before sending to API
       delete projectData.thumbnailFile;
-      if (!projectData.sponsorshipEnabled) {
-        delete projectData.sponsorshipUrl;
-      }
 
       const response = await apiRequest("POST", "/api/projects", projectData);
       if (!response.ok) {
@@ -334,13 +331,8 @@ export default function Submit() {
                       <FormControl>
                         <Switch
                           checked={field.value}
-                          onCheckedChange={(checked) => {
-                            field.onChange(checked);
-                            if (!checked) {
-                              form.setValue("sponsorshipUrl", "");
-                            }
-                          }}
-                          className="data-[state=unchecked]:bg-black data-[state=unchecked]:border-blue-400 hover:data-[state=unchecked]:border-blue-600"
+                          onCheckedChange={field.onChange}
+                          className="data-[state=unchecked]:bg-gray-800 data-[state=unchecked]:border-blue-400 hover:data-[state=unchecked]:border-blue-600"
                         />
                       </FormControl>
                     </FormItem>
@@ -353,7 +345,7 @@ export default function Submit() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-zinc-400">
-                        Sponsorship URL
+                        Sponsorship URL (optional)
                       </FormLabel>
                       <FormControl>
                         <Input
