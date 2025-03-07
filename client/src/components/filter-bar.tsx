@@ -1,4 +1,10 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PREDEFINED_AI_TOOLS } from "@shared/schema";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -12,13 +18,13 @@ interface FilterBarProps {
   onSponsorshipFilterChange: (value: boolean) => void;
 }
 
-export function FilterBar({ 
-  sortBy, 
-  aiTool, 
+export function FilterBar({
+  sortBy,
+  aiTool,
   sponsorshipFilter,
-  onSortChange, 
+  onSortChange,
   onAiToolChange,
-  onSponsorshipFilterChange 
+  onSponsorshipFilterChange,
 }: FilterBarProps) {
   return (
     <div className="mb-6 flex flex-wrap gap-4 items-center">
@@ -39,7 +45,9 @@ export function FilterBar({
         <SelectContent>
           <SelectItem value="all">All Tools</SelectItem>
           {PREDEFINED_AI_TOOLS.map((tool) => (
-            <SelectItem key={tool} value={tool}>{tool}</SelectItem>
+            <SelectItem key={tool} value={tool}>
+              {tool}
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>
@@ -49,7 +57,7 @@ export function FilterBar({
           id="sponsorship-filter"
           checked={sponsorshipFilter}
           onCheckedChange={onSponsorshipFilterChange}
-          className="data-[state=unchecked]:bg-black data-[state=unchecked]:border-blue-500"
+          className="data-[state=unchecked]:bg-gray-800 data-[state=unchecked]:border-blue-400 hover:data-[state=unchecked]:border-blue-600"
         />
         <Label htmlFor="sponsorship-filter" className="text-sm text-zinc-400">
           Open for Sponsorship

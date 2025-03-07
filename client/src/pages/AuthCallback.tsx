@@ -27,7 +27,8 @@ export default function AuthCallback() {
         toast({
           variant: "destructive",
           title: "Authentication failed",
-          description: error instanceof Error ? error.message : "Please try again",
+          description:
+            error instanceof Error ? error.message : "Please try again",
         });
         setLocation("/");
       }
@@ -52,7 +53,7 @@ export default function AuthCallback() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-pulse text-orange-400">Signing in...</div>
+      <div className="animate-pulse text-blue-400">Signing in...</div>
     </div>
   );
 }
