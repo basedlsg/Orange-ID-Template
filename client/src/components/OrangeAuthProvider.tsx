@@ -15,7 +15,7 @@ export function OrangeAuthProvider({
     <BedrockPassportProvider
       baseUrl={import.meta.env.VITE_ORANGE_BASE_URL}
       authCallbackUrl={`${origin}/auth/callback`}
-      tenantId="based-town"
+      tenantId="juice-town"
       walletConnectId={import.meta.env.VITE_WALLETCONNECT_PROJECT_ID}
     >
       {children}

@@ -13,6 +13,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Submit from "@/pages/submit";
 import Admin from "@/pages/admin";
+import AuthCallback from "@/pages/AuthCallback";
 
 async function storeUserInDB(user: any) {
   console.log("Complete BedrockPassport user object:", user);
@@ -225,6 +226,7 @@ function Router() {
       <Route path="/admin">
         <ProtectedRoute component={Admin} requiresAdmin={true} />
       </Route>
+      <Route path="/auth/callback" component={AuthCallback} />
       <Route component={NotFound} />
     </Switch>
   );
