@@ -8,7 +8,8 @@ import { useBedrockPassport, LoginPanel } from "@bedrock_org/passport";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
+import { Logo } from "@/components/logo";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Submit from "@/pages/submit";
@@ -209,17 +210,20 @@ function Navigation() {
     <nav className="border-b">
       <div className="container mx-auto flex h-16 items-center px-4">
         <Link href="/">
-          <span className="text-xl font-bold cursor-pointer">
-            VibeCodingList
-          </span>
+          <Logo className="cursor-pointer" />
         </Link>
         <div className="ml-auto flex items-center space-x-4">
           {isLoggedIn ? (
             <>
               <Link href="/submit">
-                <span className="text-sm font-medium hover:text-primary cursor-pointer">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-sm font-medium hover:text-primary"
+                >
+                  <Plus className="mr-1 h-4 w-4" />
                   Submit Project
-                </span>
+                </Button>
               </Link>
               <Button 
                 variant="ghost" 
