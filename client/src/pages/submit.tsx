@@ -45,7 +45,7 @@ export default function Submit() {
       name: "",
       description: "",
       url: "",
-      aiTools: [PREDEFINED_AI_TOOLS[0]], // Set default to first predefined tool
+      aiTools: [], // No default AI tool selected
       thumbnail: "",
       xHandle: "",
       sponsorshipEnabled: false, //Added default value
@@ -345,7 +345,9 @@ export default function Submit() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-zinc-400">
-                        Sponsorship URL (optional)
+                        {form.watch("sponsorshipEnabled") 
+                          ? "Sponsorship URL" 
+                          : "Sponsorship URL (optional)"}
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -354,10 +356,12 @@ export default function Submit() {
                           disabled={!form.watch("sponsorshipEnabled")}
                           className="bg-zinc-900 border-zinc-700 text-white"
                           placeholder="https://..."
+                          {...(!form.watch("sponsorshipEnabled") ? { required: false } : {})}
                         />
                       </FormControl>
                       <FormDescription className="text-sm text-zinc-500">
                         Link to your sponsorship or pricing page
+                        {form.watch("sponsorshipEnabled") && <span className="text-red-400"> *</span>}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

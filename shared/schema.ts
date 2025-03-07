@@ -16,6 +16,10 @@ export const PREDEFINED_AI_TOOLS = [
   "Claude",
   "GitHub Copilot",
   "Grok",
+  "Windsurf",
+  "Lovable",
+  "Bolt",
+  "v0",
 ] as const;
 
 export const users = pgTable("users", {
@@ -68,15 +72,34 @@ export const insertProjectSchema = createInsertSchema(projects)
       .string()
       .max(200, "Description must be 200 characters or less"),
     url: z.string().url(),
-    aiTools: z.array(z.string()).min(1, "Select at least one AI tool"),
+    aiTools: z.array(z.string()).superRefine((val, ctx) => {
+      // Only validate min length when form is being submitted
+      if (ctx.path.length > 0 && val.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.too_small,
+          minimum: 1,
+          type: "array",
+          inclusive: true,
+          message: "Select at least one AI tool",
+        });
+      }
+    }),
     thumbnailFile: z.any().optional(),
     xHandle: z.string().optional(),
     sponsorshipEnabled: z.boolean().default(false),
-    sponsorshipUrl: z.union([
-      z.string().url(),
-      z.string().length(0),
-      z.undefined()
-    ]).transform(val => val || undefined),
+    sponsorshipUrl: z.string().url().optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Only validate sponsorshipUrl if sponsorshipEnabled is true
+    if (data.sponsorshipEnabled) {
+      if (!data.sponsorshipUrl || data.sponsorshipUrl.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Sponsorship URL is required when sponsorship is enabled",
+          path: ["sponsorshipUrl"],
+        });
+      }
+    }
   });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
