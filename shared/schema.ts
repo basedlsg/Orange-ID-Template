@@ -16,6 +16,10 @@ export const PREDEFINED_AI_TOOLS = [
   "Claude",
   "GitHub Copilot",
   "Grok",
+  "Windsurf",
+  "Lovable",
+  "Bolt",
+  "v0",
 ] as const;
 
 export const users = pgTable("users", {
@@ -84,7 +88,8 @@ export const insertProjectSchema = createInsertSchema(projects)
     xHandle: z.string().optional(),
     sponsorshipEnabled: z.boolean().default(false),
     sponsorshipUrl: z.string().url().optional(),
-  }).superRefine((data, ctx) => {
+  })
+  .superRefine((data, ctx) => {
     // Only validate sponsorshipUrl if sponsorshipEnabled is true
     if (data.sponsorshipEnabled) {
       if (!data.sponsorshipUrl || data.sponsorshipUrl.length === 0) {
