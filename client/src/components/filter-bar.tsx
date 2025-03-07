@@ -21,41 +21,39 @@ export function FilterBar({
   onSponsorshipFilterChange 
 }: FilterBarProps) {
   return (
-    <div className="mb-8 space-y-4">
-      <h2 className="text-2xl font-bold">Projects</h2>
-      <div className="flex flex-wrap gap-4 items-center">
-        <Select value={sortBy} onValueChange={onSortChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Newest First</SelectItem>
-            <SelectItem value="views">Most Viewed</SelectItem>
-          </SelectContent>
-        </Select>
+    <div className="mb-6 flex flex-wrap gap-4 items-center">
+      <Select value={sortBy} onValueChange={onSortChange}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Sort by..." />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="views">Most Viewed</SelectItem>
+          <SelectItem value="newest">Newest First</SelectItem>
+        </SelectContent>
+      </Select>
 
-        <Select value={aiTool} onValueChange={onAiToolChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by AI Tool..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Tools</SelectItem>
-            {PREDEFINED_AI_TOOLS.map((tool) => (
-              <SelectItem key={tool} value={tool}>{tool}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <Select value={aiTool} onValueChange={onAiToolChange}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="Filter by AI Tool..." />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Tools</SelectItem>
+          {PREDEFINED_AI_TOOLS.map((tool) => (
+            <SelectItem key={tool} value={tool}>{tool}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="sponsorship-filter"
-            checked={sponsorshipFilter}
-            onCheckedChange={onSponsorshipFilterChange}
-          />
-          <Label htmlFor="sponsorship-filter" className="text-sm text-zinc-400">
-            Open for Sponsorship
-          </Label>
-        </div>
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="sponsorship-filter"
+          checked={sponsorshipFilter}
+          onCheckedChange={onSponsorshipFilterChange}
+          className="data-[state=unchecked]:bg-black data-[state=unchecked]:border-blue-500"
+        />
+        <Label htmlFor="sponsorship-filter" className="text-sm text-zinc-400">
+          Open for Sponsorship
+        </Label>
       </div>
     </div>
   );

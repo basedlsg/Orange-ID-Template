@@ -291,6 +291,7 @@ export default function Submit() {
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          className="data-[state=unchecked]:bg-black data-[state=unchecked]:border-blue-500"
                         />
                       </FormControl>
                     </FormItem>

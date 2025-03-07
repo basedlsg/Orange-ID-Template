@@ -6,7 +6,7 @@ import type { Project } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 
 export default function Home() {
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState("views");
   const [aiTool, setAiTool] = useState("all");
   const [sponsorshipFilter, setSponsorshipFilter] = useState(false);
 
