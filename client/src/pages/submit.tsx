@@ -345,7 +345,9 @@ export default function Submit() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-zinc-400">
-                        Sponsorship URL (optional)
+                        {form.watch("sponsorshipEnabled") 
+                          ? "Sponsorship URL" 
+                          : "Sponsorship URL (optional)"}
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -358,6 +360,7 @@ export default function Submit() {
                       </FormControl>
                       <FormDescription className="text-sm text-zinc-500">
                         Link to your sponsorship or pricing page
+                        {form.watch("sponsorshipEnabled") && <span className="text-red-400"> *</span>}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
