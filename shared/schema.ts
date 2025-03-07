@@ -68,7 +68,18 @@ export const insertProjectSchema = createInsertSchema(projects)
       .string()
       .max(200, "Description must be 200 characters or less"),
     url: z.string().url(),
-    aiTools: z.array(z.string()).min(1, "Select at least one AI tool"),
+    aiTools: z.array(z.string()).superRefine((val, ctx) => {
+      // Only validate min length when form is being submitted
+      if (ctx.path.length > 0 && val.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.too_small,
+          minimum: 1,
+          type: "array",
+          inclusive: true,
+          message: "Select at least one AI tool",
+        });
+      }
+    }),
     thumbnailFile: z.any().optional(),
     xHandle: z.string().optional(),
     sponsorshipEnabled: z.boolean().default(false),

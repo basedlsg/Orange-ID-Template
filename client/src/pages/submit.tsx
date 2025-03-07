@@ -45,7 +45,7 @@ export default function Submit() {
       name: "",
       description: "",
       url: "",
-      aiTools: [PREDEFINED_AI_TOOLS[0]], // Set default to first predefined tool
+      aiTools: [], // No default AI tool selected
       thumbnail: "",
       xHandle: "",
       sponsorshipEnabled: false, //Added default value
