@@ -10,12 +10,19 @@ export default function Home() {
 
   // Only fetch approved projects for the home page
   const { data: projects, isLoading } = useQuery<Project[]>({
-    queryKey: ["/api/projects?approved=true", { sortBy }],
+    queryKey: ["/api/projects", { approved: true }],
+    queryFn: async () => {
+      const response = await fetch(`/api/projects?approved=true${sortBy ? `&sortBy=${sortBy}` : ''}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch projects");
+      }
+      return response.json();
+    }
   });
 
   const handleProjectView = (id: number) => {
     queryClient.setQueryData<Project[]>(
-      ["/api/projects?approved=true", { sortBy }],
+      ["/api/projects", { approved: true }],
       (old) =>
         old?.map((p) =>
           p.id === id ? { ...p, views: p.views + 1 } : p

@@ -8,14 +8,14 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 export default function Admin() {
   const { toast } = useToast();
 
-  // Use explicit queryFn for debugging
   const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: false }],
     queryFn: async () => {
       const response = await fetch("/api/projects?approved=false");
-      const data = await response.json();
-      console.log("Pending projects data:", data); // Debug log
-      return data;
+      if (!response.ok) {
+        throw new Error("Failed to fetch pending projects");
+      }
+      return response.json();
     },
   });
 
@@ -23,20 +23,33 @@ export default function Admin() {
     queryKey: ["/api/projects", { approved: true }],
     queryFn: async () => {
       const response = await fetch("/api/projects?approved=true");
-      const data = await response.json();
-      console.log("Approved projects data:", data); // Debug log
-      return data;
+      if (!response.ok) {
+        throw new Error("Failed to fetch approved projects");
+      }
+      return response.json();
     },
   });
 
   const { mutate: approveProject } = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("POST", `/api/projects/${id}/approve`);
+      const response = await apiRequest("POST", `/api/projects/${id}/approve`);
+      if (!response.ok) {
+        throw new Error("Failed to approve project");
+      }
+      return response.json();
     },
-    onSuccess: () => {
-      // Invalidate both queries to refresh the lists
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", { approved: false }] });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", { approved: true }] });
+    onSuccess: (approvedProject) => {
+      // Remove from pending projects and add to approved projects
+      queryClient.setQueryData<Project[]>(
+        ["/api/projects", { approved: false }],
+        (old) => old?.filter((p) => p.id !== approvedProject.id) || []
+      );
+
+      queryClient.setQueryData<Project[]>(
+        ["/api/projects", { approved: true }],
+        (old) => [...(old || []), approvedProject]
+      );
+
       toast({
         title: "Success",
         description: "Project approved",
@@ -54,9 +67,6 @@ export default function Admin() {
   if (isPendingLoading || isApprovedLoading) {
     return <div className="text-white">Loading...</div>;
   }
-
-  console.log("Rendering with pending projects:", pendingProjects); // Debug log
-  console.log("Rendering with approved projects:", approvedProjects); // Debug log
 
   return (
     <div className="min-h-screen bg-black">
