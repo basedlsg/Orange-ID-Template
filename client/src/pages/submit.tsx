@@ -179,7 +179,7 @@ export default function Submit() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-zinc-400">
-                        Description (max 100 characters)
+                        Description (max 200 characters)
                       </FormLabel>
                       <FormControl>
                         <Textarea
