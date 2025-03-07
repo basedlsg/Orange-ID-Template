@@ -93,7 +93,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // undefined means get all projects
       // true means get only approved projects
       // false means get only unapproved projects
-      const approved = req.query.approved === "true" ? true : 
+      const approved = req.query.approved === "true" ? true :
                       req.query.approved === "false" ? false : undefined;
       const sortBy = req.query.sortBy as string;
 
@@ -104,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (sortBy === "views") {
         projects = projects.sort((a, b) => b.views - a.views);
       } else if (sortBy === "newest") {
-        projects = projects.sort((a, b) => 
+        projects = projects.sort((a, b) =>
           b.createdAt.getTime() - a.createdAt.getTime()
         );
       }
@@ -117,6 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Project creation endpoint
   app.post("/api/projects", async (req, res) => {
     try {
       console.log("Received project data:", JSON.stringify(req.body, null, 2));
@@ -129,6 +130,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         aiTools: req.body.aiTools,
         thumbnail: req.body.thumbnail || undefined,
         xHandle: req.body.xHandle || undefined,
+        sponsorshipEnabled: req.body.sponsorshipEnabled,
+        sponsorshipUrl: req.body.sponsorshipUrl,
       });
 
       console.log("Validated project data:", JSON.stringify(validatedData, null, 2));

@@ -71,6 +71,8 @@ export class DatabaseStorage implements IStorage {
         xHandle: insertProject.xHandle,
         userId,
         aiTools: sql`${aiToolsArray}::text[]`,
+        sponsorshipEnabled: insertProject.sponsorshipEnabled || false,
+        sponsorshipUrl: insertProject.sponsorshipUrl,
       })
       .returning();
     return project;
