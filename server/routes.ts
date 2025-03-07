@@ -2,15 +2,41 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertProjectSchema } from "@shared/schema";
+import multer from "multer";
+import path from "path";
+import express from 'express'; // Added import for express.static
+
+// Configure multer for handling file uploads
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: './uploads',
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+  })
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Ensure uploads directory exists
+  app.use('/uploads', express.static('uploads'));
+
+  // File upload endpoint
+  app.post("/api/upload", upload.single('thumbnail'), (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    const url = `/uploads/${req.file.filename}`;
+    res.json({ url });
+  });
+
   // Projects API
   app.get("/api/projects", async (req, res) => {
     const approved = req.query.approved === "true";
     const sortBy = req.query.sortBy as string;
-    
+
     let projects = await storage.getProjects(approved);
-    
+
     // Apply sorting
     if (sortBy === "views") {
       projects = projects.sort((a, b) => b.views - a.views);
@@ -19,7 +45,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         b.createdAt.getTime() - a.createdAt.getTime()
       );
     }
-    
+
     res.json(projects);
   });
 

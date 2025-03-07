@@ -29,13 +29,22 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
       <CardHeader className="p-4">
         <div className="flex items-start justify-between">
           <CardTitle className="text-lg text-white">{project.name}</CardTitle>
-          <Badge variant="secondary" className="bg-blue-500/10 text-blue-400">
-            {project.aiTool}
-          </Badge>
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0">
         <p className="mb-4 text-sm text-zinc-400">{project.description}</p>
+        <div className="flex flex-wrap gap-2 mb-4">
+          {project.aiTools.map((tool) => (
+            <Badge key={tool} variant="secondary" className="bg-blue-500/10 text-blue-400">
+              {tool}
+            </Badge>
+          ))}
+          {project.customAiTools?.map((tool) => (
+            <Badge key={tool} variant="secondary" className="bg-purple-500/10 text-purple-400">
+              {tool}
+            </Badge>
+          ))}
+        </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-zinc-400">
             <Eye className="h-4 w-4" />

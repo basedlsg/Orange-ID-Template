@@ -2,13 +2,15 @@ import {
   users, type User, type InsertUser,
   projects, type Project, type InsertProject 
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   // Project operations
   getProjects(approved?: boolean): Promise<Project[]>;
   getProject(id: number): Promise<Project | undefined>;
@@ -17,81 +19,58 @@ export interface IStorage {
   incrementViews(id: number): Promise<void>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private projects: Map<number, Project>;
-  private userId: number;
-  private projectId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.projects = new Map();
-    this.userId = 1;
-    this.projectId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userId++;
-    const user: User = { ...insertUser, id, isAdmin: false };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async getProjects(approved?: boolean): Promise<Project[]> {
-    const projects = Array.from(this.projects.values());
     if (approved !== undefined) {
-      return projects.filter(p => p.approved === approved);
+      return db.select().from(projects).where(eq(projects.approved, approved));
     }
-    return projects;
+    return db.select().from(projects);
   }
 
   async getProject(id: number): Promise<Project | undefined> {
-    return this.projects.get(id);
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project;
   }
 
   async createProject(insertProject: InsertProject, userId: number): Promise<Project> {
-    const id = this.projectId++;
-    const now = new Date();
-    const project: Project = {
-      ...insertProject,
-      id,
-      userId,
-      approved: false,
-      views: 0,
-      createdAt: now,
-    };
-    this.projects.set(id, project);
+    const [project] = await db
+      .insert(projects)
+      .values({ ...insertProject, userId })
+      .returning();
     return project;
   }
 
   async approveProject(id: number): Promise<Project> {
-    const project = await this.getProject(id);
-    if (!project) {
-      throw new Error("Project not found");
-    }
-    const updatedProject = { ...project, approved: true };
-    this.projects.set(id, updatedProject);
-    return updatedProject;
+    const [project] = await db
+      .update(projects)
+      .set({ approved: true })
+      .where(eq(projects.id, id))
+      .returning();
+    if (!project) throw new Error("Project not found");
+    return project;
   }
 
   async incrementViews(id: number): Promise<void> {
-    const project = await this.getProject(id);
-    if (!project) {
-      throw new Error("Project not found");
-    }
-    const updatedProject = { ...project, views: project.views + 1 };
-    this.projects.set(id, updatedProject);
+    await db
+      .update(projects)
+      .set({ views: projects.views + 1 })
+      .where(eq(projects.id, id));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

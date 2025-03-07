@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function Submit() {
   const [, setLocation] = useLocation();
@@ -29,7 +29,8 @@ export default function Submit() {
       name: "",
       description: "",
       url: "",
-      aiTool: "Other",
+      aiTools: [],
+      customAiTools: [],
       thumbnail: "",
       xHandle: "",
     },
@@ -37,6 +38,17 @@ export default function Submit() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {
+      // Handle file upload if a file is selected
+      if (data.thumbnailFile instanceof File) {
+        const formData = new FormData();
+        formData.append("thumbnail", data.thumbnailFile);
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const { url } = await uploadRes.json();
+        data.thumbnail = url;
+      }
       await apiRequest("POST", "/api/projects", data);
     },
     onSuccess: () => {
@@ -103,53 +115,65 @@ export default function Submit() {
                   </FormItem>
                 )}
               />
+              <div>
+                <FormLabel className="text-zinc-400">AI Tools Used</FormLabel>
+                {PREDEFINED_AI_TOOLS.map((tool) => (
+                  <FormField
+                    key={tool}
+                    control={form.control}
+                    name="aiTools"
+                    render={({ field }) => {
+                      return (
+                        <FormItem key={tool} className="flex flex-row items-start space-x-3 space-y-0 mt-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(tool)}
+                              onCheckedChange={(checked) => {
+                                const values = checked
+                                  ? [...(field.value || []), tool]
+                                  : field.value?.filter((value) => value !== tool) || [];
+                                field.onChange(values);
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="text-zinc-400">{tool}</FormLabel>
+                        </FormItem>
+                      );
+                    }}
+                  />
+                ))}
+                <FormMessage />
+              </div>
               <FormField
                 control={form.control}
-                name="aiTool"
+                name="customAiTools"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-zinc-400">AI Tool Used</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="bg-zinc-900 border-zinc-700 text-white">
-                          <SelectValue placeholder="Select AI Tool" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-zinc-900 border-zinc-700">
-                        {PREDEFINED_AI_TOOLS.map((tool) => (
-                          <SelectItem key={tool} value={tool} className="text-white hover:bg-zinc-800">
-                            {tool}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel className="text-zinc-400">Other AI Tools (comma-separated)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field}
+                        className="bg-zinc-900 border-zinc-700 text-white"
+                        onChange={(e) => field.onChange(e.target.value.split(',').map(s => s.trim()))}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              {form.watch("aiTool") === "Other" && (
-                <FormField
-                  control={form.control}
-                  name="customAiTool"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-zinc-400">Specify AI Tool</FormLabel>
-                      <FormControl>
-                        <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
               <FormField
                 control={form.control}
-                name="thumbnail"
+                name="thumbnailFile"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-zinc-400">Thumbnail URL</FormLabel>
+                    <FormLabel className="text-zinc-400">Thumbnail Image</FormLabel>
                     <FormControl>
-                      <Input {...field} type="url" className="bg-zinc-900 border-zinc-700 text-white" />
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => field.onChange(e.target.files?.[0])}
+                        className="bg-zinc-900 border-zinc-700 text-white"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
