@@ -39,7 +39,7 @@ export function LoginDialog({
             titleClass="text-xl font-semibold text-blue-400"
             logoAlt="Based Town"
             logoClass="ml-2 h-8"
-            showConnectWallet={true}
+            showConnectWallet={false}
             walletButtonClass="w-full border border-blue-500/50 hover:bg-blue-900/30 transition-all duration-200"
             walletButtonText="Connect Wallet"
             separatorTextClass="bg-black/95 text-blue-400 px-2"
