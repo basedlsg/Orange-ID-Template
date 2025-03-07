@@ -12,14 +12,14 @@ function Navigation() {
     <nav className="border-b">
       <div className="container mx-auto flex h-16 items-center px-4">
         <Link href="/">
-          <a className="text-xl font-bold">VibeCodingList</a>
+          <span className="text-xl font-bold cursor-pointer">VibeCodingList</span>
         </Link>
         <div className="ml-auto space-x-4">
           <Link href="/submit">
-            <a className="text-sm font-medium hover:text-primary">Submit Project</a>
+            <span className="text-sm font-medium hover:text-primary cursor-pointer">Submit Project</span>
           </Link>
           <Link href="/admin">
-            <a className="text-sm font-medium hover:text-primary">Admin</a>
+            <span className="text-sm font-medium hover:text-primary cursor-pointer">Admin</span>
           </Link>
         </div>
       </div>
