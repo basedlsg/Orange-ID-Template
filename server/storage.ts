@@ -53,7 +53,8 @@ export class DatabaseStorage implements IStorage {
       .values({
         ...insertProject,
         userId,
-        aiTools: sql`${insertProject.aiTools}::text[]`,
+        // Format aiTools as a proper PostgreSQL array
+        aiTools: sql`ARRAY[${insertProject.aiTools}]::text[]`,
       })
       .returning();
     return project;

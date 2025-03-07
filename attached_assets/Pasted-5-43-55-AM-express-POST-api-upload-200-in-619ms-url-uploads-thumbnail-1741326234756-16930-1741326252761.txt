@@ -1,0 +1,54 @@
+5:43:55 AM [express] POST /api/upload 200 in 619ms :: {"url":"/uploads/thumbnail-1741326234756-16930…
+Received project data: {
+  "name": "sdafasdf",
+  "description": "dsfasdf",
+  "url": "https://worlds.orangeweb3.com/5fSWRM2",
+  "aiTools": [
+    "Replit AI"
+  ],
+  "thumbnail": "/uploads/thumbnail-1741326234756-16930917.jfif",
+  "xHandle": "asdfasdf"
+}
+Validated project data: {
+  "name": "sdafasdf",
+  "description": "dsfasdf",
+  "url": "https://worlds.orangeweb3.com/5fSWRM2",
+  "aiTools": [
+    "Replit AI"
+  ],
+  "thumbnail": "/uploads/thumbnail-1741326234756-16930917.jfif",
+  "xHandle": "asdfasdf"
+}
+Project validation error: error: malformed array literal: "Replit AI"
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.createProject (/home/runner/workspace/server/storage.ts:51:23)
+    at async <anonymous> (/home/runner/workspace/server/routes.ts:76:23) {
+  length: 189,
+  severity: 'ERROR',
+  code: '22P02',
+  detail: 'Array value must start with "{" or dimension information.',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: "unnamed portal parameter $4 = '...'",
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'arrayfuncs.c',
+  line: '319',
+  routine: 'array_in'
+}
+/home/runner/workspace/node_modules/zod-validation-error/lib/fromZodError.ts:28
+    throw new TypeError(
+          ^
+
+
+TypeError: Invalid zodError param; expected instance of ZodError. Did you mean to use the "fromError" method instead?
+    at fromZodError (/home/runner/workspace/node_modules/zod-validation-error/lib/fromZodError.ts:28:11)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:80:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
