@@ -356,6 +356,7 @@ export default function Submit() {
                           disabled={!form.watch("sponsorshipEnabled")}
                           className="bg-zinc-900 border-zinc-700 text-white"
                           placeholder="https://..."
+                          {...(!form.watch("sponsorshipEnabled") ? { required: false } : {})}
                         />
                       </FormControl>
                       <FormDescription className="text-sm text-zinc-500">
