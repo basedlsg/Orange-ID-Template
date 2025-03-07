@@ -12,7 +12,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,7 +21,6 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useState } from "react";
-import {Checkbox} from "@/components/ui/checkbox"
 
 export default function Submit() {
   const [, setLocation] = useLocation();
@@ -39,9 +37,6 @@ export default function Submit() {
       aiTools: [PREDEFINED_AI_TOOLS[0]], // Set default to first predefined tool
       thumbnail: "",
       xHandle: "",
-      openForSponsorship: false, //add default value
-      sponsorshipUrl: "", //add default value
-
     },
   });
 
@@ -260,6 +255,7 @@ export default function Submit() {
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="xHandle"
@@ -273,52 +269,6 @@ export default function Submit() {
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="openForSponsorship"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-zinc-700 p-4">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          className="data-[state=checked]:bg-blue-500"
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel className="text-zinc-400">Open for Sponsorship</FormLabel>
-                        <FormDescription className="text-zinc-500">
-                          Check this if your project offers sponsorship opportunities
-                        </FormDescription>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
-                {form.watch("openForSponsorship") && (
-                  <FormField
-                    control={form.control}
-                    name="sponsorshipUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-zinc-400">Sponsorship Details URL</FormLabel>
-                        <FormControl>
-                          <Input 
-                            {...field} 
-                            type="url" 
-                            placeholder="https://..."
-                            className="bg-zinc-900 border-zinc-700 text-white" 
-                          />
-                        </FormControl>
-                        <FormDescription className="text-zinc-500">
-                          Link to your sponsorship details or contact page
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
 
                 <Button type="submit" disabled={isPending} className="bg-blue-500 hover:bg-blue-600 text-white">
                   Submit Project
