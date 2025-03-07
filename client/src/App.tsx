@@ -27,8 +27,7 @@ async function storeUserInDB(user: any) {
     throw new Error("Missing Orange ID (sub or id)");
   }
 
-  const token = JSON.parse(localStorage.getItem("passport-token")!).state
-    .accessToken;
+  const token = JSON.parse(localStorage.getItem("passport-token")!).state.accessToken;
   if (!token) throw new Error("Missing access token");
 
   try {
@@ -69,8 +68,7 @@ function StoreUserData() {
         toast({
           variant: "destructive",
           title: "Error storing user data",
-          description:
-            err instanceof Error ? err.message : "Please try again later",
+          description: err instanceof Error ? err.message : "Please try again later",
         });
       });
     }
@@ -90,14 +88,17 @@ function LoginButton() {
 
   return (
     <>
-      <Button
-        variant="outline"
+      <Button 
+        variant="outline" 
         onClick={handleOpenLogin}
         className="text-sm font-medium hover:text-primary"
       >
         Login
       </Button>
-      <LoginDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
+      <LoginDialog 
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </>
   );
 }
@@ -116,7 +117,7 @@ function ProtectedRoute({
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-blue-400">Loading...</div>
+        <div className="animate-pulse text-orange-400">Loading...</div>
       </div>
     );
   }
@@ -130,8 +131,8 @@ function ProtectedRoute({
   if (requiresAdmin && user) {
     // Get the user data from our database to check admin status
     fetch(`/api/users/check-admin?orangeId=${user.sub || user.id}`)
-      .then((response) => response.json())
-      .then((data) => {
+      .then(response => response.json())
+      .then(data => {
         if (!data.isAdmin) {
           toast({
             variant: "destructive",
@@ -141,7 +142,7 @@ function ProtectedRoute({
           setLocation("/");
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.error("Error checking admin status:", error);
         toast({
           variant: "destructive",
@@ -170,8 +171,7 @@ function Navigation() {
       toast({
         variant: "destructive",
         title: "Error logging out",
-        description:
-          error instanceof Error ? error.message : "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
       });
     }
   };
@@ -185,11 +185,11 @@ function Navigation() {
         <div className="ml-auto flex items-center space-x-4">
           {isLoggedIn ? (
             <>
-              <Button
-                variant="outline"
+              <Button 
+                variant="ghost" 
                 size="sm"
                 onClick={handleLogout}
-                className="text-sm font-medium hover:text-primary"
+                className="text-sm font-medium hover:text-destructive"
               >
                 Logout
               </Button>
