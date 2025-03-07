@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Eye, Twitter } from "lucide-react";
+import { ExternalLink, Eye } from "lucide-react";
+import { SiX } from "react-icons/si";
 import type { Project } from "@shared/schema";
 
 interface ProjectCardProps {
@@ -45,7 +46,7 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
             </Badge>
           ))}
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 text-sm text-zinc-400">
             <div className="flex items-center gap-2">
               <Eye className="h-4 w-4" />
@@ -58,7 +59,7 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
                 onClick={handleXClick}
                 className="text-zinc-400 hover:text-blue-400 p-0 h-auto"
               >
-                <Twitter className="h-4 w-4" />
+                <SiX className="h-4 w-4" />
               </Button>
             )}
           </div>
