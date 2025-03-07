@@ -41,7 +41,6 @@ export default function Submit() {
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {
       let projectData = { ...data };
-      console.log("Submitting data:", projectData);
 
       // Handle file upload if a file is selected
       if (data.thumbnailFile instanceof File) {
@@ -64,8 +63,6 @@ export default function Submit() {
       // Remove thumbnailFile from data before sending to API
       delete projectData.thumbnailFile;
 
-      console.log("Final project data:", projectData);
-
       const response = await apiRequest("POST", "/api/projects", projectData);
       if (!response.ok) {
         const error = await response.json();
@@ -74,11 +71,32 @@ export default function Submit() {
       return response.json();
     },
     onSuccess: () => {
+      // Show success toast with CTAs
       toast({
         title: "Success",
-        description: "Project submitted for review",
+        description: (
+          <div className="space-y-4">
+            <p>Project submitted successfully! It will be reviewed and approved soon.</p>
+            <div className="flex gap-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  form.reset();
+                  window.scrollTo(0, 0);
+                }}
+              >
+                Submit Another Project
+              </Button>
+              <Button
+                onClick={() => setLocation("/")}
+              >
+                Go to Explore Page
+              </Button>
+            </div>
+          </div>
+        ),
+        duration: 10000, // Show for 10 seconds to give time to read and click
       });
-      setLocation("/");
     },
     onError: (error) => {
       toast({
