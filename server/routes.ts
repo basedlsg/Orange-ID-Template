@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProjectSchema } from "@shared/schema";
+import { insertProjectSchema, insertUserSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import express from 'express';
@@ -27,6 +27,32 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   // Ensure uploads directory exists
   app.use('/uploads', express.static('uploads'));
+
+  // User API
+  app.post("/api/users", async (req, res) => {
+    try {
+      console.log("Received user data:", req.body);
+
+      // Validate the user data
+      const validatedData = insertUserSchema.parse(req.body);
+      console.log("Validated user data:", validatedData);
+
+      // Check if user already exists by orangeId
+      const existingUser = await storage.getUserByOrangeId(validatedData.orangeId);
+      if (existingUser) {
+        return res.json(existingUser); // Return existing user if found
+      }
+
+      // Create new user
+      const user = await storage.createUser(validatedData);
+      console.log("Created user:", user);
+      res.json(user);
+    } catch (error) {
+      console.error("User creation error:", error);
+      const validationError = fromZodError(error as any);
+      res.status(400).json({ error: validationError.message });
+    }
+  });
 
   // File upload endpoint
   app.post("/api/upload", upload.single('thumbnail'), (req, res) => {
