@@ -33,7 +33,10 @@ export default function Profile() {
 
       return allProjects.filter((project: Project) => likedIds.includes(project.id));
     },
-    enabled: !!orangeId
+    enabled: !!orangeId,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: false
   });
 
   // Fetch user's submitted projects
@@ -45,7 +48,10 @@ export default function Profile() {
       if (!response.ok) throw new Error("Failed to fetch submitted projects");
       return response.json();
     },
-    enabled: !!orangeId
+    enabled: !!orangeId,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: false
   });
 
   const handleLogout = async () => {
