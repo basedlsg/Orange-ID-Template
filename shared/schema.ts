@@ -112,7 +112,11 @@ export const insertProjectSchema = createInsertSchema(projects)
     thumbnailFile: z.any().optional(),
     xHandle: z.string().optional(),
     sponsorshipEnabled: z.boolean().default(false),
-    sponsorshipUrl: z.string().url().optional(),
+    sponsorshipUrl: z.union([
+      z.string().url(),
+      z.string().length(0),
+      z.undefined()
+    ]).optional(),
   })
   .superRefine((data, ctx) => {
     // Only validate sponsorshipUrl if sponsorshipEnabled is true
