@@ -1,43 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import { ProjectGrid } from "@/components/project-grid";
-import { useState, Suspense } from "react";
+import { useState } from "react";
 import type { Project } from "@shared/schema";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Redirect, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card } from "@/components/ui/card";
 
-function LoadingProjectsGrid() {
-  return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {[1, 2, 3].map((n) => (
-        <Card key={n} className="bg-black border-zinc-800">
-          <div className="aspect-video">
-            <Skeleton className="h-full w-full" />
-          </div>
-          <div className="p-4">
-            <Skeleton className="h-6 w-3/4 mb-4" />
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-2/3" />
-          </div>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
-function ProfileContent() {
+export default function Profile() {
+  const { isLoggedIn, user, signOut } = useBedrockPassport();
   const [activeTab, setActiveTab] = useState("liked");
-  const { isLoggedIn, user } = useBedrockPassport();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const orangeId = user?.sub || user?.id;
 
   // Fetch user's liked projects
-  const { data: likedProjects } = useQuery<Project[]>({
+  const { data: likedProjects, isLoading: isLoadingLiked } = useQuery<Project[]>({
     queryKey: ["/api/users", orangeId, "likes"],
     queryFn: async () => {
       if (!orangeId) throw new Error("User ID not found");
@@ -55,13 +34,13 @@ function ProfileContent() {
       return allProjects.filter((project: Project) => likedIds.includes(project.id));
     },
     enabled: !!orangeId,
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: true
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: false
   });
 
   // Fetch user's submitted projects
-  const { data: submittedProjects } = useQuery<Project[]>({
+  const { data: submittedProjects, isLoading: isLoadingSubmitted } = useQuery<Project[]>({
     queryKey: ["/api/users", orangeId, "submitted"],
     queryFn: async () => {
       if (!orangeId) throw new Error("User ID not found");
@@ -70,10 +49,36 @@ function ProfileContent() {
       return response.json();
     },
     enabled: !!orangeId,
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: true
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    refetchOnWindowFocus: false
   });
+
+  const handleLogout = async () => {
+    try {
+      await signOut?.();
+      toast({
+        title: "Logged out successfully",
+        description: "Come back soon!",
+      });
+      setLocation("/");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error logging out",
+        description:
+          error instanceof Error ? error.message : "Please try again",
+      });
+    }
+  };
+
+  if (!isLoggedIn) {
+    return <Redirect to="/" />;
+  }
+
+  if (isLoadingLiked || isLoadingSubmitted) {
+    return <div className="text-white">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-black">
@@ -100,19 +105,5 @@ function ProfileContent() {
         </Tabs>
       </div>
     </div>
-  );
-}
-
-export default function Profile() {
-  const { isLoggedIn } = useBedrockPassport();
-
-  if (!isLoggedIn) {
-    return <Redirect to="/" />;
-  }
-
-  return (
-    <Suspense fallback={<LoadingProjectsGrid />}>
-      <ProfileContent />
-    </Suspense>
   );
 }
