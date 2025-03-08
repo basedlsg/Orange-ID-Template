@@ -319,13 +319,13 @@ export default function Submit() {
                             <Badge
                               key={genre}
                               variant="secondary"
-                              className="bg-purple-500/10 text-purple-400 flex items-center gap-1"
+                              className="bg-green-500/10 text-green-400 flex items-center gap-1"
                             >
                               {genre}
                               <button
                                 type="button"
                                 onClick={() => handleRemoveGenre(genre)}
-                                className="hover:text-purple-200"
+                                className="hover:text-green-200"
                               >
                                 <X className="h-3 w-3" />
                               </button>
