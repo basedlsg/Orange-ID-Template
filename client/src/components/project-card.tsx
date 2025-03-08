@@ -58,6 +58,17 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
               Open for Sponsorship
             </Badge>
           )}
+          {/* Display genres first */}
+          {project.genres?.map((genre) => (
+            <Badge
+              key={genre}
+              variant="secondary"
+              className="bg-green-500/10 text-green-400"
+            >
+              {genre}
+            </Badge>
+          ))}
+          {/* Then display AI tools */}
           {project.aiTools.map((tool) => (
             <Badge
               key={tool}
