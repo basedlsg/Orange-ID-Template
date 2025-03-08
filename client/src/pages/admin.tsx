@@ -70,9 +70,15 @@ export default function Admin() {
       const formData = new FormData();
       formData.append('csv', file);
 
-      const response = await apiRequest("POST", "/api/projects/batch", formData);
+      // Use fetch directly for file upload to handle multipart/form-data properly
+      const response = await fetch("/api/projects/batch", {
+        method: 'POST',
+        body: formData,
+      });
+
       if (!response.ok) {
-        throw new Error("Failed to upload CSV");
+        const error = await response.json();
+        throw new Error(error.error || "Failed to upload CSV");
       }
       return response.json();
     },
@@ -94,14 +100,16 @@ export default function Admin() {
 
   const handleCsvUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === "text/csv") {
-      uploadCsv(file);
-    } else {
-      toast({
-        title: "Error",
-        description: "Please upload a valid CSV file",
-        variant: "destructive",
-      });
+    if (file) {
+      if (file.type === "text/csv" || file.name.endsWith('.csv')) {
+        uploadCsv(file);
+      } else {
+        toast({
+          title: "Error",
+          description: "Please upload a valid CSV file",
+          variant: "destructive",
+        });
+      }
     }
   };
 
