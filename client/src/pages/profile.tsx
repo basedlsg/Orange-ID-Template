@@ -4,11 +4,14 @@ import { useState } from "react";
 import type { Project } from "@shared/schema";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Redirect } from "wouter";
+import { Redirect, useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Profile() {
-  const { isLoggedIn, user } = useBedrockPassport();
+  const { isLoggedIn, user, signOut } = useBedrockPassport();
   const [activeTab, setActiveTab] = useState("liked");
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
 
   // Redirect if not logged in
   if (!isLoggedIn) {
@@ -49,6 +52,24 @@ export default function Profile() {
     },
     enabled: !!orangeId
   });
+
+  const handleLogout = async () => {
+    try {
+      await signOut?.();
+      toast({
+        title: "Logged out successfully",
+        description: "Come back soon!",
+      });
+      setLocation("/");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error logging out",
+        description:
+          error instanceof Error ? error.message : "Please try again",
+      });
+    }
+  };
 
   if (isLoadingLiked || isLoadingSubmitted) {
     return <div className="text-white">Loading...</div>;
