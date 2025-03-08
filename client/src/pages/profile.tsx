@@ -10,12 +10,12 @@ export default function Profile() {
   const { isLoggedIn, user } = useBedrockPassport();
   const [activeTab, setActiveTab] = useState("liked");
 
+  const orangeId = user?.sub || user?.id;
+
   // Redirect if not logged in
   if (!isLoggedIn) {
     return <Redirect to="/" />;
   }
-
-  const orangeId = user?.sub || user?.id;
 
   // Fetch user's liked projects
   const { data: likedProjects, isLoading: isLoadingLiked } = useQuery<Project[]>({
@@ -27,7 +27,7 @@ export default function Profile() {
       const likes = await response.json();
       return likes.map((like: any) => like.project);
     },
-    enabled: !!orangeId
+    enabled: !!orangeId && isLoggedIn
   });
 
   // Fetch user's submitted projects
@@ -39,7 +39,7 @@ export default function Profile() {
       if (!response.ok) throw new Error("Failed to fetch submitted projects");
       return response.json();
     },
-    enabled: !!orangeId
+    enabled: !!orangeId && isLoggedIn
   });
 
   if (isLoadingLiked || isLoadingSubmitted) {

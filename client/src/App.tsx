@@ -162,7 +162,8 @@ function Navigation() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
-  const handleLogout = async () => {
+  // Define the logout handler
+  const handleLogout = React.useCallback(async () => {
     try {
       if (signOut) {
         await signOut();
@@ -180,7 +181,7 @@ function Navigation() {
           error instanceof Error ? error.message : "Please try again",
       });
     }
-  };
+  }, [signOut, toast, setLocation]);
 
   return (
     <nav className="border-b">
