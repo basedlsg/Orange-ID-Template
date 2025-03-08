@@ -100,32 +100,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for await (const row of parser) {
         try {
+          console.log('Processing CSV row:', row);
+
           // Process thumbnail if URL is provided
           let thumbnailUrl = '';
           if (row.Thumbnail) {
             thumbnailUrl = await downloadAndProcessThumbnail(row.Thumbnail);
           }
 
+          const isSponsored = row.Sponsorship?.toLowerCase() === 'true';
+
           // Convert CSV row to project data
           const projectData = {
             name: row['Project Name'],
             description: row.Description,
             url: row['Project URL'],
-            aiTools: row.Tool.split(',').map((t: string) => t.trim()),
-            genres: row.Genre.split(',').map((g: string) => g.trim()),
-            thumbnail: thumbnailUrl,
-            xHandle: row['X Handle'],
-            sponsorshipEnabled: Boolean(row.Sponsorship),
-            sponsorshipUrl: row.Sponsorship || '',
+            aiTools: row.Tool ? row.Tool.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
+            genres: row.Genre ? row.Genre.split(',').map((g: string) => g.trim()).filter(Boolean) : [],
+            thumbnail: thumbnailUrl || undefined,
+            xHandle: row['X Handle'] || undefined,
+            sponsorshipEnabled: isSponsored,
+            ...(isSponsored && row.SponsorshipUrl ? { sponsorshipUrl: row.SponsorshipUrl } : {})
           };
+
+          console.log('Constructed project data:', projectData);
 
           // Validate project data
           const validatedData = insertProjectSchema.parse(projectData);
           projects.push(validatedData);
         } catch (error) {
           console.error('Error processing CSV row:', error);
-          // Continue with next row if one fails
+          if (error instanceof Error) {
+            throw new Error(`Failed to process row: ${error.message}`);
+          }
         }
+      }
+
+      if (projects.length === 0) {
+        throw new Error("No valid projects found in CSV");
       }
 
       // Create all projects in database
@@ -143,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error processing CSV:', error);
       // Clean up CSV file in case of error
       if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-      res.status(500).json({ error: "Failed to process CSV file" });
+      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to process CSV file" });
     }
   });
 

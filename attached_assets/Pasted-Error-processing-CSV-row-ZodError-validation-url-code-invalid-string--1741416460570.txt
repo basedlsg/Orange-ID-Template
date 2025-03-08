@@ -1,0 +1,69 @@
+Error processing CSV row: ZodError: [
+  {
+    "validation": "url",
+    "code": "invalid_string",
+    "message": "Invalid url",
+    "path": [
+      "sponsorshipUrl"
+    ]
+  }
+]
+    at get error [as error] (file:///home/runner/workspace/node_modules/zod/lib/index.mjs:587:31)
+    at ZodEffects.parse (file:///home/runner/workspace/node_modules/zod/lib/index.mjs:692:22)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:123:53) {
+  issues: [
+    {
+      validation: 'url',
+      code: 'invalid_string',
+      message: 'Invalid url',
+      path: [Array]
+    }
+  ],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)],
+  errors: [
+    {
+      validation: 'url',
+      code: 'invalid_string',
+      message: 'Invalid url',
+      path: [Array]
+    }
+  ]
+}
+Error processing CSV row: ZodError: [
+  {
+    "validation": "url",
+    "code": "invalid_string",
+    "message": "Invalid url",
+    "path": [
+      "sponsorshipUrl"
+    ]
+  }
+]
+    at get error [as error] (file:///home/runner/workspace/node_modules/zod/lib/index.mjs:587:31)
+    at ZodEffects.parse (file:///home/runner/workspace/node_modules/zod/lib/index.mjs:692:22)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:123:53) {
+  issues: [
+    {
+      validation: 'url',
+      code: 'invalid_string',
+      message: 'Invalid url',
+      path: [Array]
+    }
+  ],
+  addIssue: [Function (anonymous)],
+  addIssues: [Function (anonymous)],
+  errors: [
+    {
+      validation: 'url',
+      code: 'invalid_string',
+      message: 'Invalid url',
+      path: [Array]
+    }
+  ]
+}
+Error processing CSV: Error: values() must be called with at least one value
+    at PgInsertBuilder.values (/home/runner/workspace/node_modules/src/pg-core/query-builders/insert.ts:87:10)
+    at DatabaseStorage.createProjects (/home/runner/workspace/server/storage.ts:101:32)
+    at <anonymous> (/home/runner/workspace/server/routes.ts:132:45)
+6:47:15 AM [express] POST /api/projects/batch 500 in 1016ms :: {"error":"Failed to process CSV file"}
