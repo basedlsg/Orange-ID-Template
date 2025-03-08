@@ -123,7 +123,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserLikes(orangeId: string): Promise<(Like & { project: Project })[]> {
-    return db.select({...likes, project: projects}).from(likes).innerJoin(projects, eq(likes.projectId, projects.id)).where(eq(likes.orangeId, orangeId));
+    return db
+      .select({
+        id: likes.id,
+        orangeId: likes.orangeId,
+        projectId: likes.projectId,
+        createdAt: likes.createdAt,
+        project: projects
+      })
+      .from(likes)
+      .innerJoin(projects, eq(likes.projectId, projects.id))
+      .where(eq(likes.orangeId, orangeId))
+      .execute();
   }
 
   async getLike(orangeId: string, projectId: number): Promise<Like | undefined> {
@@ -186,7 +197,8 @@ export class DatabaseStorage implements IStorage {
         likeCount: sql`COALESCE(${projects.likeCount}, 0)`,
       })
       .from(projects)
-      .where(eq(projects.orangeId, orangeId));
+      .where(eq(projects.userId, orangeId)) //Corrected to use userId instead of orangeId
+      .execute();
   }
 }
 
