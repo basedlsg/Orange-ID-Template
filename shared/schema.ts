@@ -116,13 +116,7 @@ export const insertProjectSchema = createInsertSchema(projects)
       z.string().url(),
       z.string().length(0),
       z.undefined()
-    ]).optional().transform(val => {
-      // If sponsorship is disabled, ignore the URL completely
-      if (!val || val.length === 0) {
-        return undefined;
-      }
-      return val;
-    }),
+    ]).optional(),
   })
   .superRefine((data, ctx) => {
     // Only validate sponsorshipUrl if sponsorshipEnabled is true

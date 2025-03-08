@@ -47,10 +47,6 @@ export function ProjectGrid({ projects, onProjectView }: ProjectGridProps) {
     }
   };
 
-  const handleGenreClick = (genre: string) => {
-    setSelectedGenre(selectedGenre === genre ? null : genre);
-  };
-
   const filteredProjects = selectedGenre
     ? projects.filter(project => project.genres?.includes(selectedGenre))
     : projects;
@@ -99,7 +95,6 @@ export function ProjectGrid({ projects, onProjectView }: ProjectGridProps) {
             key={project.id}
             project={project}
             onView={() => handleView(project)}
-            onGenreClick={handleGenreClick}
           />
         ))}
         <LoginDialog 
