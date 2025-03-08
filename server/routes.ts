@@ -115,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             name: row['Project Name'],
             description: row.Description,
             url: row['Project URL'],
-            aiTools: row.Tool ? row.Tool.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
+            aiTools: row.Tool ? row.Tool.split(',').map((t: string) => t.trim()).filter(Boolean) : undefined,
             genres: row.Genre ? row.Genre.split(',').map((g: string) => g.trim()).filter(Boolean) : [],
             thumbnail: thumbnailUrl || undefined,
             xHandle: row['X Handle'] || undefined,
