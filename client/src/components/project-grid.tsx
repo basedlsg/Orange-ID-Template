@@ -42,8 +42,7 @@ export function ProjectGrid({
     },
     enabled: isLoggedIn,
     staleTime: 30000, // Consider data fresh for 30 seconds
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-    refetchOnWindowFocus: false
+    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   const handleView = async (project: Project) => {
