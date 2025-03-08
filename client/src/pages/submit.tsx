@@ -54,6 +54,7 @@ export default function Submit() {
       sponsorshipEnabled: false,
       sponsorshipUrl: "",
     },
+    mode: "onChange", // Enable real-time validation
   });
 
   const { mutate, isPending } = useMutation({
@@ -119,14 +120,6 @@ export default function Submit() {
 
   const handleRemoveTool = (tool: string) => {
     const currentTools = form.getValues("aiTools") || [];
-    if (currentTools.length <= 1) {
-      toast({
-        title: "Warning",
-        description: "At least one AI tool must be selected",
-        variant: "destructive",
-      });
-      return;
-    }
     form.setValue(
       "aiTools",
       currentTools.filter((t) => t !== tool),
@@ -169,6 +162,22 @@ export default function Submit() {
   const handleGoToExplore = () => {
     setShowSuccessModal(false);
     setLocation("/");
+  };
+
+  // Get validation errors for feedback
+  const getValidationErrors = () => {
+    const errors = form.formState.errors;
+    const errorMessages = [];
+
+    if (errors.name) errorMessages.push("Project name is required");
+    if (errors.description) errorMessages.push("Description is required");
+    if (errors.url) errorMessages.push("Valid project URL is required");
+    if (errors.genres) errorMessages.push("At least one genre is required");
+    if (errors.sponsorshipUrl && form.watch("sponsorshipEnabled")) {
+      errorMessages.push("Sponsorship URL is required when sponsorship is enabled");
+    }
+
+    return errorMessages;
   };
 
   return (
@@ -248,7 +257,7 @@ export default function Submit() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-zinc-400">
-                        AI Tools Used
+                        AI Tools Used (Optional)
                       </FormLabel>
                       <div className="space-y-4">
                         <div className="flex flex-wrap gap-2 min-h-[2.5rem] p-2 bg-zinc-900 border border-zinc-700 rounded-md">
@@ -462,10 +471,22 @@ export default function Submit() {
                 <Button
                   type="submit"
                   disabled={isPending}
-                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                  className="bg-blue-500 hover:bg-blue-600 text-white w-full"
                 >
                   Submit Project
                 </Button>
+
+                {/* Validation Feedback */}
+                {!form.formState.isValid && (
+                  <div className="mt-4 p-4 border border-red-500/20 rounded-md bg-red-500/10">
+                    <p className="text-red-400 font-semibold mb-2">Please fix the following issues:</p>
+                    <ul className="list-disc list-inside text-red-400">
+                      {getValidationErrors().map((error, index) => (
+                        <li key={index}>{error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </form>
             </Form>
           </CardContent>
