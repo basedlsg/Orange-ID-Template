@@ -22,6 +22,19 @@ export const PREDEFINED_AI_TOOLS = [
   "v0",
 ] as const;
 
+export const PREDEFINED_GENRES = [
+  "Games",
+  "Education",
+  "Productivity",
+  "Web3",
+  "Developer Tools",
+  "Social",
+  "Entertainment",
+  "Business",
+  "AI Research",
+  "Other"
+] as const;
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   orangeId: text("orange_id").notNull().unique(),
@@ -39,6 +52,7 @@ export const projects = pgTable("projects", {
   description: text("description").notNull(),
   url: text("url").notNull(),
   aiTools: text("ai_tools").array().notNull(),
+  genres: text("genres").array().notNull(),
   thumbnail: text("thumbnail"),
   xHandle: text("x_handle"),
   sponsorshipEnabled: boolean("sponsorship_enabled").notNull().default(false),
@@ -81,6 +95,18 @@ export const insertProjectSchema = createInsertSchema(projects)
           type: "array",
           inclusive: true,
           message: "Select at least one AI tool",
+        });
+      }
+    }),
+    genres: z.array(z.string()).superRefine((val, ctx) => {
+      // Only validate min length when form is being submitted
+      if (ctx.path.length > 0 && val.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.too_small,
+          minimum: 1,
+          type: "array",
+          inclusive: true,
+          message: "Select at least one genre",
         });
       }
     }),
