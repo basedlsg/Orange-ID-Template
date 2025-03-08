@@ -1,12 +1,22 @@
-import type { Express } from "express";
+import { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProjectSchema, insertUserSchema } from "@shared/schema";
+import { 
+  insertProjectSchema, 
+  insertUserSchema,
+  type Project,
+  type InsertProject,
+  type User,
+  type InsertUser
+} from "@shared/schema";
 import multer from "multer";
 import path from "path";
 import express from 'express';
 import { fromZodError } from "zod-validation-error";
 import fs from 'fs';
+import sharp from 'sharp';
+import { parse } from 'csv-parse';
+import fetch from 'node-fetch';
 
 // Ensure uploads directory exists
 if (!fs.existsSync('./uploads')) {
@@ -18,15 +28,136 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: './uploads',
     filename: (req, file, cb) => {
+      // Always use .jpg extension for consistency
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+      const ext = '.jpg'; // Force jpg extension
+      cb(null, file.fieldname + '-' + uniqueSuffix + ext);
     }
   })
 });
 
+async function downloadAndProcessThumbnail(thumbnailUrl: string): Promise<string> {
+  try {
+    const response = await fetch(thumbnailUrl);
+    if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+
+    const buffer = await response.buffer();
+    const filename = `thumbnail-${Date.now()}-${Math.round(Math.random() * 1E9)}.jpg`;
+    const filepath = path.join('./uploads', filename);
+
+    // Process image with Sharp
+    await sharp(buffer)
+      .jpeg({ quality: 90 })
+      .toFile(filepath);
+
+    return `/uploads/${filename}`;
+  } catch (error) {
+    console.error('Error processing thumbnail:', error);
+    return ''; // Return empty string if thumbnail processing fails
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Ensure uploads directory exists
   app.use('/uploads', express.static('uploads'));
+
+  // File upload endpoint with image processing
+  app.post("/api/upload", upload.single('thumbnail'), async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    try {
+      // Process the image with Sharp
+      await sharp(req.file.path)
+        .jpeg({ quality: 90 }) // Convert to JPEG with good quality
+        .toFile(req.file.path + '.processed');
+
+      // Replace the original file with the processed one
+      fs.unlinkSync(req.file.path);
+      fs.renameSync(req.file.path + '.processed', req.file.path);
+
+      const url = `/uploads/${req.file.filename}`;
+      res.json({ url });
+    } catch (error) {
+      console.error('Error processing image:', error);
+      // Clean up files in case of error
+      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      if (fs.existsSync(req.file.path + '.processed')) fs.unlinkSync(req.file.path + '.processed');
+      res.status(500).json({ error: "Failed to process image" });
+    }
+  });
+
+  // Batch project creation from CSV
+  app.post("/api/projects/batch", upload.single('csv'), async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No CSV file uploaded" });
+    }
+
+    try {
+      const projects: any[] = [];
+      const parser = fs.createReadStream(req.file.path).pipe(parse({ columns: true, trim: true }));
+
+      for await (const row of parser) {
+        try {
+          console.log('Processing CSV row:', row);
+
+          // Process thumbnail if URL is provided
+          let thumbnailUrl = '';
+          if (row.Thumbnail) {
+            thumbnailUrl = await downloadAndProcessThumbnail(row.Thumbnail);
+          }
+
+          const isSponsored = row.Sponsorship?.toLowerCase() === 'true';
+
+          // Convert CSV row to project data
+          const projectData = {
+            name: row['Project Name'],
+            description: row.Description,
+            url: row['Project URL'],
+            aiTools: row.Tool ? row.Tool.split(',').map((t: string) => t.trim()).filter(Boolean) : undefined,
+            genres: row.Genre ? row.Genre.split(',').map((g: string) => g.trim()).filter(Boolean) : [],
+            thumbnail: thumbnailUrl || undefined,
+            xHandle: row['X Handle'] || undefined,
+            sponsorshipEnabled: isSponsored,
+            ...(isSponsored && row.SponsorshipUrl ? { sponsorshipUrl: row.SponsorshipUrl } : {})
+          };
+
+          console.log('Constructed project data:', projectData);
+
+          // Validate project data
+          const validatedData = insertProjectSchema.parse(projectData);
+          projects.push(validatedData);
+        } catch (error) {
+          console.error('Error processing CSV row:', error);
+          if (error instanceof Error) {
+            throw new Error(`Failed to process row: ${error.message}`);
+          }
+        }
+      }
+
+      if (projects.length === 0) {
+        throw new Error("No valid projects found in CSV");
+      }
+
+      // Create all projects in database
+      const createdProjects = await storage.createProjects(projects, 1); // Using userId 1 for now
+
+      // Clean up CSV file
+      fs.unlinkSync(req.file.path);
+
+      res.json({ 
+        success: true, 
+        count: createdProjects.length,
+        message: `Successfully imported ${createdProjects.length} projects` 
+      });
+    } catch (error) {
+      console.error('Error processing CSV:', error);
+      // Clean up CSV file in case of error
+      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      res.status(500).json({ error: error instanceof Error ? error.message : "Failed to process CSV file" });
+    }
+  });
 
   // User API
   app.post("/api/users", async (req, res) => {
@@ -77,15 +208,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  // File upload endpoint
-  app.post("/api/upload", upload.single('thumbnail'), (req, res) => {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
-    const url = `/uploads/${req.file.filename}`;
-    res.json({ url });
-  });
-
   // Projects API
   app.get("/api/projects", async (req, res) => {
     try {
@@ -94,7 +216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // true means get only approved projects
       // false means get only unapproved projects
       const approved = req.query.approved === "true" ? true :
-                      req.query.approved === "false" ? false : undefined;
+                        req.query.approved === "false" ? false : undefined;
       const sortBy = req.query.sortBy as string;
 
       console.log("Fetching projects with approved:", approved);
@@ -128,6 +250,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: req.body.description,
         url: req.body.url,
         aiTools: req.body.aiTools,
+        genres: req.body.genres,
         thumbnail: req.body.thumbnail || undefined,
         xHandle: req.body.xHandle || undefined,
         sponsorshipEnabled: req.body.sponsorshipEnabled,
@@ -166,6 +289,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ success: true });
     } catch (error) {
       res.status(404).json({ error: "Project not found" });
+    }
+  });
+
+  app.delete("/api/projects/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteProject(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      res.status(500).json({ error: "Failed to delete project" });
     }
   });
 

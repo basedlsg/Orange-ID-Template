@@ -1,4 +1,11 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+} from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -8,7 +15,23 @@ export const PREDEFINED_AI_TOOLS = [
   "ChatGPT",
   "Claude",
   "GitHub Copilot",
-  "Other"
+  "Grok",
+  "Windsurf",
+  "Lovable",
+  "Bolt",
+  "v0",
+] as const;
+
+export const PREDEFINED_GENRES = [
+  "Games",
+  "Education",
+  "Productivity",
+  "Web3",
+  "Developer Tools",
+  "Social",
+  "Entertainment",
+  "Business",
+  "AI Research",
 ] as const;
 
 export const users = pgTable("users", {
@@ -27,7 +50,8 @@ export const projects = pgTable("projects", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   url: text("url").notNull(),
-  aiTools: text("ai_tools").array().notNull(),
+  aiTools: text("ai_tools").array(),  // Remove .notNull()
+  genres: text("genres").array().notNull(),
   thumbnail: text("thumbnail"),
   xHandle: text("x_handle"),
   sponsorshipEnabled: boolean("sponsorship_enabled").notNull().default(false),
@@ -57,13 +81,41 @@ export const insertProjectSchema = createInsertSchema(projects)
     createdAt: true,
   })
   .extend({
-    description: z.string().max(200, "Description must be 200 characters or less"),
+    description: z
+      .string()
+      .max(200, "Description must be 200 characters or less"),
     url: z.string().url(),
-    aiTools: z.array(z.string()).min(1, "Select at least one AI tool"),
+    aiTools: z.array(z.string()).optional().default([]),  // Make aiTools optional
+    genres: z.array(z.string()).superRefine((val, ctx) => {
+      // Only validate min length when form is being submitted
+      if (ctx.path.length > 0 && val.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.too_small,
+          minimum: 1,
+          type: "array",
+          inclusive: true,
+          message: "Select at least one genre",
+        });
+      }
+    }),
     thumbnailFile: z.any().optional(),
     xHandle: z.string().optional(),
-    sponsorshipEnabled: z.boolean().optional(),
-    sponsorshipUrl: z.string().url().optional(),
+    sponsorshipEnabled: z.boolean().default(false),
+    sponsorshipUrl: z.union([
+      z.string().url(),
+      z.string().length(0),
+      z.undefined()
+    ]).optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Only validate sponsorshipUrl if sponsorshipEnabled is true
+    if (data.sponsorshipEnabled && (!data.sponsorshipUrl || data.sponsorshipUrl.length === 0)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Sponsorship URL is required when sponsorship is enabled",
+        path: ["sponsorshipUrl"],
+      });
+    }
   });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

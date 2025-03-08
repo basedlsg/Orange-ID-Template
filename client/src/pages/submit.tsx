@@ -4,6 +4,7 @@ import {
   insertProjectSchema,
   type InsertProject,
   PREDEFINED_AI_TOOLS,
+  PREDEFINED_GENRES,
 } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -37,6 +38,7 @@ export default function Submit() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [newTool, setNewTool] = useState("");
+  const [newGenre, setNewGenre] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const form = useForm<InsertProject>({
@@ -45,11 +47,12 @@ export default function Submit() {
       name: "",
       description: "",
       url: "",
-      aiTools: [PREDEFINED_AI_TOOLS[0]], // Set default to first predefined tool
+      aiTools: [],
+      genres: [],
       thumbnail: "",
       xHandle: "",
-      sponsorshipEnabled: false, //Added default value
-      sponsorshipUrl: "", //Added default value
+      sponsorshipEnabled: false,
+      sponsorshipUrl: "",
     },
   });
 
@@ -57,7 +60,6 @@ export default function Submit() {
     mutationFn: async (data: InsertProject) => {
       let projectData = { ...data };
 
-      // Handle file upload if a file is selected
       if (data.thumbnailFile instanceof File) {
         const formData = new FormData();
         formData.append("thumbnail", data.thumbnailFile);
@@ -75,7 +77,6 @@ export default function Submit() {
         projectData.thumbnail = url;
       }
 
-      // Remove thumbnailFile from data before sending to API
       delete projectData.thumbnailFile;
 
       const response = await apiRequest("POST", "/api/projects", projectData);
@@ -107,6 +108,15 @@ export default function Submit() {
     setNewTool("");
   };
 
+  const handleAddGenre = (genre: string) => {
+    if (!genre.trim()) return;
+    const currentGenres = form.getValues("genres") || [];
+    if (!currentGenres.includes(genre)) {
+      form.setValue("genres", [...currentGenres, genre]);
+    }
+    setNewGenre("");
+  };
+
   const handleRemoveTool = (tool: string) => {
     const currentTools = form.getValues("aiTools") || [];
     if (currentTools.length <= 1) {
@@ -123,10 +133,30 @@ export default function Submit() {
     );
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleRemoveGenre = (genre: string) => {
+    const currentGenres = form.getValues("genres") || [];
+    if (currentGenres.length <= 1) {
+      toast({
+        title: "Warning",
+        description: "At least one genre must be selected",
+        variant: "destructive",
+      });
+      return;
+    }
+    form.setValue(
+      "genres",
+      currentGenres.filter((g) => g !== genre),
+    );
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent, type: 'tool' | 'genre') => {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleAddTool(newTool);
+      if (type === 'tool') {
+        handleAddTool(newTool);
+      } else {
+        handleAddGenre(newGenre);
+      }
     }
   };
 
@@ -179,7 +209,7 @@ export default function Submit() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-zinc-400">
-                        Description (max 100 characters)
+                        Description (max 200 characters)
                       </FormLabel>
                       <FormControl>
                         <Textarea
@@ -256,7 +286,7 @@ export default function Submit() {
                           <Input
                             value={newTool}
                             onChange={(e) => setNewTool(e.target.value)}
-                            onKeyPress={handleKeyPress}
+                            onKeyPress={(e) => handleKeyPress(e, 'tool')}
                             placeholder="Type and press Enter to add custom AI tool"
                             className="bg-zinc-900 border-zinc-700 text-white"
                           />
@@ -264,6 +294,69 @@ export default function Submit() {
                             type="button"
                             variant="outline"
                             onClick={() => handleAddTool(newTool)}
+                            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
+                          >
+                            Add
+                          </Button>
+                        </div>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="genres"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-zinc-400">
+                        Project Genres
+                      </FormLabel>
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap gap-2 min-h-[2.5rem] p-2 bg-zinc-900 border border-zinc-700 rounded-md">
+                          {field.value?.map((genre) => (
+                            <Badge
+                              key={genre}
+                              variant="secondary"
+                              className="bg-green-500/10 text-green-400 flex items-center gap-1"
+                            >
+                              {genre}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveGenre(genre)}
+                                className="hover:text-green-200"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 mb-2">
+                          {PREDEFINED_GENRES.map((genre) => (
+                            <Button
+                              key={genre}
+                              type="button"
+                              variant="outline"
+                              onClick={() => handleAddGenre(genre)}
+                              className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
+                            >
+                              {genre}
+                            </Button>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <Input
+                            value={newGenre}
+                            onChange={(e) => setNewGenre(e.target.value)}
+                            onKeyPress={(e) => handleKeyPress(e, 'genre')}
+                            placeholder="Type and press Enter to add custom genre"
+                            className="bg-zinc-900 border-zinc-700 text-white"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleAddGenre(newGenre)}
                             className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
                           >
                             Add
@@ -339,30 +432,32 @@ export default function Submit() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="sponsorshipUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-zinc-400">
-                        Sponsorship URL (optional)
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="url"
-                          disabled={!form.watch("sponsorshipEnabled")}
-                          className="bg-zinc-900 border-zinc-700 text-white"
-                          placeholder="https://..."
-                        />
-                      </FormControl>
-                      <FormDescription className="text-sm text-zinc-500">
-                        Link to your sponsorship or pricing page
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {form.watch("sponsorshipEnabled") && (
+                  <FormField
+                    control={form.control}
+                    name="sponsorshipUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-zinc-400">
+                          Sponsorship URL
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="url"
+                            className="bg-zinc-900 border-zinc-700 text-white"
+                            placeholder="https://..."
+                          />
+                        </FormControl>
+                        <FormDescription className="text-sm text-zinc-500">
+                          Link to your sponsorship or pricing page
+                          <span className="text-red-400"> *</span>
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <Button
                   type="submit"
