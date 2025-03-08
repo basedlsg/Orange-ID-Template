@@ -164,12 +164,14 @@ function Navigation() {
 
   const handleLogout = async () => {
     try {
-      await signOut?.();
-      toast({
-        title: "Logged out successfully",
-        description: "Come back soon!",
-      });
-      setLocation("/");
+      if (signOut) {
+        await signOut();
+        toast({
+          title: "Logged out successfully",
+          description: "Come back soon!",
+        });
+        setLocation("/");
+      }
     } catch (error) {
       toast({
         variant: "destructive",
