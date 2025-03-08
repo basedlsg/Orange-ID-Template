@@ -12,14 +12,19 @@ import { Badge } from "@/components/ui/badge";
 import { PREDEFINED_GENRES } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
 
-
 interface ProjectGridProps {
   projects: Project[];
   onProjectView?: (id: number) => void;
   showEditButton?: boolean;
+  showSubmitCard?: boolean;
 }
 
-export function ProjectGrid({ projects, onProjectView, showEditButton = false }: ProjectGridProps) {
+export function ProjectGrid({ 
+  projects, 
+  onProjectView, 
+  showEditButton = false,
+  showSubmitCard = true 
+}: ProjectGridProps) {
   const { toast } = useToast();
   const { isLoggedIn, user } = useBedrockPassport();
   const [, setLocation] = useLocation();
@@ -100,7 +105,7 @@ export function ProjectGrid({ projects, onProjectView, showEditButton = false }:
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {!showEditButton && (
+        {showSubmitCard && (
           <Card 
             key="submit-card"
             className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 border-dashed h-full"
