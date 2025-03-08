@@ -117,14 +117,12 @@ export const insertProjectSchema = createInsertSchema(projects)
   })
   .superRefine((data, ctx) => {
     // Only validate sponsorshipUrl if sponsorshipEnabled is true
-    if (data.sponsorshipEnabled) {
-      if (!data.sponsorshipUrl || data.sponsorshipUrl.length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Sponsorship URL is required when sponsorship is enabled",
-          path: ["sponsorshipUrl"],
-        });
-      }
+    if (data.sponsorshipEnabled && (!data.sponsorshipUrl || data.sponsorshipUrl.length === 0)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Sponsorship URL is required when sponsorship is enabled",
+        path: ["sponsorshipUrl"],
+      });
     }
   });
 
