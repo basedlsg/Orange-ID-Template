@@ -1,9 +1,10 @@
 import { 
   users, type User, type InsertUser,
-  projects, type Project, type InsertProject 
+  projects, type Project, type InsertProject,
+  likes, type Like, type InsertLike
 } from "@shared/schema";
 import { db, sql } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -20,6 +21,11 @@ export interface IStorage {
   approveProject(id: number): Promise<Project>;
   incrementViews(id: number): Promise<void>;
   deleteProject(id: number): Promise<void>;
+
+  // Like operations
+  createLike(userId: number, projectId: number): Promise<Like>;
+  deleteLike(userId: number, projectId: number): Promise<void>;
+  getUserLikes(userId: number): Promise<number[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -123,6 +129,54 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProject(id: number): Promise<void> {
     await db.delete(projects).where(eq(projects.id, id));
+  }
+
+  async getUserLikes(userId: number): Promise<number[]> {
+    const userLikes = await db
+      .select({ projectId: likes.projectId })
+      .from(likes)
+      .where(eq(likes.userId, userId));
+    return userLikes.map(like => like.projectId);
+  }
+
+  async createLike(userId: number, projectId: number): Promise<Like> {
+    // Start a transaction to ensure atomicity
+    return await db.transaction(async (tx) => {
+      // Create the like
+      const [like] = await tx
+        .insert(likes)
+        .values({ userId, projectId })
+        .returning();
+
+      // Increment the project's like count
+      await tx
+        .update(projects)
+        .set({ likeCount: sql`${projects.likeCount} + 1` })
+        .where(eq(projects.id, projectId));
+
+      return like;
+    });
+  }
+
+  async deleteLike(userId: number, projectId: number): Promise<void> {
+    // Start a transaction to ensure atomicity
+    await db.transaction(async (tx) => {
+      // Delete the like
+      await tx
+        .delete(likes)
+        .where(
+          and(
+            eq(likes.userId, userId),
+            eq(likes.projectId, projectId)
+          )
+        );
+
+      // Decrement the project's like count
+      await tx
+        .update(projects)
+        .set({ likeCount: sql`${projects.likeCount} - 1` })
+        .where(eq(projects.id, projectId));
+    });
   }
 }
 
