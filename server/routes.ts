@@ -149,6 +149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: req.body.description,
         url: req.body.url,
         aiTools: req.body.aiTools,
+        genres: req.body.genres,
         thumbnail: req.body.thumbnail || undefined,
         xHandle: req.body.xHandle || undefined,
         sponsorshipEnabled: req.body.sponsorshipEnabled,
