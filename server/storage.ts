@@ -20,6 +20,7 @@ export interface IStorage {
   approveProject(id: number): Promise<Project>;
   incrementViews(id: number): Promise<void>;
   deleteProject(id: number): Promise<void>;
+  getUserProjects(orangeId: string): Promise<Project[]>; // Added getUserProjects
 
   // Like operations
   createLike(orangeId: string, projectId: number): Promise<Like>;
@@ -51,9 +52,20 @@ export class DatabaseStorage implements IStorage {
 
   async getProjects(approved?: boolean): Promise<Project[]> {
     if (approved !== undefined) {
-      return db.select().from(projects).where(eq(projects.approved, approved));
+      return db
+        .select({
+          ...projects,
+          likeCount: sql`COALESCE(${projects.likeCount}, 0)`,
+        })
+        .from(projects)
+        .where(eq(projects.approved, approved));
     }
-    return db.select().from(projects);
+    return db
+      .select({
+        ...projects,
+        likeCount: sql`COALESCE(${projects.likeCount}, 0)`,
+      })
+      .from(projects);
   }
 
   async getProject(id: number): Promise<Project | undefined> {
@@ -165,6 +177,16 @@ export class DatabaseStorage implements IStorage {
         .set({ likeCount: sql`${projects.likeCount} - 1` })
         .where(eq(projects.id, projectId));
     });
+  }
+
+  async getUserProjects(orangeId: string): Promise<Project[]> {
+    return db
+      .select({
+        ...projects,
+        likeCount: sql`COALESCE(${projects.likeCount}, 0)`,
+      })
+      .from(projects)
+      .where(eq(projects.orangeId, orangeId));
   }
 }
 

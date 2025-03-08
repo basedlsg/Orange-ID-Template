@@ -7,39 +7,41 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Redirect } from "wouter";
 
 export default function Profile() {
+  // Always define hooks at the top level
   const { isLoggedIn, user } = useBedrockPassport();
   const [activeTab, setActiveTab] = useState("liked");
-
   const orangeId = user?.sub || user?.id;
 
-  // Redirect if not logged in
-  if (!isLoggedIn) {
+  // Early return if not logged in
+  if (!isLoggedIn || !orangeId) {
     return <Redirect to="/" />;
   }
 
-  // Fetch user's liked projects
+  // Fetch user's liked projects with proper caching
   const { data: likedProjects, isLoading: isLoadingLiked } = useQuery<Project[]>({
     queryKey: ["/api/users", orangeId, "likes"],
     queryFn: async () => {
-      if (!orangeId) throw new Error("User ID not found");
       const response = await fetch(`/api/users/${orangeId}/likes`);
       if (!response.ok) throw new Error("Failed to fetch liked projects");
       const likes = await response.json();
       return likes.map((like: any) => like.project);
     },
-    enabled: !!orangeId && isLoggedIn
+    staleTime: 30000, // Keep the data fresh for 30 seconds
+    cacheTime: 5 * 60 * 1000, // Cache for 5 minutes
+    enabled: isLoggedIn && !!orangeId
   });
 
   // Fetch user's submitted projects
   const { data: submittedProjects, isLoading: isLoadingSubmitted } = useQuery<Project[]>({
     queryKey: ["/api/users", orangeId, "submitted"],
     queryFn: async () => {
-      if (!orangeId) throw new Error("User ID not found");
       const response = await fetch(`/api/projects?orangeId=${orangeId}`);
       if (!response.ok) throw new Error("Failed to fetch submitted projects");
       return response.json();
     },
-    enabled: !!orangeId && isLoggedIn
+    staleTime: 30000,
+    cacheTime: 5 * 60 * 1000,
+    enabled: isLoggedIn && !!orangeId
   });
 
   if (isLoadingLiked || isLoadingSubmitted) {

@@ -162,25 +162,25 @@ function Navigation() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
-  // Define the logout handler
-  const handleLogout = React.useCallback(async () => {
-    try {
-      if (signOut) {
-        await signOut();
+  // Always define hooks at the top level
+  const handleLogout = React.useCallback(() => {
+    if (!signOut) return;
+
+    signOut()
+      .then(() => {
         toast({
           title: "Logged out successfully",
           description: "Come back soon!",
         });
         setLocation("/");
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error logging out",
-        description:
-          error instanceof Error ? error.message : "Please try again",
+      })
+      .catch((error) => {
+        toast({
+          variant: "destructive",
+          title: "Error logging out",
+          description: error instanceof Error ? error.message : "Please try again",
+        });
       });
-    }
   }, [signOut, toast, setLocation]);
 
   return (
