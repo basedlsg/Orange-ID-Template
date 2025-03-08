@@ -7,6 +7,7 @@ import path from "path";
 import express from 'express';
 import { fromZodError } from "zod-validation-error";
 import fs from 'fs';
+import sharp from 'sharp';
 
 // Ensure uploads directory exists
 if (!fs.existsSync('./uploads')) {
@@ -18,8 +19,10 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: './uploads',
     filename: (req, file, cb) => {
+      // Always use .jpg extension for consistency
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+      const ext = '.jpg'; // Force jpg extension
+      cb(null, file.fieldname + '-' + uniqueSuffix + ext);
     }
   })
 });
@@ -27,6 +30,33 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   // Ensure uploads directory exists
   app.use('/uploads', express.static('uploads'));
+
+  // File upload endpoint with image processing
+  app.post("/api/upload", upload.single('thumbnail'), async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    try {
+      // Process the image with Sharp
+      await sharp(req.file.path)
+        .jpeg({ quality: 90 }) // Convert to JPEG with good quality
+        .toFile(req.file.path + '.processed');
+
+      // Replace the original file with the processed one
+      fs.unlinkSync(req.file.path);
+      fs.renameSync(req.file.path + '.processed', req.file.path);
+
+      const url = `/uploads/${req.file.filename}`;
+      res.json({ url });
+    } catch (error) {
+      console.error('Error processing image:', error);
+      // Clean up files in case of error
+      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      if (fs.existsSync(req.file.path + '.processed')) fs.unlinkSync(req.file.path + '.processed');
+      res.status(500).json({ error: "Failed to process image" });
+    }
+  });
 
   // User API
   app.post("/api/users", async (req, res) => {
@@ -77,15 +107,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  // File upload endpoint
-  app.post("/api/upload", upload.single('thumbnail'), (req, res) => {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
-    const url = `/uploads/${req.file.filename}`;
-    res.json({ url });
-  });
-
   // Projects API
   app.get("/api/projects", async (req, res) => {
     try {
@@ -94,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // true means get only approved projects
       // false means get only unapproved projects
       const approved = req.query.approved === "true" ? true :
-                      req.query.approved === "false" ? false : undefined;
+                        req.query.approved === "false" ? false : undefined;
       const sortBy = req.query.sortBy as string;
 
       console.log("Fetching projects with approved:", approved);
