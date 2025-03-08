@@ -35,7 +35,7 @@ export default function Profile() {
     queryKey: ["/api/users", orangeId, "submitted"],
     queryFn: async () => {
       if (!orangeId) throw new Error("User ID not found");
-      const response = await fetch(`/api/projects?userId=${orangeId}`);
+      const response = await fetch(`/api/projects?orangeId=${orangeId}`);
       if (!response.ok) throw new Error("Failed to fetch submitted projects");
       return response.json();
     },
