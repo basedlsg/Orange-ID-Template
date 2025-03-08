@@ -9,7 +9,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { LoginDialog } from "./login-dialog";
 import { Badge } from "@/components/ui/badge";
-import { PREDEFINED_GENRES, PREDEFINED_AI_TOOLS } from "@shared/schema";
+import { PREDEFINED_GENRES } from "@shared/schema";
 
 interface ProjectGridProps {
   projects: Project[];
@@ -22,7 +22,6 @@ export function ProjectGrid({ projects, onProjectView }: ProjectGridProps) {
   const [, setLocation] = useLocation();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
-  const [selectedTool, setSelectedTool] = useState<string | null>(null);
 
   const handleView = async (project: Project) => {
     try {
@@ -50,68 +49,34 @@ export function ProjectGrid({ projects, onProjectView }: ProjectGridProps) {
 
   const handleGenreClick = (genre: string) => {
     setSelectedGenre(selectedGenre === genre ? null : genre);
-    setSelectedTool(null); // Reset tool filter when selecting genre
   };
 
-  const handleToolClick = (tool: string) => {
-    setSelectedTool(selectedTool === tool ? null : tool);
-    setSelectedGenre(null); // Reset genre filter when selecting tool
-  };
-
-  const filteredProjects = projects.filter(project => {
-    if (selectedGenre) {
-      return project.genres?.includes(selectedGenre);
-    }
-    if (selectedTool) {
-      return project.aiTools.includes(selectedTool);
-    }
-    return true;
-  });
+  const filteredProjects = selectedGenre
+    ? projects.filter(project => project.genres?.includes(selectedGenre))
+    : projects;
 
   return (
     <div>
-      {/* Filters */}
-      <div className="space-y-4 mb-6">
-        {/* Genre Filter */}
-        <div>
-          <h3 className="text-sm font-medium text-zinc-400 mb-2">Genres</h3>
-          <div className="flex flex-wrap gap-2">
-            {PREDEFINED_GENRES.map((genre) => (
-              <Badge
-                key={genre}
-                variant="secondary"
-                className={`cursor-pointer ${
-                  selectedGenre === genre 
-                    ? 'bg-green-500 text-white' 
-                    : 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
-                }`}
-                onClick={() => handleGenreClick(genre)}
-              >
-                {genre}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        {/* AI Tools Filter */}
-        <div>
-          <h3 className="text-sm font-medium text-zinc-400 mb-2">AI Tools</h3>
-          <div className="flex flex-wrap gap-2">
-            {PREDEFINED_AI_TOOLS.map((tool) => (
-              <Badge
-                key={tool}
-                variant="secondary"
-                className={`cursor-pointer ${
-                  selectedTool === tool 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-blue-500/10 text-blue-400 hover:bg-blue-500/20'
-                }`}
-                onClick={() => handleToolClick(tool)}
-              >
-                {tool}
-              </Badge>
-            ))}
-          </div>
+      {/* Genre Filter */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2">
+          <Badge
+            variant="secondary"
+            className={`cursor-pointer ${!selectedGenre ? 'bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-400'}`}
+            onClick={() => setSelectedGenre(null)}
+          >
+            All
+          </Badge>
+          {PREDEFINED_GENRES.map((genre) => (
+            <Badge
+              key={genre}
+              variant="secondary"
+              className={`cursor-pointer ${selectedGenre === genre ? 'bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-400'}`}
+              onClick={() => setSelectedGenre(genre)}
+            >
+              {genre}
+            </Badge>
+          ))}
         </div>
       </div>
 
@@ -135,7 +100,6 @@ export function ProjectGrid({ projects, onProjectView }: ProjectGridProps) {
             project={project}
             onView={() => handleView(project)}
             onGenreClick={handleGenreClick}
-            onToolClick={handleToolClick}
           />
         ))}
         <LoginDialog 
