@@ -35,7 +35,9 @@ export function ProjectGrid({ projects, onProjectView, showEditButton = false }:
       if (!response.ok) throw new Error("Failed to fetch likes");
       return response.json();
     },
-    enabled: isLoggedIn
+    enabled: isLoggedIn,
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   const handleView = async (project: Project) => {
@@ -76,6 +78,7 @@ export function ProjectGrid({ projects, onProjectView, showEditButton = false }:
       <div className="mb-6">
         <div className="flex flex-wrap gap-2">
           <Badge
+            key="all"
             variant="secondary"
             className={`cursor-pointer ${!selectedGenre ? 'bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-400'}`}
             onClick={() => setSelectedGenre(null)}
@@ -99,6 +102,7 @@ export function ProjectGrid({ projects, onProjectView, showEditButton = false }:
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {!showEditButton && (
           <Card 
+            key="submit-card"
             className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 border-dashed h-full"
             onClick={handleSubmitClick}
           >
@@ -113,7 +117,7 @@ export function ProjectGrid({ projects, onProjectView, showEditButton = false }:
         )}
         {filteredProjects.map((project) => (
           <ProjectCard
-            key={project.id}
+            key={`project-${project.id}`}
             project={project}
             onView={() => handleView(project)}
             userLikes={userLikes}
@@ -121,6 +125,7 @@ export function ProjectGrid({ projects, onProjectView, showEditButton = false }:
           />
         ))}
         <LoginDialog 
+          key="login-dialog"
           open={showLoginDialog}
           onOpenChange={setShowLoginDialog}
           message="Please log in to submit your project"
