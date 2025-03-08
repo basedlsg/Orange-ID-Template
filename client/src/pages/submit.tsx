@@ -432,34 +432,32 @@ export default function Submit() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="sponsorshipUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-zinc-400">
-                        {form.watch("sponsorshipEnabled")
-                          ? "Sponsorship URL"
-                          : "Sponsorship URL (optional)"}
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="url"
-                          disabled={!form.watch("sponsorshipEnabled")}
-                          className="bg-zinc-900 border-zinc-700 text-white"
-                          placeholder="https://..."
-                          {...(!form.watch("sponsorshipEnabled") ? { required: false } : {})}
-                        />
-                      </FormControl>
-                      <FormDescription className="text-sm text-zinc-500">
-                        Link to your sponsorship or pricing page
-                        {form.watch("sponsorshipEnabled") && <span className="text-red-400"> *</span>}
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {form.watch("sponsorshipEnabled") && (
+                  <FormField
+                    control={form.control}
+                    name="sponsorshipUrl"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-zinc-400">
+                          Sponsorship URL
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="url"
+                            className="bg-zinc-900 border-zinc-700 text-white"
+                            placeholder="https://..."
+                          />
+                        </FormControl>
+                        <FormDescription className="text-sm text-zinc-500">
+                          Link to your sponsorship or pricing page
+                          <span className="text-red-400"> *</span>
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <Button
                   type="submit"

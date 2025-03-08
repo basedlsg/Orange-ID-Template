@@ -32,7 +32,6 @@ export const PREDEFINED_GENRES = [
   "Entertainment",
   "Business",
   "AI Research",
-  "Other"
 ] as const;
 
 export const users = pgTable("users", {
