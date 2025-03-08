@@ -13,11 +13,6 @@ export default function Profile() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  // Redirect if not logged in
-  if (!isLoggedIn) {
-    return <Redirect to="/" />;
-  }
-
   const orangeId = user?.sub || user?.id;
 
   // Fetch user's liked projects
@@ -75,7 +70,10 @@ export default function Profile() {
     return <div className="text-white">Loading...</div>;
   }
 
-  return (
+  // Instead of early return, render the redirect inside the main return
+  return !isLoggedIn ? (
+    <Redirect to="/" />
+  ) : (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
