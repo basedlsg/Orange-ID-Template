@@ -5,10 +5,22 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
-import { Upload } from "lucide-react";
+import { Upload, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 export default function Admin() {
   const { toast } = useToast();
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
   const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: false }],
@@ -60,6 +72,30 @@ export default function Admin() {
       toast({
         title: "Error",
         description: "Failed to approve project",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { mutate: deleteProject } = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/projects/${id}`);
+      if (!response.ok) {
+        throw new Error("Failed to delete project");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      toast({
+        title: "Success",
+        description: "Project deleted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete project",
         variant: "destructive",
       });
     },
@@ -148,12 +184,19 @@ export default function Admin() {
             {pendingProjects?.map((project) => (
               <div key={project.id} className="relative">
                 <ProjectCard project={project} />
-                <div className="absolute inset-x-0 bottom-4 flex justify-center">
+                <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
                   <Button 
                     onClick={() => approveProject(project.id)}
                     className="bg-blue-500 hover:bg-blue-600 text-white z-20"
                   >
                     Approve
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => setProjectToDelete(project)}
+                    className="z-20"
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -169,13 +212,55 @@ export default function Admin() {
           <h3 className="mb-4 text-xl font-semibold text-white">Approved Projects</h3>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {approvedProjects?.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <div key={project.id} className="relative">
+                <ProjectCard project={project} />
+                <div className="absolute inset-x-0 bottom-4 flex justify-center">
+                  <Button
+                    variant="destructive"
+                    onClick={() => setProjectToDelete(project)}
+                    className="z-20"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             ))}
             {(!approvedProjects || approvedProjects.length === 0) && (
               <p className="text-zinc-400">No approved projects</p>
             )}
           </div>
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!projectToDelete} onOpenChange={() => setProjectToDelete(null)}>
+          <AlertDialogContent className="bg-black border-zinc-800">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-white">Delete Project</AlertDialogTitle>
+              <AlertDialogDescription className="text-zinc-400">
+                Are you sure you want to delete "{projectToDelete?.name}"? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={() => setProjectToDelete(null)}
+                className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (projectToDelete) {
+                    deleteProject(projectToDelete.id);
+                    setProjectToDelete(null);
+                  }
+                }}
+                className="bg-red-500 hover:bg-red-600 text-white"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

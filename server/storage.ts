@@ -19,6 +19,7 @@ export interface IStorage {
   createProjects(projects: InsertProject[], userId: number): Promise<Project[]>;
   approveProject(id: number): Promise<Project>;
   incrementViews(id: number): Promise<void>;
+  deleteProject(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -118,6 +119,10 @@ export class DatabaseStorage implements IStorage {
         views: sql`${projects.views} + 1`,
       })
       .where(eq(projects.id, id));
+  }
+
+  async deleteProject(id: number): Promise<void> {
+    await db.delete(projects).where(eq(projects.id, id));
   }
 }
 
