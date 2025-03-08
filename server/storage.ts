@@ -23,9 +23,9 @@ export interface IStorage {
   deleteProject(id: number): Promise<void>;
 
   // Like operations
-  createLike(userId: number, projectId: number): Promise<Like>;
-  deleteLike(userId: number, projectId: number): Promise<void>;
-  getUserLikes(userId: number): Promise<number[]>;
+  createLike(orangeId: string, projectId: number): Promise<Like>;
+  deleteLike(orangeId: string, projectId: number): Promise<void>;
+  getUserLikes(orangeId: string): Promise<number[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -131,21 +131,21 @@ export class DatabaseStorage implements IStorage {
     await db.delete(projects).where(eq(projects.id, id));
   }
 
-  async getUserLikes(userId: number): Promise<number[]> {
+  async getUserLikes(orangeId: string): Promise<number[]> {
     const userLikes = await db
       .select({ projectId: likes.projectId })
       .from(likes)
-      .where(eq(likes.userId, userId));
+      .where(eq(likes.orangeId, orangeId));
     return userLikes.map(like => like.projectId);
   }
 
-  async createLike(userId: number, projectId: number): Promise<Like> {
+  async createLike(orangeId: string, projectId: number): Promise<Like> {
     // Start a transaction to ensure atomicity
     return await db.transaction(async (tx) => {
       // Create the like
       const [like] = await tx
         .insert(likes)
-        .values({ userId, projectId })
+        .values({ orangeId, projectId })
         .returning();
 
       // Increment the project's like count
@@ -158,7 +158,7 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  async deleteLike(userId: number, projectId: number): Promise<void> {
+  async deleteLike(orangeId: string, projectId: number): Promise<void> {
     // Start a transaction to ensure atomicity
     await db.transaction(async (tx) => {
       // Delete the like
@@ -166,7 +166,7 @@ export class DatabaseStorage implements IStorage {
         .delete(likes)
         .where(
           and(
-            eq(likes.userId, userId),
+            eq(likes.orangeId, orangeId),
             eq(likes.projectId, projectId)
           )
         );

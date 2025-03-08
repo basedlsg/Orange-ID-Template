@@ -212,13 +212,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/projects/:id/like", async (req, res) => {
     try {
       const projectId = parseInt(req.params.id);
-      const userId = parseInt(req.body.userId);
+      const { orangeId } = req.body;
 
-      if (!userId) {
-        return res.status(400).json({ error: "User ID is required" });
+      if (!orangeId) {
+        return res.status(400).json({ error: "Orange ID is required" });
       }
 
-      await storage.createLike(userId, projectId);
+      await storage.createLike(orangeId, projectId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error liking project:", error);
@@ -232,13 +232,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/projects/:id/unlike", async (req, res) => {
     try {
       const projectId = parseInt(req.params.id);
-      const userId = parseInt(req.body.userId);
+      const { orangeId } = req.body;
 
-      if (!userId) {
-        return res.status(400).json({ error: "User ID is required" });
+      if (!orangeId) {
+        return res.status(400).json({ error: "Orange ID is required" });
       }
 
-      await storage.deleteLike(userId, projectId);
+      await storage.deleteLike(orangeId, projectId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error unliking project:", error);
@@ -246,10 +246,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/:userId/likes", async (req, res) => {
+  app.get("/api/users/:orangeId/likes", async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
-      const likedProjectIds = await storage.getUserLikes(userId);
+      const { orangeId } = req.params;
+      const likedProjectIds = await storage.getUserLikes(orangeId);
       res.json(likedProjectIds);
     } catch (error) {
       console.error("Error fetching user likes:", error);

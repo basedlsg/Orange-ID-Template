@@ -19,7 +19,7 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProps) {
-  const { isLoggedIn } = useBedrockPassport();
+  const { isLoggedIn, user } = useBedrockPassport();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -31,9 +31,15 @@ export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProp
 
   const { mutate: toggleLike, isPending: isLiking } = useMutation({
     mutationFn: async () => {
+      if (!user?.sub && !user?.id) {
+        throw new Error("User ID not found");
+      }
+
+      const orangeId = user.sub || user.id;
       const response = await apiRequest(
         "POST",
-        `/api/projects/${project.id}/${isLiked ? 'unlike' : 'like'}`
+        `/api/projects/${project.id}/${isLiked ? 'unlike' : 'like'}`,
+        { orangeId }
       );
       if (!response.ok) {
         throw new Error(`Failed to ${isLiked ? 'unlike' : 'like'} project`);
@@ -42,7 +48,11 @@ export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProp
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users/likes"] });
+      if (user?.sub || user?.id) {
+        queryClient.invalidateQueries({ 
+          queryKey: ["/api/users", user.sub || user.id, "likes"] 
+        });
+      }
       setIsLiked(!isLiked);
     },
     onError: (error) => {

@@ -66,11 +66,11 @@ export const projects = pgTable("projects", {
 
 export const likes = pgTable("likes", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
+  orangeId: text("orange_id").notNull(),
   projectId: integer("project_id").notNull().references(() => projects.id),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (table) => ({
-  userProjectUnique: unique().on(table.userId, table.projectId),
+  userProjectUnique: unique().on(table.orangeId, table.projectId),
 }));
 
 export const insertUserSchema = createInsertSchema(users)
