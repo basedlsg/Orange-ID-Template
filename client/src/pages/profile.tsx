@@ -7,33 +7,43 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Redirect } from "wouter";
 
 export default function Profile() {
-  // Always define hooks at the top level
   const { isLoggedIn, user } = useBedrockPassport();
   const [activeTab, setActiveTab] = useState("liked");
-  const orangeId = user?.sub || user?.id;
 
-  // Early return if not logged in
-  if (!isLoggedIn || !orangeId) {
+  // Redirect if not logged in
+  if (!isLoggedIn) {
     return <Redirect to="/" />;
   }
 
-  // Fetch user's liked projects with proper caching
+  const orangeId = user?.sub || user?.id;
+
+  // Fetch user's liked projects
   const { data: likedProjects, isLoading: isLoadingLiked } = useQuery<Project[]>({
     queryKey: ["/api/users", orangeId, "likes"],
     queryFn: async () => {
-      const response = await fetch(`/api/users/${orangeId}/likes`);
-      if (!response.ok) throw new Error("Failed to fetch liked projects");
-      const likes = await response.json();
-      return likes.map((like: any) => like.project);
+      if (!orangeId) throw new Error("User ID not found");
+
+      // First get the list of liked project IDs
+      const likedIdsResponse = await fetch(`/api/users/${orangeId}/likes`);
+      if (!likedIdsResponse.ok) throw new Error("Failed to fetch liked projects");
+      const likedIds = await likedIdsResponse.json();
+
+      // Then fetch all approved projects and filter by liked IDs
+      const projectsResponse = await fetch("/api/projects?approved=true");
+      if (!projectsResponse.ok) throw new Error("Failed to fetch projects");
+      const allProjects = await projectsResponse.json();
+
+      return allProjects.filter((project: Project) => likedIds.includes(project.id));
     },
     enabled: !!orangeId
   });
 
   // Fetch user's submitted projects
   const { data: submittedProjects, isLoading: isLoadingSubmitted } = useQuery<Project[]>({
-    queryKey: ["/api/users", orangeId, "projects"],
+    queryKey: ["/api/users", orangeId, "submitted"],
     queryFn: async () => {
-      const response = await fetch(`/api/users/${orangeId}/projects`);
+      if (!orangeId) throw new Error("User ID not found");
+      const response = await fetch(`/api/projects?userId=${orangeId}`);
       if (!response.ok) throw new Error("Failed to fetch submitted projects");
       return response.json();
     },

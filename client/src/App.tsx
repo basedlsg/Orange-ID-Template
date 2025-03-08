@@ -162,26 +162,23 @@ function Navigation() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
-  // Always define hooks at the top level
-  const handleLogout = React.useCallback(() => {
-    if (!signOut) return;
-
-    signOut()
-      .then(() => {
-        toast({
-          title: "Logged out successfully",
-          description: "Come back soon!",
-        });
-        setLocation("/");
-      })
-      .catch((error) => {
-        toast({
-          variant: "destructive",
-          title: "Error logging out",
-          description: error instanceof Error ? error.message : "Please try again",
-        });
+  const handleLogout = async () => {
+    try {
+      await signOut?.();
+      toast({
+        title: "Logged out successfully",
+        description: "Come back soon!",
       });
-  }, [signOut, toast, setLocation]);
+      setLocation("/");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error logging out",
+        description:
+          error instanceof Error ? error.message : "Please try again",
+      });
+    }
+  };
 
   return (
     <nav className="border-b">
