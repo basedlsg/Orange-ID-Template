@@ -218,31 +218,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Orange ID is required" });
       }
 
-      await storage.createLike(orangeId, projectId);
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Error liking project:", error);
-      if (error instanceof Error && error.message.includes('unique')) {
-        return res.status(400).json({ error: "Project already liked" });
-      }
-      res.status(500).json({ error: "Failed to like project" });
-    }
-  });
-
-  app.post("/api/projects/:id/unlike", async (req, res) => {
-    try {
-      const projectId = parseInt(req.params.id);
-      const { orangeId } = req.body;
-
-      if (!orangeId) {
-        return res.status(400).json({ error: "Orange ID is required" });
+      const existingLike = await storage.getLike(orangeId, projectId);
+      if (existingLike) {
+        // If like already exists, unlike it
+        await storage.deleteLike(orangeId, projectId);
+      } else {
+        // If no like exists, create it
+        await storage.createLike(orangeId, projectId);
       }
 
-      await storage.deleteLike(orangeId, projectId);
       res.json({ success: true });
     } catch (error) {
-      console.error("Error unliking project:", error);
-      res.status(500).json({ error: "Failed to unlike project" });
+      console.error("Error toggling project like:", error);
+      res.status(500).json({ error: "Failed to toggle project like" });
     }
   });
 
