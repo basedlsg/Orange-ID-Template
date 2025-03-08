@@ -11,6 +11,7 @@ import { LoginDialog } from "./login-dialog";
 import { Badge } from "@/components/ui/badge";
 import { PREDEFINED_GENRES } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProjectGridProps {
   projects: Project[];
@@ -31,7 +32,7 @@ export function ProjectGrid({
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 
-  // Query for user's liked projects
+  // Query for user's liked projects with optimized configuration
   const { data: userLikes = [] } = useQuery({
     queryKey: ["/api/users", user?.sub || user?.id, "likes"],
     queryFn: async () => {
@@ -41,9 +42,9 @@ export function ProjectGrid({
       return response.json();
     },
     enabled: isLoggedIn,
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-    refetchOnWindowFocus: false
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true
   });
 
   const handleView = async (project: Project) => {
