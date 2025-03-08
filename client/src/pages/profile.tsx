@@ -35,7 +35,7 @@ export default function Profile() {
     },
     enabled: !!orangeId,
     staleTime: 30000, // Consider data fresh for 30 seconds
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: false
   });
 
@@ -50,7 +50,7 @@ export default function Profile() {
     },
     enabled: !!orangeId,
     staleTime: 30000, // Consider data fresh for 30 seconds
-    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: false
   });
 
@@ -72,15 +72,14 @@ export default function Profile() {
     }
   };
 
-  if (!isLoggedIn) {
-    return <Redirect to="/" />;
-  }
-
   if (isLoadingLiked || isLoadingSubmitted) {
     return <div className="text-white">Loading...</div>;
   }
 
-  return (
+  // Instead of early return, render the redirect inside the main return
+  return !isLoggedIn ? (
+    <Redirect to="/" />
+  ) : (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
