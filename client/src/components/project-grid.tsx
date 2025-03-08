@@ -17,10 +17,9 @@ interface ProjectGridProps {
   projects: Project[];
   onProjectView?: (id: number) => void;
   showEditButton?: boolean;
-  showSubmitCard?: boolean;
 }
 
-export function ProjectGrid({ projects, onProjectView, showEditButton = false, showSubmitCard = false }: ProjectGridProps) {
+export function ProjectGrid({ projects, onProjectView, showEditButton = false }: ProjectGridProps) {
   const { toast } = useToast();
   const { isLoggedIn, user } = useBedrockPassport();
   const [, setLocation] = useLocation();
@@ -38,7 +37,7 @@ export function ProjectGrid({ projects, onProjectView, showEditButton = false, s
     },
     enabled: isLoggedIn,
     staleTime: 30000, // Consider data fresh for 30 seconds
-    cacheTime: 5 * 60 * 1000 // Keep in cache for 5 minutes
+    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 
   const handleView = async (project: Project) => {
@@ -101,7 +100,7 @@ export function ProjectGrid({ projects, onProjectView, showEditButton = false, s
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {showSubmitCard && (
+        {!showEditButton && (
           <Card 
             key="submit-card"
             className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 border-dashed h-full"
