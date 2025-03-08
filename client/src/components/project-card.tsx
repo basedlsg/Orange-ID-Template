@@ -38,11 +38,11 @@ export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProp
       const orangeId = user.sub || user.id;
       const response = await apiRequest(
         "POST",
-        `/api/projects/${project.id}/${isLiked ? 'unlike' : 'like'}`,
+        `/api/projects/${project.id}/like`,
         { orangeId }
       );
       if (!response.ok) {
-        throw new Error(`Failed to ${isLiked ? 'unlike' : 'like'} project`);
+        throw new Error("Failed to toggle like");
       }
       return response.json();
     },

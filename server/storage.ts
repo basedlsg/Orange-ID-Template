@@ -17,7 +17,6 @@ export interface IStorage {
   getProjects(approved?: boolean): Promise<Project[]>;
   getProject(id: number): Promise<Project | undefined>;
   createProject(project: InsertProject, userId: number): Promise<Project>;
-  createProjects(projects: InsertProject[], userId: number): Promise<Project[]>;
   approveProject(id: number): Promise<Project>;
   incrementViews(id: number): Promise<void>;
   deleteProject(id: number): Promise<void>;
@@ -26,6 +25,7 @@ export interface IStorage {
   createLike(orangeId: string, projectId: number): Promise<Like>;
   deleteLike(orangeId: string, projectId: number): Promise<void>;
   getUserLikes(orangeId: string): Promise<number[]>;
+  getLike(orangeId: string, projectId: number): Promise<Like | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -137,6 +137,19 @@ export class DatabaseStorage implements IStorage {
       .from(likes)
       .where(eq(likes.orangeId, orangeId));
     return userLikes.map(like => like.projectId);
+  }
+
+  async getLike(orangeId: string, projectId: number): Promise<Like | undefined> {
+    const [like] = await db
+      .select()
+      .from(likes)
+      .where(
+        and(
+          eq(likes.orangeId, orangeId),
+          eq(likes.projectId, projectId)
+        )
+      );
+    return like;
   }
 
   async createLike(orangeId: string, projectId: number): Promise<Like> {
