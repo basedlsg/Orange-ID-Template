@@ -47,10 +47,12 @@ export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProp
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate both the projects list and the specific user's likes
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       if (user?.sub || user?.id) {
         queryClient.invalidateQueries({ 
-          queryKey: ["/api/users", user.sub || user.id, "likes"] 
+          queryKey: ["/api/users", user.sub || user.id, "likes"],
+          exact: true 
         });
       }
       setIsLiked(!isLiked);
