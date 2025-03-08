@@ -6,7 +6,7 @@ import type { Project } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 
 export default function Home() {
-  const [sortBy, setSortBy] = useState("views");
+  const [sortBy, setSortBy] = useState("likes"); // Changed default to likes
   const [aiTool, setAiTool] = useState("all");
   const [sponsorshipFilter, setSponsorshipFilter] = useState(false);
 
@@ -32,12 +32,19 @@ export default function Home() {
     );
   };
 
-  // Filter projects based on selected criteria
-  const filteredProjects = projects?.filter((project) => {
-    if (sponsorshipFilter && !project.sponsorshipEnabled) return false;
-    if (aiTool !== "all" && !project.aiTools.includes(aiTool)) return false;
-    return true;
-  });
+  // Filter and sort projects based on selected criteria
+  const sortedAndFilteredProjects = projects
+    ?.filter((project) => {
+      if (sponsorshipFilter && !project.sponsorshipEnabled) return false;
+      if (aiTool !== "all" && !project.aiTools?.includes(aiTool)) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "likes") return (b.likeCount || 0) - (a.likeCount || 0);
+      if (sortBy === "views") return b.views - a.views;
+      if (sortBy === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return 0;
+    });
 
   if (isLoading) {
     return <div className="text-white">Loading...</div>;
@@ -55,7 +62,7 @@ export default function Home() {
           onSponsorshipFilterChange={setSponsorshipFilter}
         />
         <ProjectGrid
-          projects={filteredProjects || []}
+          projects={sortedAndFilteredProjects || []}
           onProjectView={handleProjectView}
         />
       </div>

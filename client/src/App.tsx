@@ -8,14 +8,16 @@ import { useBedrockPassport } from "@bedrock_org/passport";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { X, Plus } from "lucide-react";
+import { X, Plus, User } from "lucide-react";
 import { Logo } from "@/components/logo";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Submit from "@/pages/submit";
 import Admin from "@/pages/admin";
+import Profile from "@/pages/profile";
 import AuthCallback from "@/pages/AuthCallback";
 import { LoginDialog } from "@/components/login-dialog";
+import React from "react";
 
 async function storeUserInDB(user: any) {
   if (!user) {
@@ -158,6 +160,7 @@ function ProtectedRoute({
 function Navigation() {
   const { isLoggedIn, user, signOut } = useBedrockPassport();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -166,6 +169,7 @@ function Navigation() {
         title: "Logged out successfully",
         description: "Come back soon!",
       });
+      setLocation("/");
     } catch (error) {
       toast({
         variant: "destructive",
@@ -185,6 +189,15 @@ function Navigation() {
         <div className="ml-auto flex items-center space-x-4">
           {isLoggedIn ? (
             <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/profile")}
+                className="flex items-center gap-2"
+              >
+                <User className="h-4 w-4" />
+                Profile
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -207,6 +220,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/profile" component={Profile} />
       <Route path="/submit">
         <ProtectedRoute component={Submit} />
       </Route>

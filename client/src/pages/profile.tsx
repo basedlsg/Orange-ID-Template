@@ -1,0 +1,81 @@
+import { useQuery } from "@tanstack/react-query";
+import { ProjectGrid } from "@/components/project-grid";
+import { useState } from "react";
+import type { Project } from "@shared/schema";
+import { useBedrockPassport } from "@bedrock_org/passport";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Redirect } from "wouter";
+
+export default function Profile() {
+  const { isLoggedIn, user } = useBedrockPassport();
+  const [activeTab, setActiveTab] = useState("liked");
+
+  // Redirect if not logged in
+  if (!isLoggedIn) {
+    return <Redirect to="/" />;
+  }
+
+  const orangeId = user?.sub || user?.id;
+
+  // Fetch user's liked projects
+  const { data: likedProjects, isLoading: isLoadingLiked } = useQuery<Project[]>({
+    queryKey: ["/api/users", orangeId, "likes"],
+    queryFn: async () => {
+      if (!orangeId) throw new Error("User ID not found");
+
+      // First get the list of liked project IDs
+      const likedIdsResponse = await fetch(`/api/users/${orangeId}/likes`);
+      if (!likedIdsResponse.ok) throw new Error("Failed to fetch liked projects");
+      const likedIds = await likedIdsResponse.json();
+
+      // Then fetch all approved projects and filter by liked IDs
+      const projectsResponse = await fetch("/api/projects?approved=true");
+      if (!projectsResponse.ok) throw new Error("Failed to fetch projects");
+      const allProjects = await projectsResponse.json();
+
+      return allProjects.filter((project: Project) => likedIds.includes(project.id));
+    },
+    enabled: !!orangeId
+  });
+
+  // Fetch user's submitted projects
+  const { data: submittedProjects, isLoading: isLoadingSubmitted } = useQuery<Project[]>({
+    queryKey: ["/api/users", orangeId, "submitted"],
+    queryFn: async () => {
+      if (!orangeId) throw new Error("User ID not found");
+      const response = await fetch(`/api/projects?userId=${orangeId}`);
+      if (!response.ok) throw new Error("Failed to fetch submitted projects");
+      return response.json();
+    },
+    enabled: !!orangeId
+  });
+
+  if (isLoadingLiked || isLoadingSubmitted) {
+    return <div className="text-white">Loading...</div>;
+  }
+
+  return (
+    <div className="min-h-screen bg-black">
+      <div className="container mx-auto px-4 py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full max-w-[400px] grid-cols-2 mb-8">
+            <TabsTrigger value="liked">Liked Projects</TabsTrigger>
+            <TabsTrigger value="submitted">My Submissions</TabsTrigger>
+          </TabsList>
+          <TabsContent value="liked">
+            <ProjectGrid
+              projects={likedProjects || []}
+              showEditButton={false}
+            />
+          </TabsContent>
+          <TabsContent value="submitted">
+            <ProjectGrid
+              projects={submittedProjects || []}
+              showEditButton={true}
+            />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
