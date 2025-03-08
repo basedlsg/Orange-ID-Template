@@ -20,12 +20,11 @@ export interface IStorage {
   approveProject(id: number): Promise<Project>;
   incrementViews(id: number): Promise<void>;
   deleteProject(id: number): Promise<void>;
-  getUserProjects(orangeId: string): Promise<Project[]>; // Added getUserProjects
 
   // Like operations
   createLike(orangeId: string, projectId: number): Promise<Like>;
   deleteLike(orangeId: string, projectId: number): Promise<void>;
-  getUserLikes(orangeId: string): Promise<(Like & { project: Project })[]>;
+  getUserLikes(orangeId: string): Promise<number[]>;
   getLike(orangeId: string, projectId: number): Promise<Like | undefined>;
 }
 
@@ -52,20 +51,9 @@ export class DatabaseStorage implements IStorage {
 
   async getProjects(approved?: boolean): Promise<Project[]> {
     if (approved !== undefined) {
-      return db
-        .select({
-          ...projects,
-          likeCount: sql`COALESCE(${projects.likeCount}, 0)`,
-        })
-        .from(projects)
-        .where(eq(projects.approved, approved));
+      return db.select().from(projects).where(eq(projects.approved, approved));
     }
-    return db
-      .select({
-        ...projects,
-        likeCount: sql`COALESCE(${projects.likeCount}, 0)`,
-      })
-      .from(projects);
+    return db.select().from(projects);
   }
 
   async getProject(id: number): Promise<Project | undefined> {
@@ -99,6 +87,27 @@ export class DatabaseStorage implements IStorage {
     return project;
   }
 
+  async createProjects(insertProjects: InsertProject[], userId: number): Promise<Project[]> {
+    if (!userId) {
+      throw new Error("User ID is required to create projects");
+    }
+
+    const values = insertProjects.map(project => ({
+      name: project.name,
+      description: project.description,
+      url: project.url,
+      thumbnail: project.thumbnail,
+      xHandle: project.xHandle,
+      userId,
+      aiTools: sql`${`{${project.aiTools.map(tool => `"${tool}"`).join(',')}}`}::text[]`,
+      genres: sql`${`{${project.genres.map(genre => `"${genre}"`).join(',')}}`}::text[]`,
+      sponsorshipEnabled: project.sponsorshipEnabled || false,
+      sponsorshipUrl: project.sponsorshipUrl,
+    }));
+
+    return db.insert(projects).values(values).returning();
+  }
+
   async approveProject(id: number): Promise<Project> {
     const [project] = await db
       .update(projects)
@@ -122,19 +131,12 @@ export class DatabaseStorage implements IStorage {
     await db.delete(projects).where(eq(projects.id, id));
   }
 
-  async getUserLikes(orangeId: string): Promise<(Like & { project: Project })[]> {
-    return db
-      .select({
-        id: likes.id,
-        orangeId: likes.orangeId,
-        projectId: likes.projectId,
-        createdAt: likes.createdAt,
-        project: projects
-      })
+  async getUserLikes(orangeId: string): Promise<number[]> {
+    const userLikes = await db
+      .select({ projectId: likes.projectId })
       .from(likes)
-      .innerJoin(projects, eq(likes.projectId, projects.id))
-      .where(eq(likes.orangeId, orangeId))
-      .execute();
+      .where(eq(likes.orangeId, orangeId));
+    return userLikes.map(like => like.projectId);
   }
 
   async getLike(orangeId: string, projectId: number): Promise<Like | undefined> {
@@ -188,17 +190,6 @@ export class DatabaseStorage implements IStorage {
         .set({ likeCount: sql`${projects.likeCount} - 1` })
         .where(eq(projects.id, projectId));
     });
-  }
-
-  async getUserProjects(orangeId: string): Promise<Project[]> {
-    return db
-      .select({
-        ...projects,
-        likeCount: sql`COALESCE(${projects.likeCount}, 0)`,
-      })
-      .from(projects)
-      .where(eq(projects.userId, orangeId)) //Corrected to use userId instead of orangeId
-      .execute();
   }
 }
 
