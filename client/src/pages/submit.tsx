@@ -31,7 +31,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
 
 export default function Submit() {
@@ -55,16 +55,6 @@ export default function Submit() {
       sponsorshipUrl: "",
     },
   });
-
-  // Watch sponsorship toggle
-  const sponsorshipEnabled = form.watch("sponsorshipEnabled");
-
-  // Reset sponsorship URL when toggling off
-  useEffect(() => {
-    if (!sponsorshipEnabled) {
-      form.setValue("sponsorshipUrl", "");
-    }
-  }, [sponsorshipEnabled, form]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {

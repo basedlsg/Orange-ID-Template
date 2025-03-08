@@ -9,11 +9,9 @@ import defaultThumbnail from "../logocode.png";
 interface ProjectCardProps {
   project: Project;
   onView?: () => void;
-  onGenreClick?: (genre: string) => void;
-  onToolClick?: (tool: string) => void;
 }
 
-export function ProjectCard({ project, onView, onGenreClick, onToolClick }: ProjectCardProps) {
+export function ProjectCard({ project, onView }: ProjectCardProps) {
   const handleClick = async () => {
     if (onView) {
       onView();
@@ -30,20 +28,6 @@ export function ProjectCard({ project, onView, onGenreClick, onToolClick }: Proj
     e.stopPropagation();
     if (project.sponsorshipUrl) {
       window.open(project.sponsorshipUrl, "_blank");
-    }
-  };
-
-  const handleGenreClick = (e: React.MouseEvent, genre: string) => {
-    e.stopPropagation();
-    if (onGenreClick) {
-      onGenreClick(genre);
-    }
-  };
-
-  const handleToolClick = (e: React.MouseEvent, tool: string) => {
-    e.stopPropagation();
-    if (onToolClick) {
-      onToolClick(tool);
     }
   };
 
@@ -79,8 +63,7 @@ export function ProjectCard({ project, onView, onGenreClick, onToolClick }: Proj
             <Badge
               key={genre}
               variant="secondary"
-              className="bg-green-500/10 text-green-400 cursor-pointer hover:bg-green-500/20"
-              onClick={(e) => handleGenreClick(e, genre)}
+              className="bg-green-500/10 text-green-400"
             >
               {genre}
             </Badge>
@@ -90,8 +73,7 @@ export function ProjectCard({ project, onView, onGenreClick, onToolClick }: Proj
             <Badge
               key={tool}
               variant="secondary"
-              className="bg-blue-500/10 text-blue-400 cursor-pointer hover:bg-blue-500/20"
-              onClick={(e) => handleToolClick(e, tool)}
+              className="bg-blue-500/10 text-blue-400"
             >
               {tool}
             </Badge>
