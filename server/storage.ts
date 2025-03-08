@@ -58,8 +58,9 @@ export class DatabaseStorage implements IStorage {
       throw new Error("User ID is required to create a project");
     }
 
-    // Convert aiTools array to PostgreSQL array literal format
+    // Convert aiTools and genres arrays to PostgreSQL array literal format
     const aiToolsArray = `{${insertProject.aiTools.map(tool => `"${tool}"`).join(',')}}`;
+    const genresArray = `{${insertProject.genres.map(genre => `"${genre}"`).join(',')}}`;
 
     const [project] = await db
       .insert(projects)
@@ -71,6 +72,7 @@ export class DatabaseStorage implements IStorage {
         xHandle: insertProject.xHandle,
         userId,
         aiTools: sql`${aiToolsArray}::text[]`,
+        genres: sql`${genresArray}::text[]`,
         sponsorshipEnabled: insertProject.sponsorshipEnabled || false,
         sponsorshipUrl: insertProject.sponsorshipUrl,
       })
