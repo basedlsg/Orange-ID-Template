@@ -8,32 +8,39 @@ import { Redirect, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Profile() {
-  const { isLoggedIn, user } = useBedrockPassport();
+  const { isLoggedIn, user, signOut } = useBedrockPassport();
   const [activeTab, setActiveTab] = useState("liked");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const orangeId = user?.sub || user?.id;
 
-  // Fetch user's liked projects with full data
-  const { data: likedProjects, isLoading: isLoadingLiked, isError: isErrorLiked, error: errorLiked } = useQuery<Project[]>({
-    queryKey: ["/api/users", orangeId, "liked-projects"],
+  // Fetch user's liked projects
+  const { data: likedProjects, isLoading: isLoadingLiked } = useQuery<Project[]>({
+    queryKey: ["/api/users", orangeId, "likes"],
     queryFn: async () => {
       if (!orangeId) throw new Error("User ID not found");
 
-      // Fetch the complete liked projects data in a single request
-      const response = await fetch(`/api/users/${orangeId}/liked-projects`);
-      if (!response.ok) throw new Error("Failed to fetch liked projects");
-      return response.json();
+      // First get the list of liked project IDs
+      const likedIdsResponse = await fetch(`/api/users/${orangeId}/likes`);
+      if (!likedIdsResponse.ok) throw new Error("Failed to fetch liked projects");
+      const likedIds = await likedIdsResponse.json();
+
+      // Then fetch all approved projects and filter by liked IDs
+      const projectsResponse = await fetch("/api/projects?approved=true");
+      if (!projectsResponse.ok) throw new Error("Failed to fetch projects");
+      const allProjects = await projectsResponse.json();
+
+      return allProjects.filter((project: Project) => likedIds.includes(project.id));
     },
-    enabled: !!orangeId && isLoggedIn,
+    enabled: !!orangeId,
     staleTime: 30000, // Consider data fresh for 30 seconds
     cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: false
   });
 
   // Fetch user's submitted projects
-  const { data: submittedProjects, isLoading: isLoadingSubmitted, isError: isErrorSubmitted, error: errorSubmitted } = useQuery<Project[]>({
+  const { data: submittedProjects, isLoading: isLoadingSubmitted } = useQuery<Project[]>({
     queryKey: ["/api/users", orangeId, "submitted"],
     queryFn: async () => {
       if (!orangeId) throw new Error("User ID not found");
@@ -41,21 +48,32 @@ export default function Profile() {
       if (!response.ok) throw new Error("Failed to fetch submitted projects");
       return response.json();
     },
-    enabled: !!orangeId && isLoggedIn,
+    enabled: !!orangeId,
     staleTime: 30000, // Consider data fresh for 30 seconds
     cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
     refetchOnWindowFocus: false
   });
 
-  const isLoading = isLoadingLiked || isLoadingSubmitted;
-  const isError = isErrorLiked || isErrorSubmitted;
+  const handleLogout = async () => {
+    try {
+      await signOut?.();
+      toast({
+        title: "Logged out successfully",
+        description: "Come back soon!",
+      });
+      setLocation("/");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error logging out",
+        description:
+          error instanceof Error ? error.message : "Please try again",
+      });
+    }
+  };
 
-  if (isLoading) {
+  if (isLoadingLiked || isLoadingSubmitted) {
     return <div className="text-white">Loading...</div>;
-  }
-
-  if (isError) {
-    return <div className="text-red-500">Error loading data: {errorLiked?.message || errorSubmitted?.message}</div>;
   }
 
   // Instead of early return, render the redirect inside the main return

@@ -14,6 +14,10 @@ export function OrangeAuthProvider({
       authCallbackUrl={`${origin}/auth/callback`}
       tenantId="juice-town"
       walletConnectId={import.meta.env.VITE_WALLETCONNECT_PROJECT_ID}
+      disableWidget={true}
+      widgetConfig={{
+        enabled: false,
+      }}
     >
       {children}
     </BedrockPassportProvider>
