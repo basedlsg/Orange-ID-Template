@@ -208,6 +208,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+  // Like-related routes
+  app.post("/api/projects/:id/like", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = parseInt(req.body.userId);
+
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+
+      await storage.createLike(userId, projectId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error liking project:", error);
+      if (error instanceof Error && error.message.includes('unique')) {
+        return res.status(400).json({ error: "Project already liked" });
+      }
+      res.status(500).json({ error: "Failed to like project" });
+    }
+  });
+
+  app.post("/api/projects/:id/unlike", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userId = parseInt(req.body.userId);
+
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+
+      await storage.deleteLike(userId, projectId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error unliking project:", error);
+      res.status(500).json({ error: "Failed to unlike project" });
+    }
+  });
+
+  app.get("/api/users/:userId/likes", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const likedProjectIds = await storage.getUserLikes(userId);
+      res.json(likedProjectIds);
+    } catch (error) {
+      console.error("Error fetching user likes:", error);
+      res.status(500).json({ error: "Failed to fetch liked projects" });
+    }
+  });
+
   // Projects API
   app.get("/api/projects", async (req, res) => {
     try {
