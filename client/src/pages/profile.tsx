@@ -54,24 +54,6 @@ export default function Profile() {
     refetchOnWindowFocus: false
   });
 
-  const handleLogout = async () => {
-    try {
-      await signOut?.();
-      toast({
-        title: "Logged out successfully",
-        description: "Come back soon!",
-      });
-      setLocation("/");
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error logging out",
-        description:
-          error instanceof Error ? error.message : "Please try again",
-      });
-    }
-  };
-
   if (isLoadingLiked || isLoadingSubmitted) {
     return <div className="text-white">Loading...</div>;
   }
@@ -91,12 +73,14 @@ export default function Profile() {
             <ProjectGrid
               projects={likedProjects || []}
               showEditButton={false}
+              showSubmitCard={false}
             />
           </TabsContent>
           <TabsContent value="submitted">
             <ProjectGrid
               projects={submittedProjects || []}
               showEditButton={true}
+              showSubmitCard={true}
             />
           </TabsContent>
         </Tabs>
