@@ -91,12 +91,14 @@ export default function Profile() {
             <ProjectGrid
               projects={likedProjects || []}
               showEditButton={false}
+              showSubmitCard={false}
             />
           </TabsContent>
           <TabsContent value="submitted">
             <ProjectGrid
               projects={submittedProjects || []}
               showEditButton={true}
+              showSubmitCard={true}
             />
           </TabsContent>
         </Tabs>
