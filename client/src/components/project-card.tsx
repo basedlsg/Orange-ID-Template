@@ -16,9 +16,10 @@ interface ProjectCardProps {
   project: Project;
   onView?: () => void;
   userLikes?: number[];
+  onEdit?: () => void;
 }
 
-export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProps) {
+export function ProjectCard({ project, onView, userLikes = [], onEdit }: ProjectCardProps) {
   const { isLoggedIn, user } = useBedrockPassport();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { toast } = useToast();
@@ -47,12 +48,22 @@ export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProp
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate both the projects list and the specific user's likes
+      // Cache the full project data
+      queryClient.setQueryData(
+        ["/api/projects", { approved: true }],
+        (old: Project[] | undefined) => {
+          if (!old) return old;
+          return old.map((p) => p.id === project.id ? project : p);
+        }
+      );
+
+      // Invalidate all relevant queries
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       if (user?.sub || user?.id) {
+        // Invalidate both the likes list and the full liked projects data
         queryClient.invalidateQueries({ 
-          queryKey: ["/api/users", user.sub || user.id, "likes"],
-          exact: true 
+          queryKey: ["/api/users", user.sub || user.id],
+          exact: false 
         });
       }
       setIsLiked(!isLiked);
@@ -170,15 +181,30 @@ export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProp
                 </Button>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClick}
-              className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
-            >
-              <ExternalLink className="mr-2 h-4 w-4" />
-              Visit
-            </Button>
+            <div className="flex gap-2">
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                  className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
+                >
+                  Edit
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClick}
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Visit
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
