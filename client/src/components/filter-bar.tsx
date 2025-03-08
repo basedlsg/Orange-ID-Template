@@ -33,6 +33,7 @@ export function FilterBar({
           <SelectValue placeholder="Sort by..." />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="likes">Most Liked</SelectItem>
           <SelectItem value="views">Most Viewed</SelectItem>
           <SelectItem value="newest">Newest First</SelectItem>
         </SelectContent>
