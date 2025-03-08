@@ -132,7 +132,7 @@ export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProp
                 Open for Sponsorship
               </Badge>
             )}
-            {project.genres.map((genre) => (
+            {project.genres?.map((genre) => (
               <Badge
                 key={genre}
                 variant="secondary"
