@@ -26,22 +26,18 @@ export default function Profile() {
       const likes = await response.json();
       return likes.map((like: any) => like.project);
     },
-    staleTime: 30000, // Keep the data fresh for 30 seconds
-    cacheTime: 5 * 60 * 1000, // Cache for 5 minutes
-    enabled: isLoggedIn && !!orangeId
+    enabled: !!orangeId
   });
 
   // Fetch user's submitted projects
   const { data: submittedProjects, isLoading: isLoadingSubmitted } = useQuery<Project[]>({
-    queryKey: ["/api/users", orangeId, "submitted"],
+    queryKey: ["/api/users", orangeId, "projects"],
     queryFn: async () => {
-      const response = await fetch(`/api/projects?orangeId=${orangeId}`);
+      const response = await fetch(`/api/users/${orangeId}/projects`);
       if (!response.ok) throw new Error("Failed to fetch submitted projects");
       return response.json();
     },
-    staleTime: 30000,
-    cacheTime: 5 * 60 * 1000,
-    enabled: isLoggedIn && !!orangeId
+    enabled: !!orangeId
   });
 
   if (isLoadingLiked || isLoadingSubmitted) {
