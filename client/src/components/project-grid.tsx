@@ -47,9 +47,12 @@ export function ProjectGrid({ projects, onProjectView }: ProjectGridProps) {
     }
   };
 
+  // Sort projects by likes in descending order
+  const sortedProjects = [...projects].sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
+
   const filteredProjects = selectedGenre
-    ? projects.filter(project => project.genres?.includes(selectedGenre))
-    : projects;
+    ? sortedProjects.filter(project => project.genres?.includes(selectedGenre))
+    : sortedProjects;
 
   return (
     <div>

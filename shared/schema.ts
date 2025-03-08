@@ -5,6 +5,7 @@ import {
   integer,
   boolean,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -50,7 +51,7 @@ export const projects = pgTable("projects", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   url: text("url").notNull(),
-  aiTools: text("ai_tools").array(),  // Remove .notNull()
+  aiTools: text("ai_tools").array(),
   genres: text("genres").array().notNull(),
   thumbnail: text("thumbnail"),
   xHandle: text("x_handle"),
@@ -59,8 +60,18 @@ export const projects = pgTable("projects", {
   userId: integer("user_id").references(() => users.id),
   approved: boolean("approved").notNull().default(false),
   views: integer("views").notNull().default(0),
+  likeCount: integer("like_count").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+export const likes = pgTable("likes", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  projectId: integer("project_id").notNull().references(() => projects.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userProjectUnique: unique().on(table.userId, table.projectId),
+}));
 
 export const insertUserSchema = createInsertSchema(users)
   .omit({
@@ -78,6 +89,7 @@ export const insertProjectSchema = createInsertSchema(projects)
     userId: true,
     approved: true,
     views: true,
+    likeCount: true,
     createdAt: true,
   })
   .extend({
@@ -85,9 +97,8 @@ export const insertProjectSchema = createInsertSchema(projects)
       .string()
       .max(200, "Description must be 200 characters or less"),
     url: z.string().url(),
-    aiTools: z.array(z.string()).optional().default([]),  // Make aiTools optional
+    aiTools: z.array(z.string()).optional().default([]),
     genres: z.array(z.string()).superRefine((val, ctx) => {
-      // Only validate min length when form is being submitted
       if (ctx.path.length > 0 && val.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.too_small,
@@ -108,7 +119,6 @@ export const insertProjectSchema = createInsertSchema(projects)
     ]).optional(),
   })
   .superRefine((data, ctx) => {
-    // Only validate sponsorshipUrl if sponsorshipEnabled is true
     if (data.sponsorshipEnabled && (!data.sponsorshipUrl || data.sponsorshipUrl.length === 0)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -118,7 +128,14 @@ export const insertProjectSchema = createInsertSchema(projects)
     }
   });
 
+export const insertLikeSchema = createInsertSchema(likes).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type InsertLike = z.infer<typeof insertLikeSchema>;
 export type User = typeof users.$inferSelect;
 export type Project = typeof projects.$inferSelect;
+export type Like = typeof likes.$inferSelect;
