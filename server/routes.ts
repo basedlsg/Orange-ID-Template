@@ -292,6 +292,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete("/api/projects/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteProject(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      res.status(500).json({ error: "Failed to delete project" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
