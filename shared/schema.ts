@@ -50,7 +50,7 @@ export const projects = pgTable("projects", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   url: text("url").notNull(),
-  aiTools: text("ai_tools").array().notNull(),
+  aiTools: text("ai_tools").array(),  // Remove .notNull()
   genres: text("genres").array().notNull(),
   thumbnail: text("thumbnail"),
   xHandle: text("x_handle"),
@@ -85,18 +85,7 @@ export const insertProjectSchema = createInsertSchema(projects)
       .string()
       .max(200, "Description must be 200 characters or less"),
     url: z.string().url(),
-    aiTools: z.array(z.string()).superRefine((val, ctx) => {
-      // Only validate min length when form is being submitted
-      if (ctx.path.length > 0 && val.length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.too_small,
-          minimum: 1,
-          type: "array",
-          inclusive: true,
-          message: "Select at least one AI tool",
-        });
-      }
-    }),
+    aiTools: z.array(z.string()).optional().default([]),  // Make aiTools optional
     genres: z.array(z.string()).superRefine((val, ctx) => {
       // Only validate min length when form is being submitted
       if (ctx.path.length > 0 && val.length === 0) {
