@@ -16,6 +16,7 @@ export interface IStorage {
   getProjects(approved?: boolean): Promise<Project[]>;
   getProject(id: number): Promise<Project | undefined>;
   createProject(project: InsertProject, userId: number): Promise<Project>;
+  createProjects(projects: InsertProject[], userId: number): Promise<Project[]>;
   approveProject(id: number): Promise<Project>;
   incrementViews(id: number): Promise<void>;
 }
@@ -58,7 +59,6 @@ export class DatabaseStorage implements IStorage {
       throw new Error("User ID is required to create a project");
     }
 
-    // Convert aiTools and genres arrays to PostgreSQL array literal format
     const aiToolsArray = `{${insertProject.aiTools.map(tool => `"${tool}"`).join(',')}}`;
     const genresArray = `{${insertProject.genres.map(genre => `"${genre}"`).join(',')}}`;
 
@@ -78,6 +78,27 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return project;
+  }
+
+  async createProjects(insertProjects: InsertProject[], userId: number): Promise<Project[]> {
+    if (!userId) {
+      throw new Error("User ID is required to create projects");
+    }
+
+    const values = insertProjects.map(project => ({
+      name: project.name,
+      description: project.description,
+      url: project.url,
+      thumbnail: project.thumbnail,
+      xHandle: project.xHandle,
+      userId,
+      aiTools: sql`${`{${project.aiTools.map(tool => `"${tool}"`).join(',')}}`}::text[]`,
+      genres: sql`${`{${project.genres.map(genre => `"${genre}"`).join(',')}}`}::text[]`,
+      sponsorshipEnabled: project.sponsorshipEnabled || false,
+      sponsorshipUrl: project.sponsorshipUrl,
+    }));
+
+    return db.insert(projects).values(values).returning();
   }
 
   async approveProject(id: number): Promise<Project> {
