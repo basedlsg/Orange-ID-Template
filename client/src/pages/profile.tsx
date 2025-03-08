@@ -22,18 +22,10 @@ export default function Profile() {
     queryKey: ["/api/users", orangeId, "likes"],
     queryFn: async () => {
       if (!orangeId) throw new Error("User ID not found");
-
-      // First get the list of liked project IDs
-      const likedIdsResponse = await fetch(`/api/users/${orangeId}/likes`);
-      if (!likedIdsResponse.ok) throw new Error("Failed to fetch liked projects");
-      const likedIds = await likedIdsResponse.json();
-
-      // Then fetch all approved projects and filter by liked IDs
-      const projectsResponse = await fetch("/api/projects?approved=true");
-      if (!projectsResponse.ok) throw new Error("Failed to fetch projects");
-      const allProjects = await projectsResponse.json();
-
-      return allProjects.filter((project: Project) => likedIds.includes(project.id));
+      const response = await fetch(`/api/users/${orangeId}/likes`);
+      if (!response.ok) throw new Error("Failed to fetch liked projects");
+      const likes = await response.json();
+      return likes.map((like: any) => like.project);
     },
     enabled: !!orangeId
   });

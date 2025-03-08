@@ -24,7 +24,7 @@ export interface IStorage {
   // Like operations
   createLike(orangeId: string, projectId: number): Promise<Like>;
   deleteLike(orangeId: string, projectId: number): Promise<void>;
-  getUserLikes(orangeId: string): Promise<number[]>;
+  getUserLikes(orangeId: string): Promise<(Like & { project: Project })[]>;
   getLike(orangeId: string, projectId: number): Promise<Like | undefined>;
 }
 
@@ -87,27 +87,6 @@ export class DatabaseStorage implements IStorage {
     return project;
   }
 
-  async createProjects(insertProjects: InsertProject[], userId: number): Promise<Project[]> {
-    if (!userId) {
-      throw new Error("User ID is required to create projects");
-    }
-
-    const values = insertProjects.map(project => ({
-      name: project.name,
-      description: project.description,
-      url: project.url,
-      thumbnail: project.thumbnail,
-      xHandle: project.xHandle,
-      userId,
-      aiTools: sql`${`{${project.aiTools.map(tool => `"${tool}"`).join(',')}}`}::text[]`,
-      genres: sql`${`{${project.genres.map(genre => `"${genre}"`).join(',')}}`}::text[]`,
-      sponsorshipEnabled: project.sponsorshipEnabled || false,
-      sponsorshipUrl: project.sponsorshipUrl,
-    }));
-
-    return db.insert(projects).values(values).returning();
-  }
-
   async approveProject(id: number): Promise<Project> {
     const [project] = await db
       .update(projects)
@@ -131,12 +110,8 @@ export class DatabaseStorage implements IStorage {
     await db.delete(projects).where(eq(projects.id, id));
   }
 
-  async getUserLikes(orangeId: string): Promise<number[]> {
-    const userLikes = await db
-      .select({ projectId: likes.projectId })
-      .from(likes)
-      .where(eq(likes.orangeId, orangeId));
-    return userLikes.map(like => like.projectId);
+  async getUserLikes(orangeId: string): Promise<(Like & { project: Project })[]> {
+    return db.select({...likes, project: projects}).from(likes).innerJoin(projects, eq(likes.projectId, projects.id)).where(eq(likes.orangeId, orangeId));
   }
 
   async getLike(orangeId: string, projectId: number): Promise<Like | undefined> {
