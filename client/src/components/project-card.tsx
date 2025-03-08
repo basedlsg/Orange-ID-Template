@@ -59,7 +59,7 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
             </Badge>
           )}
           {/* Display genres first */}
-          {project.genres && project.genres.map((genre) => (
+          {project.genres.map((genre) => (
             <Badge
               key={genre}
               variant="secondary"
@@ -69,7 +69,7 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
             </Badge>
           ))}
           {/* Display AI tools */}
-          {project.aiTools && project.aiTools.map((tool) => (
+          {project.aiTools.map((tool) => (
             <Badge
               key={tool}
               variant="secondary"
