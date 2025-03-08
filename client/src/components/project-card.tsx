@@ -58,7 +58,7 @@ export function ProjectCard({ project, onView }: ProjectCardProps) {
               Open for Sponsorship
             </Badge>
           )}
-          {/* Display genres */}
+          {/* Display genres first */}
           {project.genres && project.genres.map((genre) => (
             <Badge
               key={genre}
