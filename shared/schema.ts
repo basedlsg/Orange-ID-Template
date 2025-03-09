@@ -35,14 +35,6 @@ export const PREDEFINED_GENRES = [
   "AI Research",
 ] as const;
 
-// Image data table for storing thumbnails
-export const imageData = pgTable("image_data", {
-  id: text("id").primaryKey(),
-  data: text("data").notNull(),
-  contentType: text("content_type").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   orangeId: text("orange_id").notNull().unique(),
