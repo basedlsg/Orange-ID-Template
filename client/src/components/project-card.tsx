@@ -16,14 +16,16 @@ interface ProjectCardProps {
   project: Project;
   onView?: () => void;
   userLikes?: number[];
+  onEdit?: () => void;
 }
 
-export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProps) {
+export function ProjectCard({ project, onView, userLikes = [], onEdit }: ProjectCardProps) {
   const { isLoggedIn, user } = useBedrockPassport();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLiked, setIsLiked] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     setIsLiked(userLikes.includes(project.id));
@@ -94,14 +96,19 @@ export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProp
     }
   };
 
+  const handleImgError = () => {
+    setImgError(true);
+  };
+
   return (
     <>
       <Card className="group relative overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800">
         <div className="aspect-video overflow-hidden bg-zinc-900">
           <img
-            src={project.thumbnail || defaultThumbnail}
+            src={imgError ? defaultThumbnail : (project.thumbnail || defaultThumbnail)}
             alt={project.name}
             className="h-full w-full object-cover transition-transform group-hover:scale-105"
+            onError={handleImgError}
           />
         </div>
         <CardHeader className="p-4">
@@ -170,15 +177,27 @@ export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProp
                 </Button>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClick}
-              className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
-            >
-              <ExternalLink className="mr-2 h-4 w-4" />
-              Visit
-            </Button>
+            <div className="flex items-center gap-2">
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                  className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
+                >
+                  Edit
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClick}
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Visit
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
