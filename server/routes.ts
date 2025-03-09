@@ -1,8 +1,8 @@
 import { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import {
-  insertProjectSchema,
+import { 
+  insertProjectSchema, 
   insertUserSchema,
   type Project,
   type InsertProject,
@@ -17,12 +17,23 @@ import fs from 'fs';
 import sharp from 'sharp';
 import { parse } from 'csv-parse';
 import fetch from 'node-fetch';
-import { sql } from "./db";
-import { db } from "./db";
+
+// Ensure uploads directory exists
+if (!fs.existsSync('./uploads')) {
+  fs.mkdirSync('./uploads', { recursive: true });
+}
 
 // Configure multer for handling file uploads
 const upload = multer({
-  storage: multer.memoryStorage()
+  storage: multer.diskStorage({
+    destination: './uploads',
+    filename: (req, file, cb) => {
+      // Always use .jpg extension for consistency
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      const ext = '.jpg'; // Force jpg extension
+      cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+    }
+  })
 });
 
 async function downloadAndProcessThumbnail(thumbnailUrl: string): Promise<string> {
@@ -31,18 +42,15 @@ async function downloadAndProcessThumbnail(thumbnailUrl: string): Promise<string
     if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
 
     const buffer = await response.buffer();
-    const processedBuffer = await sharp(buffer).jpeg({ quality: 90 }).toBuffer();
+    const filename = `thumbnail-${Date.now()}-${Math.round(Math.random() * 1E9)}.jpg`;
+    const filepath = path.join('./uploads', filename);
 
-    // Generate a unique identifier for the image
-    const imageId = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+    // Process image with Sharp
+    await sharp(buffer)
+      .jpeg({ quality: 90 })
+      .toFile(filepath);
 
-    // Store in database
-    await db.execute(sql`
-      INSERT INTO image_data (id, data, content_type)
-      VALUES (${imageId}, ${processedBuffer}, ${'image/jpeg'})
-    `);
-
-    return `/api/images/${imageId}`;
+    return `/uploads/${filename}`;
   } catch (error) {
     console.error('Error processing thumbnail:', error);
     return ''; // Return empty string if thumbnail processing fails
@@ -50,7 +58,10 @@ async function downloadAndProcessThumbnail(thumbnailUrl: string): Promise<string
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Update the upload endpoint to store in database
+  // Ensure uploads directory exists
+  app.use('/uploads', express.static('uploads'));
+
+  // File upload endpoint with image processing
   app.post("/api/upload", upload.single('thumbnail'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -58,51 +69,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       // Process the image with Sharp
-      const processedImageBuffer = await sharp(req.file.buffer)
-        .jpeg({ quality: 90 })
-        .toBuffer();
+      await sharp(req.file.path)
+        .jpeg({ quality: 90 }) // Convert to JPEG with good quality
+        .toFile(req.file.path + '.processed');
 
-      // Generate a unique identifier for the image
-      const imageId = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+      // Replace the original file with the processed one
+      fs.unlinkSync(req.file.path);
+      fs.renameSync(req.file.path + '.processed', req.file.path);
 
-      // Store the image data in the database
-      await db.execute(sql`
-        INSERT INTO image_data (id, data, content_type)
-        VALUES (${imageId}, ${processedImageBuffer}, ${req.file.mimetype})
-      `);
-
-      // Return the URL that will be used to serve the image
-      const imageUrl = `/api/images/${imageId}`;
-      res.json({ url: imageUrl });
+      const url = `/uploads/${req.file.filename}`;
+      res.json({ url });
     } catch (error) {
       console.error('Error processing image:', error);
+      // Clean up files in case of error
+      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      if (fs.existsSync(req.file.path + '.processed')) fs.unlinkSync(req.file.path + '.processed');
       res.status(500).json({ error: "Failed to process image" });
-    }
-  });
-
-  // Add endpoint to serve images from database
-  app.get("/api/images/:id", async (req, res) => {
-    try {
-      const { id } = req.params;
-
-      const result = await db.execute(sql`
-        SELECT data, content_type 
-        FROM image_data 
-        WHERE id = ${id}
-      `);
-
-      if (!result.rows.length) {
-        return res.status(404).json({ error: "Image not found" });
-      }
-
-      const { data, content_type } = result.rows[0];
-
-      res.setHeader('Content-Type', content_type);
-      res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
-      res.send(Buffer.from(data, 'base64'));
-    } catch (error) {
-      console.error('Error serving image:', error);
-      res.status(500).json({ error: "Failed to serve image" });
     }
   });
 
@@ -114,7 +96,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const projects: any[] = [];
-      const parser = fs.createReadStream(req.file.buffer).pipe(parse({ columns: true, trim: true }));
+      const parser = fs.createReadStream(req.file.path).pipe(parse({ columns: true, trim: true }));
 
       for await (const row of parser) {
         try {
@@ -161,13 +143,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create all projects in database
       const createdProjects = await storage.createProjects(projects, 1); // Using userId 1 for now
 
-      res.json({
-        success: true,
+      // Clean up CSV file
+      fs.unlinkSync(req.file.path);
+
+      res.json({ 
+        success: true, 
         count: createdProjects.length,
-        message: `Successfully imported ${createdProjects.length} projects`
+        message: `Successfully imported ${createdProjects.length} projects` 
       });
     } catch (error) {
       console.error('Error processing CSV:', error);
+      // Clean up CSV file in case of error
+      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
       res.status(500).json({ error: error instanceof Error ? error.message : "Failed to process CSV file" });
     }
   });
