@@ -16,6 +16,7 @@ import Submit from "@/pages/submit";
 import Admin from "@/pages/admin";
 import AuthCallback from "@/pages/AuthCallback";
 import { LoginDialog } from "@/components/login-dialog";
+import React from "react";
 
 async function storeUserInDB(user: any) {
   if (!user) {
@@ -158,6 +159,7 @@ function ProtectedRoute({
 function Navigation() {
   const { isLoggedIn, user, signOut } = useBedrockPassport();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -166,6 +168,7 @@ function Navigation() {
         title: "Logged out successfully",
         description: "Come back soon!",
       });
+      setLocation("/");
     } catch (error) {
       toast({
         variant: "destructive",
@@ -184,16 +187,14 @@ function Navigation() {
         </Link>
         <div className="ml-auto flex items-center space-x-4">
           {isLoggedIn ? (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                className="text-sm font-medium hover:text-primary"
-              >
-                Logout
-              </Button>
-            </>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleLogout}
+              className="text-sm font-medium hover:text-primary"
+            >
+              Logout
+            </Button>
           ) : (
             <LoginButton />
           )}

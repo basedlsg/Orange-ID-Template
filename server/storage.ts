@@ -1,9 +1,10 @@
 import { 
   users, type User, type InsertUser,
-  projects, type Project, type InsertProject 
+  projects, type Project, type InsertProject,
+  likes, type Like, type InsertLike
 } from "@shared/schema";
 import { db, sql } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -16,10 +17,15 @@ export interface IStorage {
   getProjects(approved?: boolean): Promise<Project[]>;
   getProject(id: number): Promise<Project | undefined>;
   createProject(project: InsertProject, userId: number): Promise<Project>;
-  createProjects(projects: InsertProject[], userId: number): Promise<Project[]>;
   approveProject(id: number): Promise<Project>;
   incrementViews(id: number): Promise<void>;
   deleteProject(id: number): Promise<void>;
+
+  // Like operations
+  createLike(orangeId: string, projectId: number): Promise<Like>;
+  deleteLike(orangeId: string, projectId: number): Promise<void>;
+  getUserLikes(orangeId: string): Promise<number[]>;
+  getLike(orangeId: string, projectId: number): Promise<Like | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -123,6 +129,67 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProject(id: number): Promise<void> {
     await db.delete(projects).where(eq(projects.id, id));
+  }
+
+  async getUserLikes(orangeId: string): Promise<number[]> {
+    const userLikes = await db
+      .select({ projectId: likes.projectId })
+      .from(likes)
+      .where(eq(likes.orangeId, orangeId));
+    return userLikes.map(like => like.projectId);
+  }
+
+  async getLike(orangeId: string, projectId: number): Promise<Like | undefined> {
+    const [like] = await db
+      .select()
+      .from(likes)
+      .where(
+        and(
+          eq(likes.orangeId, orangeId),
+          eq(likes.projectId, projectId)
+        )
+      );
+    return like;
+  }
+
+  async createLike(orangeId: string, projectId: number): Promise<Like> {
+    // Start a transaction to ensure atomicity
+    return await db.transaction(async (tx) => {
+      // Create the like
+      const [like] = await tx
+        .insert(likes)
+        .values({ orangeId, projectId })
+        .returning();
+
+      // Increment the project's like count
+      await tx
+        .update(projects)
+        .set({ likeCount: sql`${projects.likeCount} + 1` })
+        .where(eq(projects.id, projectId));
+
+      return like;
+    });
+  }
+
+  async deleteLike(orangeId: string, projectId: number): Promise<void> {
+    // Start a transaction to ensure atomicity
+    await db.transaction(async (tx) => {
+      // Delete the like
+      await tx
+        .delete(likes)
+        .where(
+          and(
+            eq(likes.orangeId, orangeId),
+            eq(likes.projectId, projectId)
+          )
+        );
+
+      // Decrement the project's like count
+      await tx
+        .update(projects)
+        .set({ likeCount: sql`${projects.likeCount} - 1` })
+        .where(eq(projects.id, projectId));
+    });
   }
 }
 

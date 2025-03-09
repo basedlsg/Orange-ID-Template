@@ -208,6 +208,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
+  // Like-related routes
+  app.post("/api/projects/:id/like", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const { orangeId } = req.body;
+
+      if (!orangeId) {
+        return res.status(400).json({ error: "Orange ID is required" });
+      }
+
+      const existingLike = await storage.getLike(orangeId, projectId);
+      if (existingLike) {
+        // If like already exists, unlike it
+        await storage.deleteLike(orangeId, projectId);
+      } else {
+        // If no like exists, create it
+        await storage.createLike(orangeId, projectId);
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error toggling project like:", error);
+      res.status(500).json({ error: "Failed to toggle project like" });
+    }
+  });
+
+  app.get("/api/users/:orangeId/likes", async (req, res) => {
+    try {
+      const { orangeId } = req.params;
+      const likedProjectIds = await storage.getUserLikes(orangeId);
+      res.json(likedProjectIds);
+    } catch (error) {
+      console.error("Error fetching user likes:", error);
+      res.status(500).json({ error: "Failed to fetch liked projects" });
+    }
+  });
+
   // Projects API
   app.get("/api/projects", async (req, res) => {
     try {
