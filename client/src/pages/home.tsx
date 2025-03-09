@@ -18,7 +18,9 @@ export default function Home() {
       if (!response.ok) {
         throw new Error("Failed to fetch projects");
       }
-      return response.json();
+      const data = await response.json();
+      console.log("Fetched projects:", data); // Add logging to debug
+      return data;
     }
   });
 
