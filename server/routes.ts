@@ -176,7 +176,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add this endpoint after the existing /api/users endpoint
+  // Add this endpoint to get user's submissions by orangeId
+  app.get("/api/users/:orangeId/submissions", async (req, res) => {
+    try {
+      const { orangeId } = req.params;
+
+      // First get the user to get their userId
+      const user = await storage.getUserByOrangeId(orangeId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Then fetch all projects and filter by userId
+      const allProjects = await storage.getProjects();
+      const userProjects = allProjects.filter(project => project.userId === user.id);
+
+      res.json(userProjects);
+    } catch (error) {
+      console.error("Error fetching user submissions:", error);
+      res.status(500).json({ error: "Failed to fetch user submissions" });
+    }
+  });
+
   app.get("/api/users/check-admin", async (req, res) => {
     try {
       const { orangeId } = req.query;
@@ -236,7 +257,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add this after the existing GET /api/users/:orangeId/likes endpoint
   app.get("/api/users/:orangeId/liked-projects", async (req, res) => {
     try {
       const { orangeId } = req.params;
@@ -255,7 +275,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update the existing GET /api/projects endpoint to handle userId filter
   app.get("/api/projects", async (req, res) => {
     try {
       // Parse query parameters
@@ -289,7 +308,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Project creation endpoint
   app.post("/api/projects", async (req, res) => {
     try {
       const user = await getUserFromRequest(req);
