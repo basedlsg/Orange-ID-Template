@@ -1,5 +1,6 @@
 import { Storage } from '@google-cloud/storage';
 import { extname } from 'path';
+import sharp from 'sharp';
 
 // Initialize Google Cloud Storage
 const storage = new Storage({
@@ -10,15 +11,19 @@ const bucket = storage.bucket(process.env.GOOGLE_CLOUD_BUCKET!);
 
 export async function uploadToGCS(file: Express.Multer.File): Promise<string> {
   const timestamp = Date.now();
-  const extension = extname(file.originalname);
-  const fileName = `thumbnails/${timestamp}${extension}`;
+  const fileName = `thumbnails/${timestamp}.jpg`; // Always use .jpg extension
+
+  // Process image with Sharp
+  const processedBuffer = await sharp(file.buffer)
+    .jpeg({ quality: 90 }) // Convert to JPEG with good quality
+    .toBuffer();
 
   const blob = bucket.file(fileName);
   const blobStream = blob.createWriteStream({
     resumable: false,
     gzip: true,
     metadata: {
-      contentType: file.mimetype,
+      contentType: 'image/jpeg',
       cacheControl: 'public, max-age=31536000',
     },
     predefinedAcl: 'publicRead' // Use predefined ACL instead of makePublic()
@@ -35,6 +40,6 @@ export async function uploadToGCS(file: Express.Multer.File): Promise<string> {
       resolve(publicUrl);
     });
 
-    blobStream.end(file.buffer);
+    blobStream.end(processedBuffer);
   });
 }
