@@ -27,12 +27,12 @@ export default function Profile() {
     enabled: !!orangeId,
   });
 
-  // Fetch user's submitted projects
+  // Fetch user's submitted projects using the new endpoint
   const { data: submittedProjects, isLoading: isLoadingSubmitted } = useQuery<Project[]>({
-    queryKey: ["/api/users", orangeId, "submitted"],
+    queryKey: ["/api/users", orangeId, "submissions"],
     queryFn: async () => {
       if (!orangeId) throw new Error("User ID not found");
-      const response = await fetch(`/api/projects?userId=${orangeId}`);
+      const response = await fetch(`/api/users/${orangeId}/submissions`);
       if (!response.ok) throw new Error("Failed to fetch submitted projects");
       return response.json();
     },
