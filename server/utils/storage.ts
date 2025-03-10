@@ -37,11 +37,10 @@ export async function uploadToGCS(file: Express.Multer.File): Promise<string> {
       try {
         // Make the file public
         await blob.makePublic();
-
-        // Generate the public URL
         const publicUrl = `https://storage.googleapis.com/${process.env.GOOGLE_CLOUD_BUCKET}/${fileName}`;
         resolve(publicUrl);
       } catch (error) {
+        console.error('Error making blob public:', error);
         reject(error);
       }
     });
