@@ -91,7 +91,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const response = await fetch(row.Thumbnail);
             if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
 
-            const buffer = await response.buffer();
+            // Use arrayBuffer instead of deprecated buffer()
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
             const file = {
               buffer,
               originalname: `thumbnail-${Date.now()}.jpg`,
