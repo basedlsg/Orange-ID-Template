@@ -85,7 +85,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Process thumbnail if URL is provided
           let thumbnailUrl = '';
           if (row.Thumbnail) {
-            thumbnailUrl = await downloadAndProcessThumbnail(row.Thumbnail);
+            // Download image and create a Multer-like file object
+            const response = await fetch(row.Thumbnail);
+            if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+
+            const buffer = await response.buffer();
+            const file = {
+              buffer,
+              originalname: `thumbnail-${Date.now()}.jpg`,
+              mimetype: response.headers.get('content-type') || 'image/jpeg'
+            };
+
+            // Upload directly to GCS using our utility
+            thumbnailUrl = await uploadToGCS(file as Express.Multer.File);
           }
 
           const isSponsored = row.Sponsorship?.toLowerCase() === 'true';
