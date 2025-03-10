@@ -10,12 +10,14 @@ import {
   type InsertUser
 } from "@shared/schema";
 import multer from "multer";
+import path from "path";
 import express from 'express';
 import { fromZodError } from "zod-validation-error";
+import fs from 'fs';
+import sharp from 'sharp';
 import { parse } from 'csv-parse';
 import fetch from 'node-fetch';
 import { uploadToGCS } from "./utils/storage";
-import fs from 'fs'; // Added import for fs
 
 // Configure multer for memory storage
 const upload = multer({
@@ -25,7 +27,31 @@ const upload = multer({
   }
 });
 
+async function downloadAndProcessThumbnail(thumbnailUrl: string): Promise<string> {
+  try {
+    const response = await fetch(thumbnailUrl);
+    if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+
+    const buffer = await response.buffer();
+    const filename = `thumbnail-${Date.now()}-${Math.round(Math.random() * 1E9)}.jpg`;
+    const filepath = path.join('./uploads', filename);
+
+    // Process image with Sharp
+    await sharp(buffer)
+      .jpeg({ quality: 90 })
+      .toFile(filepath);
+
+    return `/uploads/${filename}`;
+  } catch (error) {
+    console.error('Error processing thumbnail:', error);
+    return ''; // Return empty string if thumbnail processing fails
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Ensure uploads directory exists
+  app.use('/uploads', express.static('uploads'));
+
   // File upload endpoint with Google Cloud Storage
   app.post("/api/upload", upload.single('thumbnail'), async (req, res) => {
     if (!req.file) {
@@ -59,7 +85,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Process thumbnail if URL is provided
           let thumbnailUrl = '';
           if (row.Thumbnail) {
-            thumbnailUrl = await uploadToGCS(row.Thumbnail); //Directly upload to GCS
+            thumbnailUrl = await downloadAndProcessThumbnail(row.Thumbnail);
           }
 
           const isSponsored = row.Sponsorship?.toLowerCase() === 'true';
