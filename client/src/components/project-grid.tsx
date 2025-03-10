@@ -11,19 +11,22 @@ import { LoginDialog } from "./login-dialog";
 import { Badge } from "@/components/ui/badge";
 import { PREDEFINED_GENRES } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
+import { SkeletonCard } from "./skeleton-card";
 
 interface ProjectGridProps {
   projects: Project[];
   onProjectView?: (id: number) => void;
   showEditButton?: boolean;
   showSubmitCard?: boolean;
+  isLoading?: boolean;
 }
 
 export function ProjectGrid({ 
   projects, 
   onProjectView, 
   showEditButton = false,
-  showSubmitCard = true 
+  showSubmitCard = true,
+  isLoading = false
 }: ProjectGridProps) {
   const { toast } = useToast();
   const { isLoggedIn, user } = useBedrockPassport();
@@ -31,7 +34,6 @@ export function ProjectGrid({
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 
-  // Query for user's liked projects
   const { data: userLikes = [] } = useQuery({
     queryKey: ["/api/users", user?.sub || user?.id, "likes"],
     queryFn: async () => {
@@ -41,8 +43,8 @@ export function ProjectGrid({
       return response.json();
     },
     enabled: isLoggedIn,
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    staleTime: 30000, 
+    cacheTime: 5 * 60 * 1000, 
   });
 
   const handleView = async (project: Project) => {
@@ -77,9 +79,28 @@ export function ProjectGrid({
     ? projects.filter(project => project.genres?.includes(selectedGenre))
     : projects;
 
+  if (isLoading) {
+    return (
+      <div>
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2">
+            <div className="h-6 w-16 bg-zinc-800 rounded animate-pulse" />
+            <div className="h-6 w-20 bg-zinc-800 rounded animate-pulse" />
+            <div className="h-6 w-24 bg-zinc-800 rounded animate-pulse" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      {/* Genre Filter */}
       <div className="mb-6">
         <div className="flex flex-wrap gap-2">
           <Badge
@@ -103,7 +124,6 @@ export function ProjectGrid({
         </div>
       </div>
 
-      {/* Projects Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {showSubmitCard && (
           <Card 

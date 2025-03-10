@@ -13,7 +13,7 @@ import multer from "multer";
 import path from "path";
 import express from 'express';
 import { fromZodError } from "zod-validation-error";
-import { parse } from 'csv-parse/sync'; // Change to sync parser
+import { parse } from 'csv-parse/sync';
 import fetch from 'node-fetch';
 import { uploadToGCS } from "./utils/storage";
 
@@ -25,25 +25,20 @@ const upload = multer({
   }
 });
 
-async function downloadAndProcessThumbnail(thumbnailUrl: string): Promise<string> {
-  try {
-    const response = await fetch(thumbnailUrl);
-    if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
-
-    const buffer = await response.buffer();
-    const filename = `thumbnail-${Date.now()}-${Math.round(Math.random() * 1E9)}.jpg`;
-    const filepath = path.join('./uploads', filename);
-
-    // Process image with Sharp
-    await sharp(buffer)
-      .jpeg({ quality: 90 })
-      .toFile(filepath);
-
-    return `/uploads/${filename}`;
-  } catch (error) {
-    console.error('Error processing thumbnail:', error);
-    return ''; // Return empty string if thumbnail processing fails
+async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId: string } | null> {
+  // Get orangeId from the authenticated user's token
+  const orangeId = req.body.orangeId || req.query.orangeId;
+  if (!orangeId) {
+    return null;
   }
+
+  // Get the user from our database
+  const user = await storage.getUserByOrangeId(orangeId);
+  if (!user) {
+    return null;
+  }
+
+  return { userId: user.id, orangeId };
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -57,7 +52,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Upload to Google Cloud Storage
       const publicUrl = await uploadToGCS(req.file);
       res.json({ url: publicUrl });
     } catch (error) {
@@ -68,6 +62,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Batch project creation from CSV
   app.post("/api/projects/batch", upload.single('csv'), async (req, res) => {
+    const user = await getUserFromRequest(req);
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
     if (!req.file) {
       return res.status(400).json({ error: "No CSV file uploaded" });
     }
@@ -135,8 +134,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("No valid projects found in CSV");
       }
 
-      // Create all projects in database
-      const createdProjects = await storage.createProjects(projects, 1); // Using userId 1 for now
+      // Create all projects in database with the correct user ID
+      const createdProjects = await storage.createProjects(projects, user.userId);
 
       res.json({ 
         success: true, 
@@ -269,6 +268,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Project creation endpoint
   app.post("/api/projects", async (req, res) => {
     try {
+      const user = await getUserFromRequest(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
       console.log("Received project data:", JSON.stringify(req.body, null, 2));
 
       // Validate the project data
@@ -286,8 +290,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("Validated project data:", JSON.stringify(validatedData, null, 2));
 
-      // For demo, use userId 1 since we don't have auth yet
-      const project = await storage.createProject(validatedData, 1);
+      // Create project with the correct user ID
+      const project = await storage.createProject(validatedData, user.userId);
       res.json(project);
     } catch (error) {
       console.error("Project validation error:", error);
