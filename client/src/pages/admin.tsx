@@ -18,13 +18,29 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
-import { SkeletonCard } from "@/components/skeleton-card"; // Assuming this component exists
-
+import { SkeletonCard } from "@/components/skeleton-card";
 
 export default function Admin() {
   const { toast } = useToast();
   const { user } = useBedrockPassport();
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+
+  // Check if user is admin
+  const { data: isAdmin, isLoading: isCheckingAdmin } = useQuery({
+    queryKey: ["/api/users/check-admin", user?.sub || user?.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/users/check-admin?orangeId=${user?.sub || user?.id}`);
+      if (!response.ok) return false;
+      const data = await response.json();
+      return data.isAdmin;
+    },
+    enabled: !!user,
+  });
+
+  // Early return if not admin or still checking
+  if (!isAdmin && !isCheckingAdmin) {
+    return null;
+  }
 
   const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: false }],
@@ -35,6 +51,7 @@ export default function Admin() {
       }
       return response.json();
     },
+    enabled: !!isAdmin,
   });
 
   const { data: approvedProjects, isLoading: isApprovedLoading } = useQuery<Project[]>({
@@ -46,6 +63,7 @@ export default function Admin() {
       }
       return response.json();
     },
+    enabled: !!isAdmin,
   });
 
   const { mutate: approveProject } = useMutation({
@@ -159,7 +177,7 @@ export default function Admin() {
     }
   };
 
-  if (isPendingLoading || isApprovedLoading) {
+  if (isPendingLoading || isApprovedLoading || isCheckingAdmin) {
     return (
       <div className="min-h-screen bg-black">
         <div className="container mx-auto px-4 py-8">
