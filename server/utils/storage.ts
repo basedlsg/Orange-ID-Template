@@ -30,6 +30,7 @@ export async function uploadToGCS(file: Express.Multer.File): Promise<string> {
 
   return new Promise((resolve, reject) => {
     blobStream.on('error', (err) => {
+      console.error('Error uploading to GCS:', err);
       reject(err);
     });
 

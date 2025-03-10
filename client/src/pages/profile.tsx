@@ -8,7 +8,7 @@ import { Redirect, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Profile() {
-  const { isLoggedIn, user, signOut } = useBedrockPassport();
+  const { isLoggedIn, user } = useBedrockPassport();
   const [activeTab, setActiveTab] = useState("liked");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -34,9 +34,6 @@ export default function Profile() {
       return allProjects.filter((project: Project) => likedIds.includes(project.id));
     },
     enabled: !!orangeId,
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-    refetchOnWindowFocus: false
   });
 
   // Fetch user's submitted projects
@@ -49,14 +46,11 @@ export default function Profile() {
       return response.json();
     },
     enabled: !!orangeId,
-    staleTime: 30000, // Consider data fresh for 30 seconds
-    cacheTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
-    refetchOnWindowFocus: false
   });
 
   const handleLogout = async () => {
     try {
-      await signOut?.();
+      await user?.signOut();
       toast({
         title: "Logged out successfully",
         description: "Come back soon!",
@@ -71,10 +65,6 @@ export default function Profile() {
       });
     }
   };
-
-  if (isLoadingLiked || isLoadingSubmitted) {
-    return <div className="text-white">Loading...</div>;
-  }
 
   // Instead of early return, render the redirect inside the main return
   return !isLoggedIn ? (
@@ -92,6 +82,7 @@ export default function Profile() {
               projects={likedProjects || []}
               showEditButton={false}
               showSubmitCard={false}
+              isLoading={isLoadingLiked}
             />
           </TabsContent>
           <TabsContent value="submitted">
@@ -99,6 +90,7 @@ export default function Profile() {
               projects={submittedProjects || []}
               showEditButton={true}
               showSubmitCard={true}
+              isLoading={isLoadingSubmitted}
             />
           </TabsContent>
         </Tabs>
