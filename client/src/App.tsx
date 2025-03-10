@@ -17,6 +17,8 @@ import Admin from "@/pages/admin";
 import AuthCallback from "@/pages/AuthCallback";
 import { LoginDialog } from "@/components/login-dialog";
 import React from "react";
+import Profile from "@/pages/profile"; // Import the Profile component
+
 
 async function storeUserInDB(user: any) {
   if (!user) {
@@ -187,14 +189,25 @@ function Navigation() {
         </Link>
         <div className="ml-auto flex items-center space-x-4">
           {isLoggedIn ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              className="text-sm font-medium hover:text-primary"
-            >
-              Logout
-            </Button>
+            <>
+              <Link href="/profile">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm font-medium hover:text-primary"
+                >
+                  Profile
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="text-sm font-medium hover:text-primary"
+              >
+                Logout
+              </Button>
+            </>
           ) : (
             <LoginButton />
           )}
@@ -213,6 +226,9 @@ function Router() {
       </Route>
       <Route path="/admin">
         <ProtectedRoute component={Admin} requiresAdmin={true} />
+      </Route>
+      <Route path="/profile">
+        <ProtectedRoute component={Profile} />
       </Route>
       <Route path="/auth/callback" component={AuthCallback} />
       <Route component={NotFound} />
