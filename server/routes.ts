@@ -13,9 +13,7 @@ import multer from "multer";
 import path from "path";
 import express from 'express';
 import { fromZodError } from "zod-validation-error";
-import fs from 'fs';
-import sharp from 'sharp';
-import { parse } from 'csv-parse';
+import { parse } from 'csv-parse/sync'; // Change to sync parser
 import fetch from 'node-fetch';
 import { uploadToGCS } from "./utils/storage";
 
@@ -75,10 +73,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
+      // Parse CSV from buffer directly
       const projects: any[] = [];
-      const parser = fs.createReadStream(req.file.path).pipe(parse({ columns: true, trim: true }));
+      const rows = parse(req.file.buffer.toString(), { 
+        columns: true, 
+        trim: true,
+        skipEmptyLines: true 
+      });
 
-      for await (const row of parser) {
+      for (const row of rows) {
         try {
           console.log('Processing CSV row:', row);
 
@@ -135,9 +138,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create all projects in database
       const createdProjects = await storage.createProjects(projects, 1); // Using userId 1 for now
 
-      // Clean up CSV file
-      fs.unlinkSync(req.file.path);
-
       res.json({ 
         success: true, 
         count: createdProjects.length,
@@ -145,8 +145,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error('Error processing CSV:', error);
-      // Clean up CSV file in case of error
-      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
       res.status(500).json({ error: error instanceof Error ? error.message : "Failed to process CSV file" });
     }
   });
