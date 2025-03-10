@@ -15,6 +15,7 @@ import { fromZodError } from "zod-validation-error";
 import { parse } from 'csv-parse';
 import fetch from 'node-fetch';
 import { uploadToGCS } from "./utils/storage";
+import fs from 'fs'; // Added import for fs
 
 // Configure multer for memory storage
 const upload = multer({
@@ -23,7 +24,6 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024, // 5MB limit
   }
 });
-
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // File upload endpoint with Google Cloud Storage
