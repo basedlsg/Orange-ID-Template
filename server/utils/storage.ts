@@ -34,9 +34,23 @@ export async function uploadToGCS(file: Express.Multer.File): Promise<string> {
     });
 
     blobStream.on('finish', async () => {
-      // Generate a public URL without making the entire object public
-      const publicUrl = `https://storage.googleapis.com/${process.env.GOOGLE_CLOUD_BUCKET}/${fileName}`;
-      resolve(publicUrl);
+      try {
+        // Set the IAM policy to make the object public
+        await blob.iam.setPolicy({
+          bindings: [
+            {
+              role: 'roles/storage.objectViewer',
+              members: ['allUsers'],
+            },
+          ],
+        });
+
+        // Generate the public URL
+        const publicUrl = `https://storage.googleapis.com/${process.env.GOOGLE_CLOUD_BUCKET}/${fileName}`;
+        resolve(publicUrl);
+      } catch (error) {
+        reject(error);
+      }
     });
 
     blobStream.end(processedBuffer);
