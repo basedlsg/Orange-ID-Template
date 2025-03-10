@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
 import { Upload, Trash2 } from "lucide-react";
+import { useBedrockPassport } from "@bedrock_org/passport";
+import { Redirect } from "wouter";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +22,21 @@ import { useState } from "react";
 
 export default function Admin() {
   const { toast } = useToast();
+  const { isLoggedIn, user } = useBedrockPassport();
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+
+  // Check admin status
+  const { data: isAdmin, isLoading: isCheckingAdmin } = useQuery({
+    queryKey: ["/api/users/check-admin", user?.sub || user?.id],
+    queryFn: async () => {
+      if (!user?.sub && !user?.id) return false;
+      const response = await fetch(`/api/users/check-admin?orangeId=${user.sub || user.id}`);
+      if (!response.ok) return false;
+      const data = await response.json();
+      return data.isAdmin;
+    },
+    enabled: isLoggedIn,
+  });
 
   const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: false }],
@@ -31,6 +47,7 @@ export default function Admin() {
       }
       return response.json();
     },
+    enabled: isLoggedIn && isAdmin,
   });
 
   const { data: approvedProjects, isLoading: isApprovedLoading } = useQuery<Project[]>({
@@ -42,7 +59,67 @@ export default function Admin() {
       }
       return response.json();
     },
+    enabled: isLoggedIn && isAdmin,
   });
+
+  const { mutate: uploadCsv, isPending: isUploading } = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('csv', file);
+
+      // Add orangeId to FormData
+      const orangeId = user?.sub || user?.id;
+      if (!orangeId) {
+        throw new Error("User not authenticated");
+      }
+      formData.append('orangeId', orangeId);
+
+      const response = await fetch("/api/projects/batch", {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to upload CSV");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      toast({
+        title: "Success",
+        description: `Successfully imported ${data.count} projects`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to upload CSV",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Early return if not logged in or not admin
+  if (!isLoggedIn || (!isCheckingAdmin && !isAdmin)) {
+    return <Redirect to="/" />;
+  }
+
+  // Show loading state while checking admin status
+  if (isCheckingAdmin) {
+    return (
+      <div className="min-h-screen bg-black">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="h-64 bg-zinc-800 rounded animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const { mutate: approveProject } = useMutation({
     mutationFn: async (id: number) => {
@@ -101,39 +178,6 @@ export default function Admin() {
     },
   });
 
-  const { mutate: uploadCsv, isPending: isUploading } = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append('csv', file);
-
-      // Use fetch directly for file upload to handle multipart/form-data properly
-      const response = await fetch("/api/projects/batch", {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to upload CSV");
-      }
-      return response.json();
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      toast({
-        title: "Success",
-        description: `Successfully imported ${data.count} projects`,
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to upload CSV",
-        variant: "destructive",
-      });
-    },
-  });
-
   const handleCsvUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -185,7 +229,7 @@ export default function Admin() {
               <div key={project.id} className="relative">
                 <ProjectCard project={project} />
                 <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
-                  <Button 
+                  <Button
                     onClick={() => approveProject(project.id)}
                     className="bg-blue-500 hover:bg-blue-600 text-white z-20"
                   >
