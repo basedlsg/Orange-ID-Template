@@ -17,9 +17,7 @@ export default function Home() {
       if (!response.ok) {
         throw new Error("Failed to fetch projects");
       }
-      const data = await response.json();
-      console.log("Fetched projects:", data);
-      return data;
+      return response.json();
     }
   });
 
@@ -45,10 +43,6 @@ export default function Home() {
       if (sortBy === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       return 0;
     });
-
-  if (isLoading) {
-    return <div className="text-white">Loading...</div>;
-  }
 
   return (
     <div className="min-h-screen bg-black">

@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useBedrockPassport } from "@bedrock_org/passport";
 import {
   insertProjectSchema,
   type InsertProject,
@@ -35,6 +36,7 @@ import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
 
 export default function Submit() {
+  const { user } = useBedrockPassport();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [newTool, setNewTool] = useState("");
@@ -59,6 +61,11 @@ export default function Submit() {
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {
       let projectData = { ...data };
+      const orangeId = user?.sub || user?.id;
+
+      if (!orangeId) {
+        throw new Error("User not authenticated");
+      }
 
       if (data.thumbnailFile instanceof File) {
         const formData = new FormData();
@@ -79,7 +86,11 @@ export default function Submit() {
 
       delete projectData.thumbnailFile;
 
-      const response = await apiRequest("POST", "/api/projects", projectData);
+      const response = await apiRequest("POST", "/api/projects", {
+        ...projectData,
+        orangeId,
+      });
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Failed to submit project");
