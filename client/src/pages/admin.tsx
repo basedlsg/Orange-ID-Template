@@ -25,12 +25,7 @@ export default function Admin() {
   const { isLoggedIn, user } = useBedrockPassport();
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
-  // If not logged in, redirect immediately
-  if (!isLoggedIn) {
-    return <Redirect to="/" />;
-  }
-
-  // Check admin status
+  // All hooks must be called before any conditional returns
   const { data: isAdmin, isLoading: isCheckingAdmin } = useQuery({
     queryKey: ["/api/users/check-admin", user?.sub || user?.id],
     queryFn: async () => {
@@ -42,11 +37,6 @@ export default function Admin() {
     },
     enabled: isLoggedIn,
   });
-
-  // If we've finished checking and user is not admin, redirect
-  if (!isCheckingAdmin && !isAdmin) {
-    return <Redirect to="/" />;
-  }
 
   const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: false }],
@@ -110,19 +100,6 @@ export default function Admin() {
       });
     },
   });
-
-  // Show loading state while checking admin status
-  if (isCheckingAdmin) {
-    return (
-      <div className="min-h-screen bg-black">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="h-8 w-8 bg-blue-500 rounded-full animate-pulse" />
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const { mutate: approveProject } = useMutation({
     mutationFn: async (id: number) => {
@@ -196,8 +173,39 @@ export default function Admin() {
     }
   };
 
+  // All hooks have been called, now we can safely return based on conditions
+  if (!isLoggedIn) {
+    return <Redirect to="/" />;
+  }
+
+  if (isCheckingAdmin) {
+    return (
+      <div className="min-h-screen bg-black">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="h-8 w-8 bg-blue-500 rounded-full animate-pulse" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return <Redirect to="/" />;
+  }
+
   if (isPendingLoading || isApprovedLoading) {
-    return <div className="text-white">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-black">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="h-64 bg-zinc-800 rounded animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
