@@ -4,32 +4,28 @@ import fs from 'fs';
 import path from 'path';
 import { uploadToGCS } from "../utils/storage";
 import { projects } from "@shared/schema";
+import fetch from 'node-fetch';
 
-async function migrateProjectThumbnails() {
+async function migrateSpecificProjects() {
   try {
-    // Get all projects with local thumbnails
+    // Get specific projects that still have local thumbnails
     const projectsToMigrate = await db.query.projects.findMany({
-      where: sql`thumbnail LIKE '/uploads/%'`
+      where: sql`id IN (100, 101) AND thumbnail LIKE '/uploads/%'`
     });
 
-    console.log(`Found ${projectsToMigrate.length} projects with local thumbnails to migrate`);
+    console.log(`Found ${projectsToMigrate.length} projects to migrate`);
 
     for (const project of projectsToMigrate) {
       try {
         if (!project.thumbnail) continue;
 
-        // Get the local file path
-        const localPath = path.join(process.cwd(), project.thumbnail);
-
-        if (!fs.existsSync(localPath)) {
-          console.log(`File not found for project ${project.id}: ${localPath}`);
-          continue;
-        }
+        console.log(`Processing project ${project.id}: ${project.name}`);
 
         // Create a file object that matches Multer's file interface
         const file = {
-          buffer: fs.readFileSync(localPath),
-          originalname: path.basename(localPath),
+          buffer: await fetch(`http://localhost:5000${project.thumbnail}`)
+            .then(res => res.buffer()),
+          originalname: path.basename(project.thumbnail),
           mimetype: 'image/jpeg'
         };
 
@@ -54,4 +50,4 @@ async function migrateProjectThumbnails() {
 }
 
 // Run the migration
-migrateProjectThumbnails().catch(console.error);
+migrateSpecificProjects().catch(console.error);
