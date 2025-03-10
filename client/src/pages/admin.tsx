@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
 import { Upload, Trash2 } from "lucide-react";
+import { useBedrockPassport } from "@bedrock_org/passport";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,9 +18,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { SkeletonCard } from "@/components/skeleton-card"; // Assuming this component exists
+
 
 export default function Admin() {
   const { toast } = useToast();
+  const { user } = useBedrockPassport();
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
   const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
@@ -106,7 +110,13 @@ export default function Admin() {
       const formData = new FormData();
       formData.append('csv', file);
 
-      // Use fetch directly for file upload to handle multipart/form-data properly
+      // Add orangeId to the FormData
+      const orangeId = user?.sub || user?.id;
+      if (!orangeId) {
+        throw new Error("User not authenticated");
+      }
+      formData.append('orangeId', orangeId);
+
       const response = await fetch("/api/projects/batch", {
         method: 'POST',
         body: formData,
@@ -150,7 +160,17 @@ export default function Admin() {
   };
 
   if (isPendingLoading || isApprovedLoading) {
-    return <div className="text-white">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-black">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <SkeletonCard key={index} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
