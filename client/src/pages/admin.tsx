@@ -25,6 +25,11 @@ export default function Admin() {
   const { isLoggedIn, user } = useBedrockPassport();
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
+  // If not logged in, redirect immediately
+  if (!isLoggedIn) {
+    return <Redirect to="/" />;
+  }
+
   // Check admin status
   const { data: isAdmin, isLoading: isCheckingAdmin } = useQuery({
     queryKey: ["/api/users/check-admin", user?.sub || user?.id],
@@ -37,6 +42,11 @@ export default function Admin() {
     },
     enabled: isLoggedIn,
   });
+
+  // If we've finished checking and user is not admin, redirect
+  if (!isCheckingAdmin && !isAdmin) {
+    return <Redirect to="/" />;
+  }
 
   const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: false }],
@@ -101,20 +111,13 @@ export default function Admin() {
     },
   });
 
-  // Early return if not logged in or not admin
-  if (!isLoggedIn || (!isCheckingAdmin && !isAdmin)) {
-    return <Redirect to="/" />;
-  }
-
   // Show loading state while checking admin status
   if (isCheckingAdmin) {
     return (
       <div className="min-h-screen bg-black">
         <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div key={index} className="h-64 bg-zinc-800 rounded animate-pulse" />
-            ))}
+          <div className="flex items-center justify-center h-64">
+            <div className="h-8 w-8 bg-blue-500 rounded-full animate-pulse" />
           </div>
         </div>
       </div>
