@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@bedrock_org/passport": "0.1.4-rc.6",
+    "@google-cloud/storage": "^7.15.2",
     "@hookform/resolvers": "^3.9.1",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@neondatabase/serverless": "^0.10.4",

@@ -17,23 +17,14 @@ import fs from 'fs';
 import sharp from 'sharp';
 import { parse } from 'csv-parse';
 import fetch from 'node-fetch';
+import { uploadToGCS } from "./utils/storage";
 
-// Ensure uploads directory exists
-if (!fs.existsSync('./uploads')) {
-  fs.mkdirSync('./uploads', { recursive: true });
-}
-
-// Configure multer for handling file uploads
+// Configure multer for memory storage
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: './uploads',
-    filename: (req, file, cb) => {
-      // Always use .jpg extension for consistency
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const ext = '.jpg'; // Force jpg extension
-      cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-    }
-  })
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  }
 });
 
 async function downloadAndProcessThumbnail(thumbnailUrl: string): Promise<string> {
@@ -61,30 +52,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Ensure uploads directory exists
   app.use('/uploads', express.static('uploads'));
 
-  // File upload endpoint with image processing
+  // File upload endpoint with Google Cloud Storage
   app.post("/api/upload", upload.single('thumbnail'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
     try {
-      // Process the image with Sharp
-      await sharp(req.file.path)
-        .jpeg({ quality: 90 }) // Convert to JPEG with good quality
-        .toFile(req.file.path + '.processed');
-
-      // Replace the original file with the processed one
-      fs.unlinkSync(req.file.path);
-      fs.renameSync(req.file.path + '.processed', req.file.path);
-
-      const url = `/uploads/${req.file.filename}`;
-      res.json({ url });
+      // Upload to Google Cloud Storage
+      const publicUrl = await uploadToGCS(req.file);
+      res.json({ url: publicUrl });
     } catch (error) {
-      console.error('Error processing image:', error);
-      // Clean up files in case of error
-      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-      if (fs.existsSync(req.file.path + '.processed')) fs.unlinkSync(req.file.path + '.processed');
-      res.status(500).json({ error: "Failed to process image" });
+      console.error('Error uploading to Google Cloud Storage:', error);
+      res.status(500).json({ error: "Failed to upload image" });
     }
   });
 
