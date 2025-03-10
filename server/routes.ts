@@ -236,19 +236,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Projects API
+  // Add this after the existing GET /api/users/:orangeId/likes endpoint
+  app.get("/api/users/:orangeId/liked-projects", async (req, res) => {
+    try {
+      const { orangeId } = req.params;
+
+      // First get the list of liked project IDs
+      const likedIds = await storage.getUserLikes(orangeId);
+
+      // Then fetch all approved projects and filter by liked IDs
+      const allProjects = await storage.getProjects(true);
+      const likedProjects = allProjects.filter(project => likedIds.includes(project.id));
+
+      res.json(likedProjects);
+    } catch (error) {
+      console.error("Error fetching liked projects:", error);
+      res.status(500).json({ error: "Failed to fetch liked projects" });
+    }
+  });
+
+  // Update the existing GET /api/projects endpoint to handle userId filter
   app.get("/api/projects", async (req, res) => {
     try {
-      // Explicitly parse the approved parameter
-      // undefined means get all projects
-      // true means get only approved projects
-      // false means get only unapproved projects
+      // Parse query parameters
       const approved = req.query.approved === "true" ? true :
-                        req.query.approved === "false" ? false : undefined;
+                      req.query.approved === "false" ? false : undefined;
+      const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
       const sortBy = req.query.sortBy as string;
 
-      console.log("Fetching projects with approved:", approved);
+      console.log("Fetching projects with approved:", approved, "userId:", userId);
       let projects = await storage.getProjects(approved);
+
+      // Filter by userId if provided
+      if (userId) {
+        projects = projects.filter(project => project.userId === userId);
+      }
 
       // Apply sorting
       if (sortBy === "views") {
