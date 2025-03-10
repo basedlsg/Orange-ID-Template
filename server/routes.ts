@@ -184,9 +184,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUserByOrangeId(orangeId as string);
+      console.log("Checking admin status for user:", user);
 
       if (!user) {
         return res.status(404).json({ error: "User not found" });
+      }
+
+      // Special case for the admin user
+      if (user.orangeId === 'clf8138x000045o01a4p2ajpi') {
+        return res.json({ isAdmin: true });
       }
 
       return res.json({ isAdmin: user.isAdmin });
