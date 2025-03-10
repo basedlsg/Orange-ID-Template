@@ -6,11 +6,10 @@ import type { Project } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 
 export default function Home() {
-  const [sortBy, setSortBy] = useState("likes"); // Changed default to likes
+  const [sortBy, setSortBy] = useState("likes");
   const [aiTool, setAiTool] = useState("all");
   const [sponsorshipFilter, setSponsorshipFilter] = useState(false);
 
-  // Include sortBy in the queryKey to trigger refetch when it changes
   const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: true, sortBy }],
     queryFn: async () => {
@@ -19,7 +18,7 @@ export default function Home() {
         throw new Error("Failed to fetch projects");
       }
       const data = await response.json();
-      console.log("Fetched projects:", data); // Add logging to debug
+      console.log("Fetched projects:", data);
       return data;
     }
   });
@@ -34,7 +33,6 @@ export default function Home() {
     );
   };
 
-  // Filter and sort projects based on selected criteria
   const sortedAndFilteredProjects = projects
     ?.filter((project) => {
       if (sponsorshipFilter && !project.sponsorshipEnabled) return false;
@@ -66,6 +64,7 @@ export default function Home() {
         <ProjectGrid
           projects={sortedAndFilteredProjects || []}
           onProjectView={handleProjectView}
+          isLoading={isLoading}
         />
       </div>
     </div>
