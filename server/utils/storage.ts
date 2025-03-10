@@ -26,7 +26,6 @@ export async function uploadToGCS(file: Express.Multer.File): Promise<string> {
       contentType: 'image/jpeg',
       cacheControl: 'public, max-age=31536000',
     },
-    predefinedAcl: 'publicRead' // Use predefined ACL instead of makePublic()
   });
 
   return new Promise((resolve, reject) => {

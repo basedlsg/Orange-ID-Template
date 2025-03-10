@@ -1,0 +1,89 @@
+}
+5:46:40 AM [express] POST /api/users 200 in 199ms :: {"id":1,"orangeId":"clf8138x000045o01a4p2ajpi",…
+Error uploading to Google Cloud Storage: ApiError: The member bindings allUsers and allAuthenticatedUsers are not allowed since public access prevention is enforced.
+    at new ApiError (file:///home/runner/workspace/node_modules/@google-cloud/storage/build/esm/src/nodejs-common/util.js:85:15)
+    at Util.parseHttpRespBody (file:///home/runner/workspace/node_modules/@google-cloud/storage/build/esm/src/nodejs-common/util.js:222:38)
+    at Util.handleResp (file:///home/runner/workspace/node_modules/@google-cloud/storage/build/esm/src/nodejs-common/util.js:162:30)
+    at file:///home/runner/workspace/node_modules/@google-cloud/storage/build/esm/src/nodejs-common/util.js:552:22
+    at onResponse (/home/runner/workspace/node_modules/retry-request/index.js:259:7)
+    at <anonymous> (/home/runner/workspace/node_modules/teeny-request/src/index.ts:244:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  code: 412,
+  errors: [
+    {
+      message: 'The member bindings allUsers and allAuthenticatedUsers are not allowed since public access prevention is enforced.',
+      domain: 'global',
+      reason: 'conditionNotMet',
+      locationType: 'header',
+      location: 'If-Match'
+    }
+  ],
+  response: PassThrough {
+    _events: {
+      close: undefined,
+      error: [Array],
+      prefinish: [Function: prefinish],
+      finish: undefined,
+      drain: undefined,
+      data: [Function (anonymous)],
+      end: [Function (anonymous)],
+      readable: undefined,
+      unpipe: undefined
+    },
+    _readableState: ReadableState {
+      highWaterMark: 16384,
+      buffer: [],
+      bufferIndex: 0,
+      length: 0,
+      pipes: [],
+      awaitDrainWriters: null,
+      [Symbol(kState)]: 194512764
+    },
+    _writableState: WritableState {
+      highWaterMark: 16384,
+      length: 0,
+      corked: 0,
+      onwrite: [Function: bound onwrite],
+      writelen: 0,
+      bufferedIndex: 0,
+      pendingcb: 0,
+      [Symbol(kState)]: 1091466620,
+      [Symbol(kBufferedValue)]: null,
+      [Symbol(kWriteCbValue)]: null
+    },
+    allowHalfOpen: true,
+    _maxListeners: undefined,
+    _eventsCount: 4,
+    statusCode: 412,
+    statusMessage: 'Precondition Failed',
+    request: {
+      agent: [Agent],
+      headers: [Object],
+      href: 'https://storage.googleapis.com/upload/storage/v1/b/vibecodinglist/o?uploadType=multipart&name=thumbnails%2F1741585613055.jpg&predefinedAcl=publicRead'
+    },
+    body: '{\n' +
+      '  "error": {\n' +
+      '    "code": 412,\n' +
+      '    "message": "The member bindings allUsers and allAuthenticatedUsers are not allowed since public access prevention is enforced.",\n' +
+      '    "errors": [\n' +
+      '      {\n' +
+      '        "message": "The member bindings allUsers and allAuthenticatedUsers are not allowed since public access prevention is enforced.",\n' +
+      '        "domain": "global",\n' +
+      '        "reason": "conditionNotMet",\n' +
+      '        "locationType": "header",\n' +
+      '        "location": "If-Match"\n' +
+      '      }\n' +
+      '    ]\n' +
+      '  }\n' +
+      '}\n',
+    headers: {
+      'cache-control': 'no-cache, no-store, max-age=0, must-revalidate',
+      'content-length': '476',
+      'content-type': 'application/json; charset=UTF-8',
+      date: 'Mon, 10 Mar 2025 05:46:53 GMT',
+      expires: 'Mon, 01 Jan 1990 00:00:00 GMT',
+      pragma: 'no-cache',
+      server: 'UploadServer',
+      vary: 'Origin, X-Origin',
+      'x-guploader-uploadid': 'AKDAyItRYn92LZqXZdeMxbfALc-Lp43h6OQVoHCmxoWCG4q2EmgVKAJnz-iMbULuuv_-NZ2az-iOS7U'
+    },
