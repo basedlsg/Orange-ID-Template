@@ -25,7 +25,7 @@ export default function Admin() {
   const { user } = useBedrockPassport();
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
-  // Check if user is admin
+  // Check if user is admin - always run this hook first
   const { data: isAdmin, isLoading: isCheckingAdmin } = useQuery({
     queryKey: ["/api/users/check-admin", user?.sub || user?.id],
     queryFn: async () => {
@@ -37,11 +37,7 @@ export default function Admin() {
     enabled: !!user,
   });
 
-  // Early return if not admin or still checking
-  if (!isAdmin && !isCheckingAdmin) {
-    return null;
-  }
-
+  // These queries only run if user is admin
   const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: false }],
     queryFn: async () => {
@@ -176,6 +172,11 @@ export default function Admin() {
       }
     }
   };
+
+  // After all hooks are called, we can safely return null for non-admin users
+  if (!isAdmin && !isCheckingAdmin) {
+    return null;
+  }
 
   if (isPendingLoading || isApprovedLoading || isCheckingAdmin) {
     return (
