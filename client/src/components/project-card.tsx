@@ -16,9 +16,10 @@ interface ProjectCardProps {
   project: Project;
   onView?: () => void;
   userLikes?: number[];
+  onEdit?: () => void;
 }
 
-export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProps) {
+export function ProjectCard({ project, onView, userLikes = [], onEdit }: ProjectCardProps) {
   const { isLoggedIn, user } = useBedrockPassport();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { toast } = useToast();
@@ -91,6 +92,13 @@ export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProp
     e.stopPropagation();
     if (project.sponsorshipUrl) {
       window.open(project.sponsorshipUrl, "_blank");
+    }
+  };
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onEdit) {
+      onEdit();
     }
   };
 
@@ -170,15 +178,27 @@ export function ProjectCard({ project, onView, userLikes = [] }: ProjectCardProp
                 </Button>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClick}
-              className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
-            >
-              <ExternalLink className="mr-2 h-4 w-4" />
-              Visit
-            </Button>
+            <div className="flex items-center gap-2">
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleEditClick}
+                  className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
+                >
+                  Edit
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClick}
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Visit
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
