@@ -6,7 +6,7 @@ import { useBedrockPassport } from "@bedrock_org/passport";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LoginDialog } from "./login-dialog";
 import { Badge } from "@/components/ui/badge";
 import { PREDEFINED_GENRES } from "@shared/schema";
@@ -33,19 +33,29 @@ export function ProjectGrid({
   const [, setLocation] = useLocation();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
-  const queryClient = new QueryClient(); //added queryClient
+  const queryClient = new QueryClient();
+
+  // Effect to handle post-login like action
+  useEffect(() => {
+    if (isLoggedIn) {
+      const pendingLikeProjectId = sessionStorage.getItem("pendingLikeProjectId");
+      if (pendingLikeProjectId) {
+        handleLikeClick(projects.find(p => p.id === parseInt(pendingLikeProjectId))!);
+        sessionStorage.removeItem("pendingLikeProjectId");
+      }
+    }
+  }, [isLoggedIn]);
 
   const { data: userLikes = [] } = useQuery({
     queryKey: ["/api/users", user?.sub || user?.id, "likes"],
     queryFn: async () => {
       if (!user?.sub && !user?.id) return [];
-      const response = await fetch(`/api/users/${user.sub || user.id}/likes`);
+      const response = await fetch(`/api/users/${user.sub || user?.id}/likes`);
       if (!response.ok) throw new Error("Failed to fetch likes");
       return response.json();
     },
     enabled: isLoggedIn,
     staleTime: 30000,
-    cacheTime: 5 * 60 * 1000,
   });
 
   const handleView = async (project: Project) => {
@@ -78,13 +88,15 @@ export function ProjectGrid({
 
   const handleLikeClick = async (project: Project) => {
     if (!isLoggedIn) {
+      // Store the project ID for post-login like action
+      sessionStorage.setItem("pendingLikeProjectId", project.id.toString());
       setShowLoginDialog(true);
       return;
     }
 
     try {
       await apiRequest("POST", `/api/projects/${project.id}/like`);
-      queryClient.invalidateQueries(["/api/users", user?.sub || user?.id, "likes"]);
+      await queryClient.invalidateQueries(["/api/users", user?.sub || user?.id, "likes"]);
       toast({
         title: "Success",
         description: "Project liked successfully!",
@@ -170,7 +182,7 @@ export function ProjectGrid({
             onView={() => handleView(project)}
             userLikes={userLikes}
             onEdit={showEditButton ? () => handleEditClick(project) : undefined}
-            onLike={handleLikeClick} //added onLike prop
+            onLike={() => handleLikeClick(project)}
           />
         ))}
         <LoginDialog
