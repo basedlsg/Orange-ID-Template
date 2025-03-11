@@ -46,30 +46,32 @@ export function FilterBar({
       </div>
 
       <div className="flex flex-wrap sm:flex-nowrap gap-2 items-center">
-        <Select value={sortBy} onValueChange={onSortChange}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Sort by..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="likes">Most Liked</SelectItem>
-            <SelectItem value="views">Most Viewed</SelectItem>
-            <SelectItem value="newest">Newest First</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
+          <Select value={sortBy} onValueChange={onSortChange}>
+            <SelectTrigger className="w-full sm:w-[140px]">
+              <SelectValue placeholder="Sort by..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="likes">Most Liked</SelectItem>
+              <SelectItem value="views">Most Viewed</SelectItem>
+              <SelectItem value="newest">Newest First</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <Select value={aiTool} onValueChange={onAiToolChange}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Filter by AI Tool..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Tools</SelectItem>
-            {PREDEFINED_AI_TOOLS.map((tool) => (
-              <SelectItem key={tool} value={tool}>
-                {tool}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <Select value={aiTool} onValueChange={onAiToolChange}>
+            <SelectTrigger className="w-full sm:w-[140px]">
+              <SelectValue placeholder="Filter by AI Tool..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Tools</SelectItem>
+              {PREDEFINED_AI_TOOLS.map((tool) => (
+                <SelectItem key={tool} value={tool}>
+                  {tool}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         <div className="flex items-center space-x-2 shrink-0">
           <Switch
