@@ -97,7 +97,10 @@ function LoginButton() {
   };
 
   return (
-    <>
+    <div className="flex items-center gap-3">
+      <span className="text-sm text-zinc-400 hidden sm:inline">
+        Sign in to like projects and more
+      </span>
       <Button
         variant="outline"
         onClick={handleOpenLogin}
@@ -106,7 +109,7 @@ function LoginButton() {
         Login
       </Button>
       <LoginDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
-    </>
+    </div>
   );
 }
 
