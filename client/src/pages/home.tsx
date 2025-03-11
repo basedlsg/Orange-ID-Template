@@ -4,6 +4,7 @@ import { FilterBar } from "@/components/filter-bar";
 import { useState } from "react";
 import type { Project } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
+import { SiX } from "react-icons/si"; // Import X (Twitter) icon
 
 export default function Home() {
   const [sortBy, setSortBy] = useState("likes");
@@ -46,6 +47,23 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black">
+      {/* Social Banner */}
+      <div className="border-b border-zinc-800 bg-gradient-to-r from-zinc-900 to-black">
+        <div className="container mx-auto px-4 py-3">
+          <a 
+            href="https://x.com/vibecodinglist" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center justify-center sm:justify-start gap-2 text-zinc-400 hover:text-white transition-colors"
+          >
+            <SiX className="h-4 w-4" />
+            <span className="text-sm">
+              Follow <span className="font-medium text-blue-400">@vibecodinglist</span> for weekly updates on the latest AI-powered projects
+            </span>
+          </a>
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 py-8">
         <FilterBar 
           sortBy={sortBy} 
