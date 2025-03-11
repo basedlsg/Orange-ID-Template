@@ -5,17 +5,12 @@ import { useState } from "react";
 import type { Project } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 import { SiX } from "react-icons/si";
-import { useBedrockPassport } from "@bedrock_org/passport";
-import { LoginDialog } from "@/components/login-dialog";
-import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
 
 export default function Home() {
   const [sortBy, setSortBy] = useState("likes");
   const [aiTool, setAiTool] = useState("all");
   const [sponsorshipFilter, setSponsorshipFilter] = useState(false);
-  const { isLoggedIn } = useBedrockPassport();
-  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: true, sortBy }],
@@ -40,6 +35,11 @@ export default function Home() {
 
   const sortedAndFilteredProjects = projects
     ?.filter((project) => {
+      // Apply search filter
+      if (searchQuery && !project.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !project.description.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
       if (sponsorshipFilter && !project.sponsorshipEnabled) return false;
       if (aiTool !== "all" && !project.aiTools?.includes(aiTool)) return false;
       return true;
@@ -53,29 +53,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Login Benefits Banner */}
-      {!isLoggedIn && (
-        <div className="bg-gradient-to-r from-blue-600/20 via-blue-600/10 to-blue-600/5 border-b border-blue-500/20">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-blue-400" />
-                <span className="text-sm text-zinc-200">
-                  Join the community to like projects, track your favorites, and unlock exclusive features!
-                </span>
-              </div>
-              <Button
-                onClick={() => setShowLoginDialog(true)}
-                className="bg-blue-500 hover:bg-blue-600 text-white shrink-0"
-                size="sm"
-              >
-                Sign In
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Social Banner */}
       <div className="border-b border-zinc-800 bg-gradient-to-r from-zinc-900 to-black">
         <div className="container mx-auto px-4 py-3">
@@ -98,9 +75,11 @@ export default function Home() {
           sortBy={sortBy} 
           aiTool={aiTool}
           sponsorshipFilter={sponsorshipFilter}
+          searchQuery={searchQuery}
           onSortChange={setSortBy}
           onAiToolChange={setAiTool}
           onSponsorshipFilterChange={setSponsorshipFilter}
+          onSearchChange={setSearchQuery}
         />
         <ProjectGrid
           projects={sortedAndFilteredProjects || []}
@@ -108,12 +87,6 @@ export default function Home() {
           isLoading={isLoading}
         />
       </div>
-
-      <LoginDialog 
-        open={showLoginDialog} 
-        onOpenChange={setShowLoginDialog}
-        message="Join the community to like projects and unlock exclusive features!"
-      />
     </div>
   );
 }
