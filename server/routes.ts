@@ -1,13 +1,14 @@
 import { type Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { 
-  insertProjectSchema, 
+import {
+  insertProjectSchema,
   insertUserSchema,
   type Project,
   type InsertProject,
   type User,
-  type InsertUser
+  type InsertUser,
+  projects
 } from "@shared/schema";
 import multer from "multer";
 import path from "path";
@@ -74,10 +75,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Parse CSV from buffer directly
       const projects: any[] = [];
-      const rows = parse(req.file.buffer.toString(), { 
-        columns: true, 
+      const rows = parse(req.file.buffer.toString(), {
+        columns: true,
         trim: true,
-        skipEmptyLines: true 
+        skipEmptyLines: true
       });
 
       for (const row of rows) {
@@ -139,10 +140,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create all projects in database with the correct user ID
       const createdProjects = await storage.createProjects(projects, user.userId);
 
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         count: createdProjects.length,
-        message: `Successfully imported ${createdProjects.length} projects` 
+        message: `Successfully imported ${createdProjects.length} projects`
       });
     } catch (error) {
       console.error('Error processing CSV:', error);
@@ -373,6 +374,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting project:", error);
       res.status(500).json({ error: "Failed to delete project" });
+    }
+  });
+
+  // Sitemap endpoint
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      const baseUrl = process.env.NODE_ENV === 'production'
+        ? 'https://vibecodinglist.com'
+        : `http://${req.headers.host}`;
+
+      // Get all approved projects
+      const approvedProjects = await storage.getProjects(true);
+
+      // Create sitemap XML
+      const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/submit</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  ${approvedProjects.map(project => `
+  <url>
+    <loc>${baseUrl}/projects/${project.id}</loc>
+    <lastmod>${new Date(project.createdAt).toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>`).join('')}
+</urlset>`;
+
+      res.header('Content-Type', 'application/xml');
+      res.send(sitemap);
+    } catch (error) {
+      console.error("Error generating sitemap:", error);
+      res.status(500).json({ error: "Failed to generate sitemap" });
     }
   });
 
