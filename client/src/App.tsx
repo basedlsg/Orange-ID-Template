@@ -8,7 +8,7 @@ import { useBedrockPassport } from "@bedrock_org/passport";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { X, Plus } from "lucide-react";
+import { X, Plus, User } from "lucide-react";
 import { Logo } from "@/components/logo";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -17,8 +17,13 @@ import Admin from "@/pages/admin";
 import AuthCallback from "@/pages/AuthCallback";
 import { LoginDialog } from "@/components/login-dialog";
 import React from "react";
-import Profile from "@/pages/profile"; // Import the Profile component
-
+import Profile from "@/pages/profile";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 async function storeUserInDB(user: any) {
   if (!user) {
@@ -189,25 +194,26 @@ function Navigation() {
         </Link>
         <div className="ml-auto flex items-center space-x-4">
           {isLoggedIn ? (
-            <>
-              <Link href="/profile">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-sm font-medium hover:text-primary"
                 >
-                  Profile
+                  <User className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Account</span>
                 </Button>
-              </Link>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                className="text-sm font-medium hover:text-primary"
-              >
-                Logout
-              </Button>
-            </>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setLocation("/profile")}>
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <LoginButton />
           )}
