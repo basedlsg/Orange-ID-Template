@@ -33,8 +33,8 @@ export function FilterBar({
   onSearchChange,
 }: FilterBarProps) {
   return (
-    <div className="mb-6 flex flex-col gap-4">
-      <div className="relative w-full">
+    <div className="mb-6 flex flex-col sm:flex-row gap-4 sm:items-center">
+      <div className="relative flex-1 min-w-[200px]">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
         <Input
           type="text"
@@ -45,33 +45,31 @@ export function FilterBar({
         />
       </div>
 
-      <div className="flex flex-wrap gap-4 items-center">
-        <div className="flex gap-2 flex-1 min-w-[180px] sm:min-w-0">
-          <Select value={sortBy} onValueChange={onSortChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Sort by..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="likes">Most Liked</SelectItem>
-              <SelectItem value="views">Most Viewed</SelectItem>
-              <SelectItem value="newest">Newest First</SelectItem>
-            </SelectContent>
-          </Select>
+      <div className="flex flex-wrap sm:flex-nowrap gap-2 items-center">
+        <Select value={sortBy} onValueChange={onSortChange}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Sort by..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="likes">Most Liked</SelectItem>
+            <SelectItem value="views">Most Viewed</SelectItem>
+            <SelectItem value="newest">Newest First</SelectItem>
+          </SelectContent>
+        </Select>
 
-          <Select value={aiTool} onValueChange={onAiToolChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Filter by AI Tool..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Tools</SelectItem>
-              {PREDEFINED_AI_TOOLS.map((tool) => (
-                <SelectItem key={tool} value={tool}>
-                  {tool}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <Select value={aiTool} onValueChange={onAiToolChange}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Filter by AI Tool..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Tools</SelectItem>
+            {PREDEFINED_AI_TOOLS.map((tool) => (
+              <SelectItem key={tool} value={tool}>
+                {tool}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         <div className="flex items-center space-x-2 shrink-0">
           <Switch
