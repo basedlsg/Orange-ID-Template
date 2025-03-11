@@ -99,7 +99,7 @@ function LoginButton() {
   return (
     <div className="flex items-center gap-3">
       <span className="text-sm text-zinc-400 hidden sm:inline">
-        Sign in to like projects and more
+        Login to save favorites — more soon!
       </span>
       <Button
         variant="outline"

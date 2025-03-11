@@ -10,7 +10,7 @@ import { useState } from "react";
 import { LoginDialog } from "./login-dialog";
 import { Badge } from "@/components/ui/badge";
 import { PREDEFINED_GENRES } from "@shared/schema";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, QueryClient } from "@tanstack/react-query";
 import { SkeletonCard } from "./skeleton-card";
 
 interface ProjectGridProps {
@@ -21,18 +21,19 @@ interface ProjectGridProps {
   isLoading?: boolean;
 }
 
-export function ProjectGrid({ 
-  projects, 
-  onProjectView, 
+export function ProjectGrid({
+  projects,
+  onProjectView,
   showEditButton = false,
   showSubmitCard = true,
-  isLoading = false
+  isLoading = false,
 }: ProjectGridProps) {
   const { toast } = useToast();
   const { isLoggedIn, user } = useBedrockPassport();
   const [, setLocation] = useLocation();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const queryClient = new QueryClient(); //added queryClient
 
   const { data: userLikes = [] } = useQuery({
     queryKey: ["/api/users", user?.sub || user?.id, "likes"],
@@ -43,8 +44,8 @@ export function ProjectGrid({
       return response.json();
     },
     enabled: isLoggedIn,
-    staleTime: 30000, 
-    cacheTime: 5 * 60 * 1000, 
+    staleTime: 30000,
+    cacheTime: 5 * 60 * 1000,
   });
 
   const handleView = async (project: Project) => {
@@ -75,8 +76,30 @@ export function ProjectGrid({
     setLocation(`/submit?edit=${project.id}`);
   };
 
+  const handleLikeClick = async (project: Project) => {
+    if (!isLoggedIn) {
+      setShowLoginDialog(true);
+      return;
+    }
+
+    try {
+      await apiRequest("POST", `/api/projects/${project.id}/like`);
+      queryClient.invalidateQueries(["/api/users", user?.sub || user?.id, "likes"]);
+      toast({
+        title: "Success",
+        description: "Project liked successfully!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to like project",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredProjects = selectedGenre
-    ? projects.filter(project => project.genres?.includes(selectedGenre))
+    ? projects.filter((project) => project.genres?.includes(selectedGenre))
     : projects;
 
   if (isLoading) {
@@ -106,7 +129,7 @@ export function ProjectGrid({
           <Badge
             key="all"
             variant="secondary"
-            className={`cursor-pointer ${!selectedGenre ? 'bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-400'}`}
+            className={`cursor-pointer ${!selectedGenre ? "bg-blue-500 text-white" : "bg-zinc-800 text-zinc-400"}`}
             onClick={() => setSelectedGenre(null)}
           >
             All
@@ -115,7 +138,7 @@ export function ProjectGrid({
             <Badge
               key={genre}
               variant="secondary"
-              className={`cursor-pointer ${selectedGenre === genre ? 'bg-blue-500 text-white' : 'bg-zinc-800 text-zinc-400'}`}
+              className={`cursor-pointer ${selectedGenre === genre ? "bg-blue-500 text-white" : "bg-zinc-800 text-zinc-400"}`}
               onClick={() => setSelectedGenre(genre)}
             >
               {genre}
@@ -126,7 +149,7 @@ export function ProjectGrid({
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {showSubmitCard && (
-          <Card 
+          <Card
             key="submit-card"
             className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 border-dashed h-full"
             onClick={handleSubmitClick}
@@ -147,13 +170,13 @@ export function ProjectGrid({
             onView={() => handleView(project)}
             userLikes={userLikes}
             onEdit={showEditButton ? () => handleEditClick(project) : undefined}
+            onLike={handleLikeClick} //added onLike prop
           />
         ))}
-        <LoginDialog 
-          key="login-dialog"
+        <LoginDialog
           open={showLoginDialog}
           onOpenChange={setShowLoginDialog}
-          message="Please log in to submit your project"
+          message="Please log in to like this project"
         />
       </div>
     </div>
