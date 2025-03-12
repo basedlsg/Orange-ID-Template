@@ -41,19 +41,19 @@ export default function Admin() {
   const { data: advertisingRequests, isLoading: isLoadingAds } = useQuery<AdvertisingRequest[]>({
     queryKey: ["/api/advertising-requests"],
     queryFn: async () => {
-      const response = await fetch("/api/advertising-requests");
+      const response = await fetch(`/api/advertising-requests?orangeId=${user?.sub || user?.id}`);
       if (!response.ok) {
         throw new Error("Failed to fetch advertising requests");
       }
       return response.json();
     },
-    enabled: !!isAdmin,
+    enabled: !!isAdmin && !!user,
   });
 
   // Mark advertising request as processed
   const { mutate: markProcessed } = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest("POST", `/api/advertising-requests/${id}/process`);
+      const response = await apiRequest("POST", `/api/advertising-requests/${id}/process?orangeId=${user?.sub || user?.id}`);
       if (!response.ok) {
         throw new Error("Failed to mark request as processed");
       }
@@ -280,8 +280,8 @@ export default function Admin() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm">${request.budget}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          request.processed 
-                            ? 'bg-green-900 text-green-200' 
+                          request.processed
+                            ? 'bg-green-900 text-green-200'
                             : 'bg-yellow-900 text-yellow-200'
                         }`}>
                           {request.processed ? 'Processed' : 'Pending'}
@@ -323,7 +323,7 @@ export default function Admin() {
               <div key={project.id} className="relative">
                 <ProjectCard project={project} />
                 <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
-                  <Button 
+                  <Button
                     onClick={() => approveProject(project.id)}
                     className="bg-blue-500 hover:bg-blue-600 text-white z-20"
                   >
