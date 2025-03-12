@@ -263,8 +263,10 @@ export default function Admin() {
                   <tr className="border-b border-zinc-800">
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Date</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Email</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Company</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Budget</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Message</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Actions</th>
                   </tr>
@@ -276,8 +278,18 @@ export default function Admin() {
                         {new Date(request.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">{request.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <a href={`mailto:${request.email}`} className="text-blue-400 hover:text-blue-300">
+                          {request.email}
+                        </a>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">{request.company}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">${request.budget}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">{request.budget}</td>
+                      <td className="px-6 py-4 text-sm max-w-xs">
+                        <div className="truncate" title={request.message}>
+                          {request.message}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <span className={`px-2 py-1 rounded-full text-xs ${
                           request.processed
@@ -304,7 +316,7 @@ export default function Admin() {
                   ))}
                   {(!advertisingRequests || advertisingRequests.length === 0) && (
                     <tr>
-                      <td colSpan={6} className="px-6 py-4 text-center text-zinc-400">
+                      <td colSpan={8} className="px-6 py-4 text-center text-zinc-400">
                         No advertising requests yet
                       </td>
                     </tr>
