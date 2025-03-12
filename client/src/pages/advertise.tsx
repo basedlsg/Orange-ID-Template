@@ -47,10 +47,21 @@ export default function Advertise() {
 
   async function onSubmit(data: AdvertiseForm) {
     try {
-      const response = await apiRequest("POST", "/api/advertising-requests", data);
+      console.log("Form data being submitted:", data);
+
+      const response = await fetch("/api/advertising-requests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const responseData = await response.json();
+      console.log("Server response:", responseData);
 
       if (!response.ok) {
-        throw new Error("Failed to submit form");
+        throw new Error(responseData.error || "Failed to submit form");
       }
 
       toast({
@@ -60,6 +71,7 @@ export default function Advertise() {
 
       form.reset();
     } catch (error) {
+      console.error("Form submission error:", error);
       toast({
         variant: "destructive",
         title: "Error submitting form",

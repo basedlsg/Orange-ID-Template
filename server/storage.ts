@@ -4,8 +4,8 @@ import {
   likes, type Like, type InsertLike,
   advertisingRequests, type AdvertisingRequest, type InsertAdvertisingRequest
 } from "@shared/schema";
-import { db, sql } from "./db";
-import { eq, and } from "drizzle-orm";
+import { db } from "./db";
+import { eq, and, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -200,7 +200,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAdvertisingRequest(request: InsertAdvertisingRequest): Promise<AdvertisingRequest> {
+    console.log('Creating advertising request with data:', request);
     const [adRequest] = await db.insert(advertisingRequests).values(request).returning();
+    console.log('Successfully created advertising request:', adRequest);
     return adRequest;
   }
 
