@@ -17,6 +17,8 @@ import { fromZodError } from "zod-validation-error";
 import { parse } from 'csv-parse/sync';
 import fetch from 'node-fetch';
 import { uploadToGCS } from "./utils/storage";
+import { insertAdvertisingRequestSchema } from "@shared/schema"; // Assuming this schema exists
+
 
 // Configure multer for memory storage
 const upload = multer({
@@ -414,6 +416,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating sitemap:", error);
       res.status(500).json({ error: "Failed to generate sitemap" });
+    }
+  });
+
+  // Create advertising request
+  app.post("/api/advertising-requests", async (req, res) => {
+    try {
+      console.log("Received advertising request:", req.body);
+
+      // Validate the request data using the schema
+      const validatedData = insertAdvertisingRequestSchema.parse(req.body);
+      console.log("Validated advertising request data:", validatedData);
+
+      const request = await storage.createAdvertisingRequest(validatedData);
+      console.log("Created advertising request:", request);
+
+      res.json(request);
+    } catch (error) {
+      console.error("Error creating advertising request:", error);
+      if (error instanceof Error) {
+        const validationError = fromZodError(error);
+        res.status(400).json({ error: validationError.message });
+      } else {
+        res.status(500).json({ error: "Failed to create advertising request" });
+      }
+    }
+  });
+
+  // Get all advertising requests (admin only)
+  app.get("/api/advertising-requests", async (req, res) => {
+    try {
+      // Check if user is admin
+      const user = await getUserFromRequest(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const dbUser = await storage.getUserByOrangeId(user.orangeId);
+      if (!dbUser?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const requests = await storage.getAdvertisingRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching advertising requests:", error);
+      res.status(500).json({ error: "Failed to fetch advertising requests" });
+    }
+  });
+
+  // Mark advertising request as processed (admin only)
+  app.post("/api/advertising-requests/:id/process", async (req, res) => {
+    try {
+      // Check if user is admin
+      const user = await getUserFromRequest(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const dbUser = await storage.getUserByOrangeId(user.orangeId);
+      if (!dbUser?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const id = parseInt(req.params.id);
+      const request = await storage.markAdvertisingRequestProcessed(id);
+      res.json(request);
+    } catch (error) {
+      console.error("Error processing advertising request:", error);
+      res.status(500).json({ error: "Failed to process advertising request" });
     }
   });
 

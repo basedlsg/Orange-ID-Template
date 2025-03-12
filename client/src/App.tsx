@@ -202,7 +202,7 @@ function Navigation() {
             onClick={() => setLocation("/advertise")}
             className="text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            Advertise
+            Advertise Across Projects
           </Button>
           {isLoggedIn ? (
             <DropdownMenu>
