@@ -1,7 +1,8 @@
 import { 
   users, type User, type InsertUser,
   projects, type Project, type InsertProject,
-  likes, type Like, type InsertLike
+  likes, type Like, type InsertLike,
+  advertisingRequests, type AdvertisingRequest, type InsertAdvertisingRequest
 } from "@shared/schema";
 import { db, sql } from "./db";
 import { eq, and } from "drizzle-orm";
@@ -20,12 +21,18 @@ export interface IStorage {
   approveProject(id: number): Promise<Project>;
   incrementViews(id: number): Promise<void>;
   deleteProject(id: number): Promise<void>;
+  createProjects(insertProjects: InsertProject[], userId: number): Promise<Project[]>;
 
   // Like operations
   createLike(orangeId: string, projectId: number): Promise<Like>;
   deleteLike(orangeId: string, projectId: number): Promise<void>;
   getUserLikes(orangeId: string): Promise<number[]>;
   getLike(orangeId: string, projectId: number): Promise<Like | undefined>;
+
+  // Advertising request operations
+  createAdvertisingRequest(request: InsertAdvertisingRequest): Promise<AdvertisingRequest>;
+  getAdvertisingRequests(): Promise<AdvertisingRequest[]>;
+  markAdvertisingRequestProcessed(id: number): Promise<AdvertisingRequest>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -190,6 +197,25 @@ export class DatabaseStorage implements IStorage {
         .set({ likeCount: sql`${projects.likeCount} - 1` })
         .where(eq(projects.id, projectId));
     });
+  }
+
+  async createAdvertisingRequest(request: InsertAdvertisingRequest): Promise<AdvertisingRequest> {
+    const [adRequest] = await db.insert(advertisingRequests).values(request).returning();
+    return adRequest;
+  }
+
+  async getAdvertisingRequests(): Promise<AdvertisingRequest[]> {
+    return db.select().from(advertisingRequests).orderBy(sql`${advertisingRequests.createdAt} DESC`);
+  }
+
+  async markAdvertisingRequestProcessed(id: number): Promise<AdvertisingRequest> {
+    const [request] = await db
+      .update(advertisingRequests)
+      .set({ processed: true })
+      .where(eq(advertisingRequests.id, id))
+      .returning();
+    if (!request) throw new Error("Advertising request not found");
+    return request;
   }
 }
 

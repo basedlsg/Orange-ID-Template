@@ -1,11 +1,11 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { ProjectCard } from "@/components/project-card";
-import type { Project } from "@shared/schema";
+import type { Project, AdvertisingRequest } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
-import { Upload, Trash2 } from "lucide-react";
+import { Upload, Trash2, Check } from "lucide-react";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import {
   AlertDialog,
@@ -35,6 +35,44 @@ export default function Admin() {
       return data.isAdmin;
     },
     enabled: !!user,
+  });
+
+  // Fetch advertising requests
+  const { data: advertisingRequests, isLoading: isLoadingAds } = useQuery<AdvertisingRequest[]>({
+    queryKey: ["/api/advertising-requests"],
+    queryFn: async () => {
+      const response = await fetch("/api/advertising-requests");
+      if (!response.ok) {
+        throw new Error("Failed to fetch advertising requests");
+      }
+      return response.json();
+    },
+    enabled: !!isAdmin,
+  });
+
+  // Mark advertising request as processed
+  const { mutate: markProcessed } = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("POST", `/api/advertising-requests/${id}/process`);
+      if (!response.ok) {
+        throw new Error("Failed to mark request as processed");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/advertising-requests"] });
+      toast({
+        title: "Success",
+        description: "Advertising request marked as processed",
+      });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to process request",
+      });
+    },
   });
 
   // These queries only run if user is admin
@@ -173,12 +211,11 @@ export default function Admin() {
     }
   };
 
-  // After all hooks are called, we can safely return null for non-admin users
   if (!isAdmin && !isCheckingAdmin) {
     return null;
   }
 
-  if (isPendingLoading || isApprovedLoading || isCheckingAdmin) {
+  if (isPendingLoading || isApprovedLoading || isCheckingAdmin || isLoadingAds) {
     return (
       <div className="min-h-screen bg-black">
         <div className="container mx-auto px-4 py-8">
@@ -213,6 +250,68 @@ export default function Admin() {
               <Upload className="h-4 w-4 mr-2" />
               {isUploading ? "Uploading..." : "Upload CSV"}
             </Button>
+          </div>
+        </div>
+
+        {/* Advertising Requests Section */}
+        <div className="mb-12">
+          <h3 className="mb-4 text-xl font-semibold text-white">Advertising Requests</h3>
+          <div className="bg-zinc-900 rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-zinc-800">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Company</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Budget</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800">
+                  {advertisingRequests?.map((request) => (
+                    <tr key={request.id} className="text-zinc-300">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {new Date(request.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">{request.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">{request.company}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">${request.budget}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          request.processed 
+                            ? 'bg-green-900 text-green-200' 
+                            : 'bg-yellow-900 text-yellow-200'
+                        }`}>
+                          {request.processed ? 'Processed' : 'Pending'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {!request.processed && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => markProcessed(request.id)}
+                            className="text-green-400 hover:text-green-300"
+                          >
+                            <Check className="h-4 w-4 mr-1" />
+                            Mark Processed
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {(!advertisingRequests || advertisingRequests.length === 0) && (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-4 text-center text-zinc-400">
+                        No advertising requests yet
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
