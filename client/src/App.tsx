@@ -241,7 +241,13 @@ function Navigation() {
       </nav>
       {/* Show on mobile only */}
       <div className="sm:hidden container mx-auto px-4 py-2">
-        <AdvertiseButton />
+        <Button
+          variant="outline"
+          onClick={() => setLocation("/advertise")}
+          className="w-full text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          Advertise Across Projects
+        </Button>
       </div>
     </>
   );
