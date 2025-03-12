@@ -190,47 +190,60 @@ function Navigation() {
     }
   };
 
+  const AdvertiseButton = () => (
+    <Button
+      variant="outline"
+      onClick={() => setLocation("/advertise")}
+      className="text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
+    >
+      Advertise Across Projects
+    </Button>
+  );
+
   return (
-    <nav className="border-b">
-      <div className="container mx-auto flex h-16 items-center px-4">
-        <Link href="/">
-          <Logo className="cursor-pointer" />
-        </Link>
-        <div className="ml-auto flex items-center space-x-4">
-          <Button
-            variant="outline"
-            onClick={() => setLocation("/advertise")}
-            className="text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            Advertise Across Projects
-          </Button>
-          {isLoggedIn ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-sm font-medium hover:text-primary"
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Account</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setLocation("/profile")}>
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <LoginButton />
-          )}
+    <>
+      <nav className="border-b">
+        <div className="container mx-auto flex h-16 items-center px-4">
+          <Link href="/">
+            <Logo className="cursor-pointer" />
+          </Link>
+          <div className="ml-auto flex items-center space-x-4">
+            {/* Hide on mobile, show on desktop */}
+            <div className="hidden sm:block">
+              <AdvertiseButton />
+            </div>
+            {isLoggedIn ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-sm font-medium hover:text-primary"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    <span className="hidden sm:inline">Account</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setLocation("/profile")}>
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <LoginButton />
+            )}
+          </div>
         </div>
+      </nav>
+      {/* Show on mobile only */}
+      <div className="sm:hidden container mx-auto px-4 py-2">
+        <AdvertiseButton />
       </div>
-    </nav>
+    </>
   );
 }
 
