@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Advertise from "@/pages/advertise";
 
 async function storeUserInDB(user: any) {
   if (!user) {
@@ -196,6 +197,13 @@ function Navigation() {
           <Logo className="cursor-pointer" />
         </Link>
         <div className="ml-auto flex items-center space-x-4">
+          <Button
+            variant="outline"
+            onClick={() => setLocation("/advertise")}
+            className="text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Advertise
+          </Button>
           {isLoggedIn ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -239,6 +247,7 @@ function Router() {
       <Route path="/profile">
         <ProtectedRoute component={Profile} />
       </Route>
+      <Route path="/advertise" component={Advertise} />
       <Route path="/auth/callback" component={AuthCallback} />
       <Route component={NotFound} />
     </Switch>
