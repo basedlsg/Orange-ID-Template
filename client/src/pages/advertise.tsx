@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { apiRequest } from "@/lib/queryClient";
 
 const advertiseFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -46,20 +47,23 @@ export default function Advertise() {
 
   async function onSubmit(data: AdvertiseForm) {
     try {
-      // In a real implementation, this would send the data to your backend
-      console.log("Form submitted:", data);
-      
+      const response = await apiRequest("POST", "/api/advertising-requests", data);
+
+      if (!response.ok) {
+        throw new Error("Failed to submit form");
+      }
+
       toast({
         title: "Form submitted successfully",
         description: "We'll get back to you soon!",
       });
-      
+
       form.reset();
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error submitting form",
-        description: "Please try again later",
+        description: error instanceof Error ? error.message : "Please try again later",
       });
     }
   }

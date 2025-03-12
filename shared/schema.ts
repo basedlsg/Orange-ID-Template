@@ -133,9 +133,29 @@ export const insertLikeSchema = createInsertSchema(likes).omit({
   createdAt: true,
 });
 
+export const advertisingRequests = pgTable("advertising_requests", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  company: text("company").notNull(),
+  budget: text("budget").notNull(),
+  message: text("message").notNull(),
+  processed: boolean("processed").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertAdvertisingRequestSchema = createInsertSchema(advertisingRequests)
+  .omit({
+    id: true,
+    processed: true,
+    createdAt: true,
+  });
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type InsertLike = z.infer<typeof insertLikeSchema>;
 export type User = typeof users.$inferSelect;
 export type Project = typeof projects.$inferSelect;
 export type Like = typeof likes.$inferSelect;
+export type InsertAdvertisingRequest = z.infer<typeof insertAdvertisingRequestSchema>;
+export type AdvertisingRequest = typeof advertisingRequests.$inferSelect;
