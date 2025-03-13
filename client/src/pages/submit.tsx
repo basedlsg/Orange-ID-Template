@@ -36,6 +36,18 @@ import { X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 
+const defaultFormValues: InsertProject = {
+  name: "",
+  description: "",
+  url: "",
+  aiTools: [],
+  genres: [],
+  thumbnail: "",
+  xHandle: "",
+  sponsorshipEnabled: false,
+  sponsorshipUrl: "",
+};
+
 export default function Submit() {
   const { user } = useBedrockPassport();
   const [, setLocation] = useLocation();
@@ -50,38 +62,30 @@ export default function Submit() {
   const editingProjectId = params.get('edit');
   const isEditing = !!editingProjectId;
 
-  // Initialize form with empty values
-  const form = useForm<InsertProject>({
-    resolver: zodResolver(insertProjectSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      url: "",
-      aiTools: [],
-      genres: [],
-      thumbnail: "",
-      xHandle: "",
-      sponsorshipEnabled: false,
-      sponsorshipUrl: "",
-    },
-  });
-
   // Fetch existing project data if editing
-  const { data: existingProject, isLoading: isLoadingProject } = useQuery({
+  const { data: existingProject, isLoading: isLoadingProject } = useQuery<Project>({
     queryKey: ['/api/projects', editingProjectId],
     queryFn: async () => {
       if (!editingProjectId) throw new Error('No project ID provided');
       const response = await fetch(`/api/projects/${editingProjectId}`);
       if (!response.ok) throw new Error('Failed to fetch project');
-      return response.json();
+      const data = await response.json();
+      console.log('Fetched project data:', data);
+      return data;
     },
     enabled: !!editingProjectId,
   });
 
-  // Update form with existing project data when available
+  // Initialize form with default values
+  const form = useForm<InsertProject>({
+    resolver: zodResolver(insertProjectSchema),
+    defaultValues: existingProject || defaultFormValues,
+  });
+
+  // Update form when existing project data changes
   useEffect(() => {
     if (existingProject) {
-      console.log('Resetting form with existing project:', existingProject);
+      console.log('Setting form values with:', existingProject);
       form.reset({
         name: existingProject.name,
         description: existingProject.description,
@@ -90,7 +94,7 @@ export default function Submit() {
         genres: existingProject.genres || [],
         thumbnail: existingProject.thumbnail || '',
         xHandle: existingProject.xHandle || '',
-        sponsorshipEnabled: existingProject.sponsorshipEnabled,
+        sponsorshipEnabled: existingProject.sponsorshipEnabled || false,
         sponsorshipUrl: existingProject.sponsorshipUrl || '',
       });
     }
