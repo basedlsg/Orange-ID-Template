@@ -86,7 +86,12 @@ export function ProjectCard({
     if (onView) {
       onView();
     }
-    window.open(project.url, "_blank");
+    const url = new URL(project.url);
+    url.searchParams.set('ref', 'vibecodinglist.com');
+    url.searchParams.set('utm_source', 'vibecodinglist');
+    url.searchParams.set('utm_medium', 'directory');
+    url.searchParams.set('utm_campaign', 'project_click');
+    window.open(url.toString(), "_blank");
   };
 
   const handleXClick = (e: React.MouseEvent) => {
