@@ -98,7 +98,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-black border-zinc-800 max-w-2xl">
+      <DialogContent className="bg-black border-zinc-800 max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-white">Edit Project</DialogTitle>
         </DialogHeader>
