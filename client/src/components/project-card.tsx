@@ -40,9 +40,10 @@ export function ProjectCard({
       if (!user?.sub && !user?.id) {
         throw new Error("User ID not found");
       }
+      const orangeId = user.sub || user.id;
       const response = await apiRequest(
         "POST",
-        `/api/projects/${project.id}/like`,
+        `/api/projects/${project.id}/like?orangeId=${orangeId}`
       );
       if (!response.ok) {
         throw new Error("Failed to toggle like");
