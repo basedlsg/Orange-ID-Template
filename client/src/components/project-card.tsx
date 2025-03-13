@@ -35,6 +35,7 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
       if (!user?.sub && !user?.id) {
         throw new Error("User ID not found");
       }
+
       const orangeId = user.sub || user.id;
       const response = await apiRequest(
         "POST",
@@ -112,27 +113,23 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
         </div>
         <CardHeader className="p-4">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-white line-clamp-2">
-              {project.name}
-            </CardTitle>
+            <CardTitle className="text-white line-clamp-2">{project.name}</CardTitle>
             <Button
               variant="ghost"
               size="icon"
               className={`${
-                isLiked ? "text-red-500" : "text-zinc-400 hover:text-red-500"
+                isLiked ? 'text-red-500' : 'text-zinc-400 hover:text-red-500'
               } transition-colors`}
               onClick={handleLikeClick}
               disabled={isLiking}
             >
-              <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
+              <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
               <span className="ml-1 text-sm">{project.likeCount || 0}</span>
             </Button>
           </div>
         </CardHeader>
         <CardContent className="p-4 pt-0 flex flex-col flex-grow">
-          <p className="mb-4 text-sm text-zinc-400 line-clamp-3">
-            {project.description}
-          </p>
+          <p className="mb-4 text-sm text-zinc-400 line-clamp-3">{project.description}</p>
           <div className="flex flex-wrap gap-2 mb-4">
             {project.sponsorshipEnabled && (
               <Badge
