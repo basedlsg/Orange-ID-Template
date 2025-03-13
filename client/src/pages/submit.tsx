@@ -57,39 +57,47 @@ export default function Submit() {
   const [newGenre, setNewGenre] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Get project ID from URL if editing
+  // Parse project ID from URL
   const params = new URLSearchParams(search);
   const editingProjectId = params.get('edit');
   const isEditing = !!editingProjectId;
+  const projectId = isEditing ? parseInt(editingProjectId, 10) : null;
 
+  console.log('Edit mode:', isEditing, 'Project ID:', projectId);
+
+  // Initialize form
   const form = useForm<InsertProject>({
     resolver: zodResolver(insertProjectSchema),
     defaultValues: defaultFormValues,
   });
 
   // Fetch existing project data if editing
-  const { data: existingProject, isLoading: isLoadingProject } = useQuery<Project>({
-    queryKey: ['/api/projects', Number(editingProjectId)],
+  const { data: existingProject, isLoading: isLoadingProject } = useQuery({
+    queryKey: ['/api/projects', projectId],
     queryFn: async () => {
-      console.log('Fetching project data for ID:', editingProjectId);
-      const response = await fetch(`/api/projects/${editingProjectId}`);
+      if (!projectId) throw new Error('No project ID provided');
+      console.log('Fetching project data for ID:', projectId);
+
+      const response = await fetch(`/api/projects/${projectId}`);
       if (!response.ok) {
         const error = await response.json();
         console.error('Failed to fetch project:', error);
         throw new Error('Failed to fetch project');
       }
+
       const data = await response.json();
-      console.log('Fetched project data:', data);
-      return data;
+      console.log('Successfully fetched project data:', data);
+      return data as Project;
     },
-    enabled: isEditing,
+    enabled: isEditing && projectId !== null,
   });
 
-  // Update form when existing project data changes
+  // Update form when project data is loaded
   useEffect(() => {
     if (existingProject) {
-      console.log('Setting form values with:', existingProject);
-      form.reset({
+      console.log('Updating form with project data:', existingProject);
+
+      const formData = {
         name: existingProject.name,
         description: existingProject.description,
         url: existingProject.url,
@@ -99,18 +107,19 @@ export default function Submit() {
         xHandle: existingProject.xHandle || '',
         sponsorshipEnabled: existingProject.sponsorshipEnabled || false,
         sponsorshipUrl: existingProject.sponsorshipUrl || '',
-      });
+      };
+
+      console.log('Setting form values:', formData);
+      form.reset(formData);
     }
   }, [existingProject, form]);
 
-  const { mutate, isPending } = useMutation({
+  const { mutate: submitProject, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {
-      let projectData = { ...data };
       const orangeId = user?.sub || user?.id;
+      if (!orangeId) throw new Error("User not authenticated");
 
-      if (!orangeId) {
-        throw new Error("User not authenticated");
-      }
+      let projectData = { ...data };
 
       // Handle thumbnail upload if needed
       if (data.thumbnailFile instanceof File) {
@@ -122,10 +131,7 @@ export default function Submit() {
           body: formData,
         });
 
-        if (!uploadRes.ok) {
-          throw new Error("Failed to upload thumbnail");
-        }
-
+        if (!uploadRes.ok) throw new Error("Failed to upload thumbnail");
         const { url } = await uploadRes.json();
         projectData.thumbnail = url;
       }
@@ -133,7 +139,8 @@ export default function Submit() {
       delete projectData.thumbnailFile;
 
       const method = isEditing ? "PATCH" : "POST";
-      const endpoint = isEditing ? `/api/projects/${editingProjectId}` : "/api/projects";
+      const endpoint = isEditing ? `/api/projects/${projectId}` : "/api/projects";
+
       console.log(`Submitting project with method ${method} to endpoint ${endpoint}`, projectData);
 
       const response = await apiRequest(method, endpoint, {
@@ -244,7 +251,7 @@ export default function Submit() {
           <CardContent>
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit((data) => mutate(data))}
+                onSubmit={form.handleSubmit((data) => submitProject(data))}
                 className="space-y-6"
               >
                 <FormField
