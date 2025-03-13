@@ -189,7 +189,7 @@ export function ProjectGrid({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 h-full">
         {showSubmitCard && (
           <Card
             key="submit-card"
@@ -207,7 +207,7 @@ export function ProjectGrid({
         )}
 
         {projects.map((project) => (
-          <div key={project.id} className="relative">
+          <div key={project.id} className="relative h-full">
             <ProjectCard
               project={project}
               onView={() => handleView(project)}
