@@ -4,13 +4,14 @@ import { useBedrockPassport } from "@bedrock_org/passport";
 import {
   insertProjectSchema,
   type InsertProject,
+  type Project,
   PREDEFINED_AI_TOOLS,
   PREDEFINED_GENRES,
 } from "@shared/schema";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import {
   Form,
   FormControl,
@@ -32,16 +33,33 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Switch } from "@/components/ui/switch";
 
 export default function Submit() {
   const { user } = useBedrockPassport();
   const [, setLocation] = useLocation();
+  const [search] = useSearch();
   const { toast } = useToast();
   const [newTool, setNewTool] = useState("");
   const [newGenre, setNewGenre] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Get project ID from URL if editing
+  const params = new URLSearchParams(search);
+  const editingProjectId = params.get('edit');
+  const isEditing = !!editingProjectId;
+
+  // Fetch existing project data if editing
+  const { data: existingProject, isLoading: isLoadingProject } = useQuery<Project>({
+    queryKey: ['/api/projects', editingProjectId],
+    queryFn: async () => {
+      const response = await fetch(`/api/projects/${editingProjectId}`);
+      if (!response.ok) throw new Error('Failed to fetch project');
+      return response.json();
+    },
+    enabled: isEditing,
+  });
 
   const form = useForm<InsertProject>({
     resolver: zodResolver(insertProjectSchema),
@@ -57,6 +75,23 @@ export default function Submit() {
       sponsorshipUrl: "",
     },
   });
+
+  // Update form with existing project data when available
+  useEffect(() => {
+    if (existingProject) {
+      form.reset({
+        name: existingProject.name,
+        description: existingProject.description,
+        url: existingProject.url,
+        aiTools: existingProject.aiTools || [],
+        genres: existingProject.genres || [],
+        thumbnail: existingProject.thumbnail || '',
+        xHandle: existingProject.xHandle || '',
+        sponsorshipEnabled: existingProject.sponsorshipEnabled,
+        sponsorshipUrl: existingProject.sponsorshipUrl || '',
+      });
+    }
+  }, [existingProject, form]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {
@@ -86,14 +121,17 @@ export default function Submit() {
 
       delete projectData.thumbnailFile;
 
-      const response = await apiRequest("POST", "/api/projects", {
+      const method = isEditing ? "PATCH" : "POST";
+      const endpoint = isEditing ? `/api/projects/${editingProjectId}` : "/api/projects";
+
+      const response = await apiRequest(method, endpoint, {
         ...projectData,
         orangeId,
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || "Failed to submit project");
+        throw new Error(error.error || `Failed to ${isEditing ? 'update' : 'submit'} project`);
       }
       return response.json();
     },
@@ -174,6 +212,10 @@ export default function Submit() {
   const handleSubmitAnother = () => {
     setShowSuccessModal(false);
     form.reset();
+    if (isEditing) {
+      // If we were editing, go back to submit page without edit parameter
+      setLocation("/submit");
+    }
     window.scrollTo(0, 0);
   };
 
@@ -182,12 +224,28 @@ export default function Submit() {
     setLocation("/");
   };
 
+  if (isLoadingProject) {
+    return (
+      <div className="container mx-auto max-w-2xl px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-zinc-800 rounded w-1/3 mb-4"></div>
+          <div className="space-y-4">
+            <div className="h-32 bg-zinc-800 rounded"></div>
+            <div className="h-32 bg-zinc-800 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="container mx-auto max-w-2xl px-4 py-8">
         <Card className="bg-black border-zinc-800">
           <CardHeader>
-            <CardTitle className="text-white">Submit a Project</CardTitle>
+            <CardTitle className="text-white">
+              {isEditing ? 'Edit Project' : 'Submit a Project'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
@@ -475,7 +533,7 @@ export default function Submit() {
                   disabled={isPending}
                   className="bg-blue-500 hover:bg-blue-600 text-white"
                 >
-                  Submit Project
+                  {isEditing ? 'Update Project' : 'Submit Project'}
                 </Button>
               </form>
             </Form>
@@ -487,12 +545,14 @@ export default function Submit() {
         <DialogContent className="bg-black border-zinc-800">
           <DialogHeader>
             <DialogTitle className="text-white">
-              Project Submitted Successfully!
+              Project {isEditing ? 'Updated' : 'Submitted'} Successfully!
             </DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-zinc-400 mb-6">
-              Your project has been submitted and will be reviewed soon.
+              {isEditing 
+                ? 'Your project has been updated successfully.'
+                : 'Your project has been submitted and will be reviewed soon.'}
             </p>
             <div className="flex gap-4">
               <Button
@@ -500,7 +560,7 @@ export default function Submit() {
                 onClick={handleSubmitAnother}
                 className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
               >
-                Submit Another Project
+                {isEditing ? 'Edit Another Project' : 'Submit Another Project'}
               </Button>
               <Button
                 onClick={handleGoToExplore}
