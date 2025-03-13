@@ -174,7 +174,7 @@ export function ProjectGrid({
               onLike={() => handleLikeClick(project)}
             />
             {showEditButton && (
-              <div className="absolute bottom-4 right-4 z-20">
+              <div className="absolute top-4 right-4 z-20">
                 <Button
                   onClick={() => handleEditClick(project)}
                   variant="outline"

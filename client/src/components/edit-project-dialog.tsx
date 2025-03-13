@@ -76,8 +76,12 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate all relevant queries
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", project?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users", user?.sub || user?.id, "submissions"] });
+
       toast({
         title: "Success",
         description: "Project updated successfully",

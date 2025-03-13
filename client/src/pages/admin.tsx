@@ -335,22 +335,18 @@ export default function Admin() {
             {pendingProjects?.map((project) => (
               <div key={project.id} className="relative">
                 <ProjectCard project={project} />
-                <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
-                  <Button
-                    onClick={() => approveProject(project.id)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white z-20"
-                  >
-                    Approve
-                  </Button>
+                <div className="absolute top-4 right-4 flex gap-2 z-20">
                   <Button
                     onClick={() => handleEditClick(project)}
                     variant="outline"
-                    className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 z-20"
+                    size="icon"
+                    className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="destructive"
+                    size="icon"
                     onClick={() => setProjectToDelete(project)}
                     className="z-20"
                   >
@@ -371,16 +367,18 @@ export default function Admin() {
             {approvedProjects?.map((project) => (
               <div key={project.id} className="relative">
                 <ProjectCard project={project} />
-                <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
+                <div className="absolute top-4 right-4 flex gap-2 z-20">
                   <Button
                     onClick={() => handleEditClick(project)}
                     variant="outline"
-                    className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 z-20"
+                    size="icon"
+                    className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="destructive"
+                    size="icon"
                     onClick={() => setProjectToDelete(project)}
                     className="z-20"
                   >
