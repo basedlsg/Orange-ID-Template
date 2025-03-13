@@ -135,7 +135,7 @@ export function ProjectCard({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-4 pt-0">
+        <CardContent className="p-4 pt-0 flex-grow flex flex-col">
           <p className="mb-4 text-sm text-zinc-400">{project.description}</p>
           <div className="flex flex-wrap gap-2 mb-4">
             {project.sponsorshipEnabled && (
@@ -167,7 +167,7 @@ export function ProjectCard({
               </Badge>
             ))}
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 mt-auto">
             <div className="flex items-center gap-4 text-sm text-zinc-400">
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
