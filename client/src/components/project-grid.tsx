@@ -5,7 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
 import { useState } from "react";
 import { LoginDialog } from "./login-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import { PREDEFINED_GENRES } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
 import { SkeletonCard } from "./skeleton-card";
 import { EditProjectDialog } from "./edit-project-dialog";
+import { Button } from "@/components/ui/button";
 
 interface ProjectGridProps {
   projects: Project[];
@@ -123,6 +124,7 @@ export function ProjectGrid({
 
   return (
     <div>
+      {/* Genre filters */}
       <div className="mb-6">
         <div className="flex flex-wrap gap-2">
           <Badge
@@ -162,15 +164,28 @@ export function ProjectGrid({
             </CardContent>
           </Card>
         )}
-        {filteredProjects.map((project) => (
-          <ProjectCard
-            key={`project-${project.id}`}
-            project={project}
-            onView={() => handleView(project)}
-            userLikes={userLikes}
-            onEdit={showEditButton ? () => handleEditClick(project) : undefined}
-            onLike={() => handleLikeClick(project)}
-          />
+
+        {projects.map((project) => (
+          <div key={project.id} className="relative">
+            <ProjectCard
+              project={project}
+              onView={() => handleView(project)}
+              userLikes={userLikes}
+              onLike={() => handleLikeClick(project)}
+            />
+            {showEditButton && (
+              <div className="absolute bottom-4 right-4 z-20">
+                <Button
+                  onClick={() => handleEditClick(project)}
+                  variant="outline"
+                  size="icon"
+                  className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
         ))}
       </div>
 

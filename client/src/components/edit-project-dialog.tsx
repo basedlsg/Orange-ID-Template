@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
 import { PREDEFINED_AI_TOOLS, PREDEFINED_GENRES, type Project, type InsertProject, insertProjectSchema } from "@shared/schema";
+import { useBedrockPassport } from "@bedrock_org/passport";
 
 interface EditProjectDialogProps {
   project: Project | null;
@@ -22,6 +23,7 @@ interface EditProjectDialogProps {
 
 export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDialogProps) {
   const { toast } = useToast();
+  const { user } = useBedrockPassport();
   const [newTool, setNewTool] = useState("");
   const [newGenre, setNewGenre] = useState("");
   const [formState, setFormState] = useState<InsertProject>({
@@ -56,14 +58,17 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
 
   const form = useForm<InsertProject>({
     resolver: zodResolver(insertProjectSchema),
-    values: formState, // Use the controlled state as form values
+    values: formState,
   });
 
   const { mutate: updateProject, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {
       if (!project) throw new Error("No project to update");
+      const orangeId = user?.sub || user?.id;
+      if (!orangeId) throw new Error("User not authenticated");
+
       console.log('Updating project with data:', data);
-      const response = await apiRequest("PATCH", `/api/projects/${project.id}`, data);
+      const response = await apiRequest("PATCH", `/api/projects/${project.id}?orangeId=${orangeId}`, data);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Failed to update project");
@@ -72,6 +77,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       toast({
         title: "Success",
         description: "Project updated successfully",
