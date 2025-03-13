@@ -32,7 +32,9 @@ export default function Admin() {
   const { data: isAdmin, isLoading: isCheckingAdmin } = useQuery({
     queryKey: ["/api/users/check-admin", user?.sub || user?.id],
     queryFn: async () => {
-      const response = await fetch(`/api/users/check-admin?orangeId=${user?.sub || user?.id}`);
+      const response = await fetch(
+        `/api/users/check-admin?orangeId=${user?.sub || user?.id}`,
+      );
       if (!response.ok) return false;
       const data = await response.json();
       return data.isAdmin;
@@ -40,10 +42,14 @@ export default function Admin() {
     enabled: !!user,
   });
 
-  const { data: advertisingRequests, isLoading: isLoadingAds } = useQuery<AdvertisingRequest[]>({
+  const { data: advertisingRequests, isLoading: isLoadingAds } = useQuery<
+    AdvertisingRequest[]
+  >({
     queryKey: ["/api/advertising-requests"],
     queryFn: async () => {
-      const response = await fetch(`/api/advertising-requests?orangeId=${user?.sub || user?.id}`);
+      const response = await fetch(
+        `/api/advertising-requests?orangeId=${user?.sub || user?.id}`,
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch advertising requests");
       }
@@ -54,14 +60,19 @@ export default function Admin() {
 
   const { mutate: markProcessed } = useMutation({
     mutationFn: async (id: number) => {
-      const response = await apiRequest("POST", `/api/advertising-requests/${id}/process?orangeId=${user?.sub || user?.id}`);
+      const response = await apiRequest(
+        "POST",
+        `/api/advertising-requests/${id}/process?orangeId=${user?.sub || user?.id}`,
+      );
       if (!response.ok) {
         throw new Error("Failed to mark request as processed");
       }
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/advertising-requests"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/advertising-requests"],
+      });
       toast({
         title: "Success",
         description: "Advertising request marked as processed",
@@ -71,12 +82,15 @@ export default function Admin() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to process request",
+        description:
+          error instanceof Error ? error.message : "Failed to process request",
       });
     },
   });
 
-  const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
+  const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<
+    Project[]
+  >({
     queryKey: ["/api/projects", { approved: false }],
     queryFn: async () => {
       const response = await fetch("/api/projects?approved=false");
@@ -88,7 +102,9 @@ export default function Admin() {
     enabled: !!isAdmin,
   });
 
-  const { data: approvedProjects, isLoading: isApprovedLoading } = useQuery<Project[]>({
+  const { data: approvedProjects, isLoading: isApprovedLoading } = useQuery<
+    Project[]
+  >({
     queryKey: ["/api/projects", { approved: true }],
     queryFn: async () => {
       const response = await fetch("/api/projects?approved=true");
@@ -111,12 +127,12 @@ export default function Admin() {
     onSuccess: (approvedProject) => {
       queryClient.setQueryData<Project[]>(
         ["/api/projects", { approved: false }],
-        (old) => old?.filter((p) => p.id !== approvedProject.id) || []
+        (old) => old?.filter((p) => p.id !== approvedProject.id) || [],
       );
 
       queryClient.setQueryData<Project[]>(
         ["/api/projects", { approved: true }],
-        (old) => [approvedProject, ...(old || [])]
+        (old) => [approvedProject, ...(old || [])],
       );
 
       toast({
@@ -151,7 +167,8 @@ export default function Admin() {
     onError: (error) => {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete project",
+        description:
+          error instanceof Error ? error.message : "Failed to delete project",
         variant: "destructive",
       });
     },
@@ -160,16 +177,16 @@ export default function Admin() {
   const { mutate: uploadCsv, isPending: isUploading } = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
-      formData.append('csv', file);
+      formData.append("csv", file);
 
       const orangeId = user?.sub || user?.id;
       if (!orangeId) {
         throw new Error("User not authenticated");
       }
-      formData.append('orangeId', orangeId);
+      formData.append("orangeId", orangeId);
 
       const response = await fetch("/api/projects/batch", {
-        method: 'POST',
+        method: "POST",
         body: formData,
       });
 
@@ -189,7 +206,8 @@ export default function Admin() {
     onError: (error) => {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to upload CSV",
+        description:
+          error instanceof Error ? error.message : "Failed to upload CSV",
         variant: "destructive",
       });
     },
@@ -198,7 +216,7 @@ export default function Admin() {
   const handleCsvUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.type === "text/csv" || file.name.endsWith('.csv')) {
+      if (file.type === "text/csv" || file.name.endsWith(".csv")) {
         uploadCsv(file);
       } else {
         toast({
@@ -218,7 +236,12 @@ export default function Admin() {
     return null;
   }
 
-  if (isPendingLoading || isApprovedLoading || isCheckingAdmin || isLoadingAds) {
+  if (
+    isPendingLoading ||
+    isApprovedLoading ||
+    isCheckingAdmin ||
+    isLoadingAds
+  ) {
     return (
       <div className="min-h-screen bg-black">
         <div className="container mx-auto px-4 py-8">
@@ -257,20 +280,38 @@ export default function Admin() {
         </div>
 
         <div className="mb-12">
-          <h3 className="mb-4 text-xl font-semibold text-white">Advertising Requests</h3>
+          <h3 className="mb-4 text-xl font-semibold text-white">
+            Advertising Requests
+          </h3>
           <div className="bg-zinc-900 rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-zinc-800">
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Company</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Budget</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Message</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      Company
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      Budget
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      Message
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-800">
@@ -279,26 +320,37 @@ export default function Admin() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {new Date(request.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">{request.name}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <a href={`mailto:${request.email}`} className="text-blue-400 hover:text-blue-300">
+                        {request.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <a
+                          href={`mailto:${request.email}`}
+                          className="text-blue-400 hover:text-blue-300"
+                        >
                           {request.email}
                         </a>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">{request.company}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">{request.budget}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {request.company}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {request.budget}
+                      </td>
                       <td className="px-6 py-4 text-sm max-w-xs">
                         <div className="truncate" title={request.message}>
                           {request.message}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          request.processed
-                            ? 'bg-green-900 text-green-200'
-                            : 'bg-yellow-900 text-yellow-200'
-                        }`}>
-                          {request.processed ? 'Processed' : 'Pending'}
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            request.processed
+                              ? "bg-green-900 text-green-200"
+                              : "bg-yellow-900 text-yellow-200"
+                          }`}
+                        >
+                          {request.processed ? "Processed" : "Pending"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -316,9 +368,13 @@ export default function Admin() {
                       </td>
                     </tr>
                   ))}
-                  {(!advertisingRequests || advertisingRequests.length === 0) && (
+                  {(!advertisingRequests ||
+                    advertisingRequests.length === 0) && (
                     <tr>
-                      <td colSpan={8} className="px-6 py-4 text-center text-zinc-400">
+                      <td
+                        colSpan={8}
+                        className="px-6 py-4 text-center text-zinc-400"
+                      >
                         No advertising requests yet
                       </td>
                     </tr>
@@ -330,7 +386,9 @@ export default function Admin() {
         </div>
 
         <div className="mb-12">
-          <h3 className="mb-4 text-xl font-semibold text-white">Pending Approvals</h3>
+          <h3 className="mb-4 text-xl font-semibold text-white">
+            Pending Approvals
+          </h3>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 h-full">
             {pendingProjects?.map((project) => (
               <div key={project.id} className="relative h-full">
@@ -362,7 +420,9 @@ export default function Admin() {
         </div>
 
         <div>
-          <h3 className="mb-4 text-xl font-semibold text-white">Approved Projects</h3>
+          <h3 className="mb-4 text-xl font-semibold text-white">
+            Approved Projects
+          </h3>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 h-full">
             {approvedProjects?.map((project) => (
               <div key={project.id} className="relative h-full">
@@ -393,12 +453,18 @@ export default function Admin() {
           </div>
         </div>
 
-        <AlertDialog open={!!projectToDelete} onOpenChange={() => setProjectToDelete(null)}>
+        <AlertDialog
+          open={!!projectToDelete}
+          onOpenChange={() => setProjectToDelete(null)}
+        >
           <AlertDialogContent className="bg-black border-zinc-800">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-white">Delete Project</AlertDialogTitle>
+              <AlertDialogTitle className="text-white">
+                Delete Project
+              </AlertDialogTitle>
               <AlertDialogDescription className="text-zinc-400">
-                Are you sure you want to delete "{projectToDelete?.name}"? This action cannot be undone.
+                Are you sure you want to delete "{projectToDelete?.name}"? This
+                action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

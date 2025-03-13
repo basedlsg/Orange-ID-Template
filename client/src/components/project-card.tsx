@@ -16,10 +16,15 @@ interface ProjectCardProps {
   project: Project;
   onView?: () => void;
   userLikes?: number[];
-  onLike?: () => void;
+  onEdit?: () => void;
 }
 
-export function ProjectCard({ project, onView, userLikes = [], onLike }: ProjectCardProps) {
+export function ProjectCard({
+  project,
+  onView,
+  userLikes = [],
+  onEdit,
+}: ProjectCardProps) {
   const { isLoggedIn, user } = useBedrockPassport();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { toast } = useToast();
@@ -40,7 +45,7 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
       const response = await apiRequest(
         "POST",
         `/api/projects/${project.id}/like`,
-        { orangeId }
+        { orangeId },
       );
       if (!response.ok) {
         throw new Error("Failed to toggle like");
@@ -48,11 +53,12 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
       return response.json();
     },
     onSuccess: () => {
+      // Invalidate both the projects list and the specific user's likes
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       if (user?.sub || user?.id) {
-        queryClient.invalidateQueries({ 
+        queryClient.invalidateQueries({
           queryKey: ["/api/users", user.sub || user.id, "likes"],
-          exact: true 
+          exact: true,
         });
       }
       setIsLiked(!isLiked);
@@ -60,7 +66,8 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
     onError: (error) => {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update like",
+        description:
+          error instanceof Error ? error.message : "Failed to update like",
         variant: "destructive",
       });
     },
@@ -72,11 +79,7 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
       setShowLoginDialog(true);
       return;
     }
-    if (onLike) {
-      onLike();
-    } else {
-      toggleLike();
-    }
+    toggleLike();
   };
 
   const handleClick = async () => {
@@ -98,12 +101,16 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
     }
   };
 
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onEdit) {
+      onEdit();
+    }
+  };
+
   return (
     <>
-      <Card 
-        className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 h-full flex flex-col"
-        onClick={handleClick}
-      >
+      <Card className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 h-full flex flex-col">
         <div className="aspect-video overflow-hidden bg-zinc-900">
           <img
             src={project.thumbnail || defaultThumbnail}
@@ -113,23 +120,23 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
         </div>
         <CardHeader className="p-4">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-white line-clamp-2">{project.name}</CardTitle>
+            <CardTitle className="text-white">{project.name}</CardTitle>
             <Button
               variant="ghost"
               size="icon"
               className={`${
-                isLiked ? 'text-red-500' : 'text-zinc-400 hover:text-red-500'
+                isLiked ? "text-red-500" : "text-zinc-400 hover:text-red-500"
               } transition-colors`}
               onClick={handleLikeClick}
               disabled={isLiking}
             >
-              <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+              <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
               <span className="ml-1 text-sm">{project.likeCount || 0}</span>
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-4 pt-0 flex flex-col flex-grow">
-          <p className="mb-4 text-sm text-zinc-400 line-clamp-3">{project.description}</p>
+        <CardContent className="p-4 pt-0">
+          <p className="mb-4 text-sm text-zinc-400">{project.description}</p>
           <div className="flex flex-wrap gap-2 mb-4">
             {project.sponsorshipEnabled && (
               <Badge
@@ -160,7 +167,7 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
               </Badge>
             ))}
           </div>
-          <div className="mt-auto flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 text-sm text-zinc-400">
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
@@ -171,21 +178,33 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
                   variant="ghost"
                   size="sm"
                   onClick={handleXClick}
-                  className="text-zinc-400 hover:text-blue-400 p-0 h-auto"
+                  className="text-zinc-400 hover:text-blue-400 p-0 h-auto z-30"
                 >
                   <SiX className="h-4 w-4" />
                 </Button>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClick}
-              className="text-zinc-400 hover:text-white hover:bg-zinc-800"
-            >
-              <ExternalLink className="mr-2 h-4 w-4" />
-              Visit
-            </Button>
+            <div className="flex items-center gap-2">
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleEditClick}
+                  className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
+                >
+                  Edit
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClick}
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Visit
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

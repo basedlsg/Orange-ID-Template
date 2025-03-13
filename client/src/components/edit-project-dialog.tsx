@@ -1,5 +1,17 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +24,13 @@ import { X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
-import { PREDEFINED_AI_TOOLS, PREDEFINED_GENRES, type Project, type InsertProject, insertProjectSchema } from "@shared/schema";
+import {
+  PREDEFINED_AI_TOOLS,
+  PREDEFINED_GENRES,
+  type Project,
+  type InsertProject,
+  insertProjectSchema,
+} from "@shared/schema";
 import { useBedrockPassport } from "@bedrock_org/passport";
 
 interface EditProjectDialogProps {
@@ -21,7 +39,11 @@ interface EditProjectDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDialogProps) {
+export function EditProjectDialog({
+  project,
+  open,
+  onOpenChange,
+}: EditProjectDialogProps) {
   const { toast } = useToast();
   const { user } = useBedrockPassport();
   const [newTool, setNewTool] = useState("");
@@ -42,7 +64,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
   // Update local state when project changes
   useEffect(() => {
     if (project && open) {
-      console.log('Setting form state with project:', project);
+      console.log("Setting form state with project:", project);
       setFormState({
         name: project.name,
         description: project.description,
@@ -88,8 +110,12 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
 
       delete projectData.thumbnailFile;
 
-      console.log('Updating project with data:', projectData);
-      const response = await apiRequest("PATCH", `/api/projects/${project.id}?orangeId=${orangeId}`, projectData);
+      console.log("Updating project with data:", projectData);
+      const response = await apiRequest(
+        "PATCH",
+        `/api/projects/${project.id}?orangeId=${orangeId}`,
+        projectData,
+      );
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Failed to update project");
@@ -99,24 +125,27 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
     onSuccess: (updatedProject) => {
       // Update the cache with the new data
       queryClient.setQueryData<Project>(
-        ['/api/projects', project?.id],
-        updatedProject
+        ["/api/projects", project?.id],
+        updatedProject,
       );
 
       // Update the project in any list queries
       queryClient.setQueryData<Project[]>(
-        ['/api/projects', { approved: true }],
-        (old) => old?.map(p => p.id === project?.id ? updatedProject : p) || []
+        ["/api/projects", { approved: true }],
+        (old) =>
+          old?.map((p) => (p.id === project?.id ? updatedProject : p)) || [],
       );
 
       queryClient.setQueryData<Project[]>(
-        ['/api/projects', { approved: false }],
-        (old) => old?.map(p => p.id === project?.id ? updatedProject : p) || []
+        ["/api/projects", { approved: false }],
+        (old) =>
+          old?.map((p) => (p.id === project?.id ? updatedProject : p)) || [],
       );
 
       queryClient.setQueryData<Project[]>(
-        ['/api/users', user?.sub || user?.id, 'submissions'],
-        (old) => old?.map(p => p.id === project?.id ? updatedProject : p) || []
+        ["/api/users", user?.sub || user?.id, "submissions"],
+        (old) =>
+          old?.map((p) => (p.id === project?.id ? updatedProject : p)) || [],
       );
 
       toast({
@@ -128,7 +157,8 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
     onError: (error) => {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update project",
+        description:
+          error instanceof Error ? error.message : "Failed to update project",
         variant: "destructive",
       });
     },
@@ -139,7 +169,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
     const currentTools = formState.aiTools || [];
     if (!currentTools.includes(tool)) {
       const newTools = [...currentTools, tool];
-      setFormState(prev => ({ ...prev, aiTools: newTools }));
+      setFormState((prev) => ({ ...prev, aiTools: newTools }));
       form.setValue("aiTools", newTools);
     }
     setNewTool("");
@@ -150,21 +180,21 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
     const currentGenres = formState.genres || [];
     if (!currentGenres.includes(genre)) {
       const newGenres = [...currentGenres, genre];
-      setFormState(prev => ({ ...prev, genres: newGenres }));
+      setFormState((prev) => ({ ...prev, genres: newGenres }));
       form.setValue("genres", newGenres);
     }
     setNewGenre("");
   };
 
   const handleRemoveTool = (tool: string) => {
-    const newTools = formState.aiTools.filter(t => t !== tool);
-    setFormState(prev => ({ ...prev, aiTools: newTools }));
+    const newTools = formState.aiTools.filter((t) => t !== tool);
+    setFormState((prev) => ({ ...prev, aiTools: newTools }));
     form.setValue("aiTools", newTools);
   };
 
   const handleRemoveGenre = (genre: string) => {
-    const newGenres = formState.genres.filter(g => g !== genre);
-    setFormState(prev => ({ ...prev, genres: newGenres }));
+    const newGenres = formState.genres.filter((g) => g !== genre);
+    setFormState((prev) => ({ ...prev, genres: newGenres }));
     form.setValue("genres", newGenres);
   };
 
@@ -175,7 +205,10 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
           <DialogTitle className="text-white">Edit Project</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit((data) => updateProject(data))} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit((data) => updateProject(data))}
+            className="space-y-6"
+          >
             <FormField
               control={form.control}
               name="name"
@@ -183,14 +216,17 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
                 <FormItem>
                   <FormLabel className="text-zinc-400">Project Name</FormLabel>
                   <FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       value={formState.name}
-                      onChange={e => {
+                      onChange={(e) => {
                         field.onChange(e);
-                        setFormState(prev => ({ ...prev, name: e.target.value }));
+                        setFormState((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }));
                       }}
-                      className="bg-zinc-900 border-zinc-700 text-white" 
+                      className="bg-zinc-900 border-zinc-700 text-white"
                     />
                   </FormControl>
                   <FormMessage />
@@ -205,12 +241,15 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
                 <FormItem>
                   <FormLabel className="text-zinc-400">Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      {...field} 
+                    <Textarea
+                      {...field}
                       value={formState.description}
-                      onChange={e => {
+                      onChange={(e) => {
                         field.onChange(e);
-                        setFormState(prev => ({ ...prev, description: e.target.value }));
+                        setFormState((prev) => ({
+                          ...prev,
+                          description: e.target.value,
+                        }));
                       }}
                       className="bg-zinc-900 border-zinc-700 text-white"
                     />
@@ -227,15 +266,18 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
                 <FormItem>
                   <FormLabel className="text-zinc-400">Project URL</FormLabel>
                   <FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       type="url"
                       value={formState.url}
-                      onChange={e => {
+                      onChange={(e) => {
                         field.onChange(e);
-                        setFormState(prev => ({ ...prev, url: e.target.value }));
+                        setFormState((prev) => ({
+                          ...prev,
+                          url: e.target.value,
+                        }));
                       }}
-                      className="bg-zinc-900 border-zinc-700 text-white" 
+                      className="bg-zinc-900 border-zinc-700 text-white"
                     />
                   </FormControl>
                   <FormMessage />
@@ -292,7 +334,9 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
               name="genres"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">Project Genres</FormLabel>
+                  <FormLabel className="text-zinc-400">
+                    Project Genres
+                  </FormLabel>
                   <div className="space-y-4">
                     <div className="flex flex-wrap gap-2 min-h-[2.5rem] p-2 bg-zinc-900 border border-zinc-700 rounded-md">
                       {formState.genres?.map((genre) => (
@@ -347,7 +391,10 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
                         const file = e.target.files?.[0];
                         field.onChange(file);
                         if (file) {
-                          setFormState(prev => ({ ...prev, thumbnailFile: file }));
+                          setFormState((prev) => ({
+                            ...prev,
+                            thumbnailFile: file,
+                          }));
                         }
                       }}
                       className="bg-zinc-900 border-zinc-700 text-white"
@@ -363,14 +410,19 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
               name="xHandle"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">X Handle (optional)</FormLabel>
+                  <FormLabel className="text-zinc-400">
+                    X Handle (optional)
+                  </FormLabel>
                   <FormControl>
-                    <Input 
+                    <Input
                       {...field}
                       value={formState.xHandle}
-                      onChange={e => {
+                      onChange={(e) => {
                         field.onChange(e);
-                        setFormState(prev => ({ ...prev, xHandle: e.target.value }));
+                        setFormState((prev) => ({
+                          ...prev,
+                          xHandle: e.target.value,
+                        }));
                       }}
                       className="bg-zinc-900 border-zinc-700 text-white"
                     />
@@ -395,7 +447,10 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
                       checked={formState.sponsorshipEnabled}
                       onCheckedChange={(checked) => {
                         field.onChange(checked);
-                        setFormState(prev => ({ ...prev, sponsorshipEnabled: checked }));
+                        setFormState((prev) => ({
+                          ...prev,
+                          sponsorshipEnabled: checked,
+                        }));
                       }}
                       className="data-[state=unchecked]:bg-gray-800 data-[state=unchecked]:border-blue-400"
                     />
@@ -410,14 +465,19 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
                 name="sponsorshipUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-zinc-400">Sponsorship URL</FormLabel>
+                    <FormLabel className="text-zinc-400">
+                      Sponsorship URL
+                    </FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         value={formState.sponsorshipUrl}
-                        onChange={e => {
+                        onChange={(e) => {
                           field.onChange(e);
-                          setFormState(prev => ({ ...prev, sponsorshipUrl: e.target.value }));
+                          setFormState((prev) => ({
+                            ...prev,
+                            sponsorshipUrl: e.target.value,
+                          }));
                         }}
                         type="url"
                         className="bg-zinc-900 border-zinc-700 text-white"
