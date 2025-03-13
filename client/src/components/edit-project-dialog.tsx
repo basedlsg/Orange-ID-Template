@@ -333,6 +333,33 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
 
             <FormField
               control={form.control}
+              name="thumbnailFile"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-zinc-400">
+                    Thumbnail Image
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        field.onChange(file);
+                        if (file) {
+                          setFormState(prev => ({ ...prev, thumbnailFile: file }));
+                        }
+                      }}
+                      className="bg-zinc-900 border-zinc-700 text-white"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="xHandle"
               render={({ field }) => (
                 <FormItem>
@@ -402,33 +429,6 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
                 )}
               />
             )}
-
-            <FormField
-              control={form.control}
-              name="thumbnailFile"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-zinc-400">
-                    Thumbnail Image
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        field.onChange(file);
-                        if (file) {
-                          setFormState(prev => ({ ...prev, thumbnailFile: file }));
-                        }
-                      }}
-                      className="bg-zinc-900 border-zinc-700 text-white"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <Button
               type="submit"

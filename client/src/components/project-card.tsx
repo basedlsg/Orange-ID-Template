@@ -16,10 +16,10 @@ interface ProjectCardProps {
   project: Project;
   onView?: () => void;
   userLikes?: number[];
-  onEdit?: () => void;
+  onLike?: () => void;
 }
 
-export function ProjectCard({ project, onView, userLikes = [], onEdit }: ProjectCardProps) {
+export function ProjectCard({ project, onView, userLikes = [], onLike }: ProjectCardProps) {
   const { isLoggedIn, user } = useBedrockPassport();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { toast } = useToast();
@@ -35,12 +35,9 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
       if (!user?.sub && !user?.id) {
         throw new Error("User ID not found");
       }
-
-      const orangeId = user.sub || user.id;
       const response = await apiRequest(
         "POST",
-        `/api/projects/${project.id}/like`,
-        { orangeId }
+        `/api/projects/${project.id}/like`
       );
       if (!response.ok) {
         throw new Error("Failed to toggle like");
@@ -48,7 +45,6 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate both the projects list and the specific user's likes
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       if (user?.sub || user?.id) {
         queryClient.invalidateQueries({ 
@@ -73,7 +69,11 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
       setShowLoginDialog(true);
       return;
     }
-    toggleLike();
+    if (onLike) {
+      onLike();
+    } else {
+      toggleLike();
+    }
   };
 
   const handleClick = async () => {
@@ -95,16 +95,12 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
     }
   };
 
-  const handleEditClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onEdit) {
-      onEdit();
-    }
-  };
-
   return (
     <>
-      <Card className="group relative overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800">
+      <Card 
+        className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 min-h-[500px] flex flex-col"
+        onClick={handleClick}
+      >
         <div className="aspect-video overflow-hidden bg-zinc-900">
           <img
             src={project.thumbnail || defaultThumbnail}
@@ -114,7 +110,7 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
         </div>
         <CardHeader className="p-4">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-white">{project.name}</CardTitle>
+            <CardTitle className="text-white line-clamp-2">{project.name}</CardTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -129,8 +125,8 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-4 pt-0">
-          <p className="mb-4 text-sm text-zinc-400">{project.description}</p>
+        <CardContent className="p-4 pt-0 flex flex-col flex-grow">
+          <p className="mb-4 text-sm text-zinc-400 line-clamp-3">{project.description}</p>
           <div className="flex flex-wrap gap-2 mb-4">
             {project.sponsorshipEnabled && (
               <Badge
@@ -161,7 +157,7 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
               </Badge>
             ))}
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="mt-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 text-sm text-zinc-400">
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
@@ -172,33 +168,21 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
                   variant="ghost"
                   size="sm"
                   onClick={handleXClick}
-                  className="text-zinc-400 hover:text-blue-400 p-0 h-auto z-30"
+                  className="text-zinc-400 hover:text-blue-400 p-0 h-auto"
                 >
                   <SiX className="h-4 w-4" />
                 </Button>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              {onEdit && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleEditClick}
-                  className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
-                >
-                  Edit
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClick}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
-              >
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Visit
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleClick}
+              className="text-zinc-400 hover:text-white hover:bg-zinc-800"
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Visit
+            </Button>
           </div>
         </CardContent>
       </Card>
