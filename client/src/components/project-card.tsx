@@ -19,7 +19,12 @@ interface ProjectCardProps {
   onLike?: () => void;
 }
 
-export function ProjectCard({ project, onView, userLikes = [], onLike }: ProjectCardProps) {
+export function ProjectCard({
+  project,
+  onView,
+  userLikes = [],
+  onLike,
+}: ProjectCardProps) {
   const { isLoggedIn, user } = useBedrockPassport();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { toast } = useToast();
@@ -37,7 +42,7 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
       }
       const response = await apiRequest(
         "POST",
-        `/api/projects/${project.id}/like`
+        `/api/projects/${project.id}/like`,
       );
       if (!response.ok) {
         throw new Error("Failed to toggle like");
@@ -47,9 +52,9 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       if (user?.sub || user?.id) {
-        queryClient.invalidateQueries({ 
+        queryClient.invalidateQueries({
           queryKey: ["/api/users", user.sub || user.id, "likes"],
-          exact: true 
+          exact: true,
         });
       }
       setIsLiked(!isLiked);
@@ -57,7 +62,8 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
     onError: (error) => {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update like",
+        description:
+          error instanceof Error ? error.message : "Failed to update like",
         variant: "destructive",
       });
     },
@@ -98,7 +104,7 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
   return (
     <>
       <Card 
-        className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 min-h-[500px] flex flex-col"
+        className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 h-full flex flex-col"
         onClick={handleClick}
       >
         <div className="aspect-video overflow-hidden bg-zinc-900">
@@ -110,23 +116,27 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
         </div>
         <CardHeader className="p-4">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-white line-clamp-2">{project.name}</CardTitle>
+            <CardTitle className="text-white line-clamp-2">
+              {project.name}
+            </CardTitle>
             <Button
               variant="ghost"
               size="icon"
               className={`${
-                isLiked ? 'text-red-500' : 'text-zinc-400 hover:text-red-500'
+                isLiked ? "text-red-500" : "text-zinc-400 hover:text-red-500"
               } transition-colors`}
               onClick={handleLikeClick}
               disabled={isLiking}
             >
-              <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+              <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
               <span className="ml-1 text-sm">{project.likeCount || 0}</span>
             </Button>
           </div>
         </CardHeader>
         <CardContent className="p-4 pt-0 flex flex-col flex-grow">
-          <p className="mb-4 text-sm text-zinc-400 line-clamp-3">{project.description}</p>
+          <p className="mb-4 text-sm text-zinc-400 line-clamp-3">
+            {project.description}
+          </p>
           <div className="flex flex-wrap gap-2 mb-4">
             {project.sponsorshipEnabled && (
               <Badge

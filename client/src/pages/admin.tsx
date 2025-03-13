@@ -331,9 +331,9 @@ export default function Admin() {
 
         <div className="mb-12">
           <h3 className="mb-4 text-xl font-semibold text-white">Pending Approvals</h3>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 h-full">
             {pendingProjects?.map((project) => (
-              <div key={project.id} className="relative">
+              <div key={project.id} className="relative h-full">
                 <ProjectCard project={project} />
                 <div className="absolute top-4 right-4 flex gap-2 z-20">
                   <Button
@@ -363,9 +363,9 @@ export default function Admin() {
 
         <div>
           <h3 className="mb-4 text-xl font-semibold text-white">Approved Projects</h3>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 h-full">
             {approvedProjects?.map((project) => (
-              <div key={project.id} className="relative">
+              <div key={project.id} className="relative h-full">
                 <ProjectCard project={project} />
                 <div className="absolute top-4 right-4 flex gap-2 z-20">
                   <Button
