@@ -62,6 +62,11 @@ export default function Submit() {
   const editingProjectId = params.get('edit');
   const isEditing = !!editingProjectId;
 
+  const form = useForm<InsertProject>({
+    resolver: zodResolver(insertProjectSchema),
+    defaultValues: defaultFormValues,
+  });
+
   // Fetch existing project data if editing
   const { data: existingProject, isLoading: isLoadingProject } = useQuery<Project>({
     queryKey: ['/api/projects', Number(editingProjectId)],
@@ -78,11 +83,6 @@ export default function Submit() {
       return data;
     },
     enabled: isEditing,
-  });
-
-  const form = useForm<InsertProject>({
-    resolver: zodResolver(insertProjectSchema),
-    defaultValues: defaultFormValues,
   });
 
   // Update form when existing project data changes
@@ -252,14 +252,9 @@ export default function Submit() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-400">
-                        Project Name
-                      </FormLabel>
+                      <FormLabel className="text-zinc-400">Project Name</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          className="bg-zinc-900 border-zinc-700 text-white"
-                        />
+                        <Input {...field} className="bg-zinc-900 border-zinc-700 text-white" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -271,14 +266,9 @@ export default function Submit() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-400">
-                        Description (max 200 characters)
-                      </FormLabel>
+                      <FormLabel className="text-zinc-400">Description</FormLabel>
                       <FormControl>
-                        <Textarea
-                          {...field}
-                          className="bg-zinc-900 border-zinc-700 text-white"
-                        />
+                        <Textarea {...field} className="bg-zinc-900 border-zinc-700 text-white" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
