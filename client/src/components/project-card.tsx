@@ -135,7 +135,7 @@ export function ProjectCard({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-4 pt-0">
+        <CardContent className="p-4 pt-0 flex-grow flex flex-col">
           <p className="mb-4 text-sm text-zinc-400">{project.description}</p>
           <div className="flex flex-wrap gap-2 mb-4">
             {project.sponsorshipEnabled && (
