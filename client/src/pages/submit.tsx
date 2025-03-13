@@ -64,22 +64,25 @@ export default function Submit() {
 
   // Fetch existing project data if editing
   const { data: existingProject, isLoading: isLoadingProject } = useQuery<Project>({
-    queryKey: ['/api/projects', editingProjectId],
+    queryKey: ['/api/projects', Number(editingProjectId)],
     queryFn: async () => {
-      if (!editingProjectId) throw new Error('No project ID provided');
+      console.log('Fetching project data for ID:', editingProjectId);
       const response = await fetch(`/api/projects/${editingProjectId}`);
-      if (!response.ok) throw new Error('Failed to fetch project');
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Failed to fetch project:', error);
+        throw new Error('Failed to fetch project');
+      }
       const data = await response.json();
       console.log('Fetched project data:', data);
       return data;
     },
-    enabled: !!editingProjectId,
+    enabled: isEditing,
   });
 
-  // Initialize form with default values
   const form = useForm<InsertProject>({
     resolver: zodResolver(insertProjectSchema),
-    defaultValues: existingProject || defaultFormValues,
+    defaultValues: defaultFormValues,
   });
 
   // Update form when existing project data changes
@@ -129,7 +132,6 @@ export default function Submit() {
 
       delete projectData.thumbnailFile;
 
-      // Use PATCH for updates, POST for new submissions
       const method = isEditing ? "PATCH" : "POST";
       const endpoint = isEditing ? `/api/projects/${editingProjectId}` : "/api/projects";
       console.log(`Submitting project with method ${method} to endpoint ${endpoint}`, projectData);
@@ -177,14 +179,6 @@ export default function Submit() {
 
   const handleRemoveTool = (tool: string) => {
     const currentTools = form.getValues("aiTools") || [];
-    if (currentTools.length <= 1) {
-      toast({
-        title: "Warning",
-        description: "At least one AI tool must be selected",
-        variant: "destructive",
-      });
-      return;
-    }
     form.setValue(
       "aiTools",
       currentTools.filter((t) => t !== tool),
@@ -193,14 +187,6 @@ export default function Submit() {
 
   const handleRemoveGenre = (genre: string) => {
     const currentGenres = form.getValues("genres") || [];
-    if (currentGenres.length <= 1) {
-      toast({
-        title: "Warning",
-        description: "At least one genre must be selected",
-        variant: "destructive",
-      });
-      return;
-    }
     form.setValue(
       "genres",
       currentGenres.filter((g) => g !== genre),
@@ -220,9 +206,8 @@ export default function Submit() {
 
   const handleSubmitAnother = () => {
     setShowSuccessModal(false);
-    form.reset();
+    form.reset(defaultFormValues);
     if (isEditing) {
-      // If we were editing, go back to submit page without edit parameter
       setLocation("/submit");
     }
     window.scrollTo(0, 0);
