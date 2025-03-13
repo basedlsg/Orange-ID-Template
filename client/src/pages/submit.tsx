@@ -56,63 +56,71 @@ export default function Submit() {
   const [newTool, setNewTool] = useState("");
   const [newGenre, setNewGenre] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [projectData, setProjectData] = useState<Project | null>(null);
 
   // Parse project ID from URL
   const params = new URLSearchParams(search);
   const editingProjectId = params.get('edit');
-  const isEditing = !!editingProjectId;
-  const projectId = isEditing ? parseInt(editingProjectId, 10) : null;
+  const projectId = editingProjectId ? parseInt(editingProjectId, 10) : null;
+  const isEditing = !!projectId;
 
-  console.log('Edit mode:', isEditing, 'Project ID:', projectId);
+  console.log('Submit page - Edit mode:', isEditing, 'Project ID:', projectId);
 
-  // Initialize form
+  // Create form after we have project data
   const form = useForm<InsertProject>({
     resolver: zodResolver(insertProjectSchema),
-    defaultValues: defaultFormValues,
+    defaultValues: projectData ? {
+      name: projectData.name,
+      description: projectData.description,
+      url: projectData.url,
+      aiTools: projectData.aiTools || [],
+      genres: projectData.genres || [],
+      thumbnail: projectData.thumbnail || '',
+      xHandle: projectData.xHandle || '',
+      sponsorshipEnabled: projectData.sponsorshipEnabled || false,
+      sponsorshipUrl: projectData.sponsorshipUrl || '',
+    } : defaultFormValues,
   });
 
-  // Fetch existing project data if editing
-  const { data: existingProject, isLoading: isLoadingProject } = useQuery({
+  // Fetch project data if editing
+  useQuery({
     queryKey: ['/api/projects', projectId],
     queryFn: async () => {
       if (!projectId) throw new Error('No project ID provided');
-      console.log('Fetching project data for ID:', projectId);
 
+      console.log('Fetching project data for ID:', projectId);
       const response = await fetch(`/api/projects/${projectId}`);
+
       if (!response.ok) {
-        const error = await response.json();
-        console.error('Failed to fetch project:', error);
+        console.error('Failed to fetch project:', await response.text());
         throw new Error('Failed to fetch project');
       }
 
       const data = await response.json();
       console.log('Successfully fetched project data:', data);
-      return data as Project;
+      setProjectData(data);
+      return data;
     },
-    enabled: isEditing && projectId !== null,
+    enabled: isEditing,
   });
 
-  // Update form when project data is loaded
+  // Update form when project data changes
   useEffect(() => {
-    if (existingProject) {
-      console.log('Updating form with project data:', existingProject);
-
-      const formData = {
-        name: existingProject.name,
-        description: existingProject.description,
-        url: existingProject.url,
-        aiTools: existingProject.aiTools || [],
-        genres: existingProject.genres || [],
-        thumbnail: existingProject.thumbnail || '',
-        xHandle: existingProject.xHandle || '',
-        sponsorshipEnabled: existingProject.sponsorshipEnabled || false,
-        sponsorshipUrl: existingProject.sponsorshipUrl || '',
-      };
-
-      console.log('Setting form values:', formData);
-      form.reset(formData);
+    if (projectData) {
+      console.log('Updating form with project data:', projectData);
+      form.reset({
+        name: projectData.name,
+        description: projectData.description,
+        url: projectData.url,
+        aiTools: projectData.aiTools || [],
+        genres: projectData.genres || [],
+        thumbnail: projectData.thumbnail || '',
+        xHandle: projectData.xHandle || '',
+        sponsorshipEnabled: projectData.sponsorshipEnabled || false,
+        sponsorshipUrl: projectData.sponsorshipUrl || '',
+      });
     }
-  }, [existingProject, form]);
+  }, [projectData, form]);
 
   const { mutate: submitProject, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {
@@ -188,7 +196,7 @@ export default function Submit() {
     const currentTools = form.getValues("aiTools") || [];
     form.setValue(
       "aiTools",
-      currentTools.filter((t) => t !== tool),
+      currentTools.filter((t) => t !== tool)
     );
   };
 
@@ -196,7 +204,7 @@ export default function Submit() {
     const currentGenres = form.getValues("genres") || [];
     form.setValue(
       "genres",
-      currentGenres.filter((g) => g !== genre),
+      currentGenres.filter((g) => g !== genre)
     );
   };
 
@@ -225,7 +233,7 @@ export default function Submit() {
     setLocation("/");
   };
 
-  if (isLoadingProject) {
+  if (!projectData && isEditing) {
     return (
       <div className="container mx-auto max-w-2xl px-4 py-8">
         <div className="animate-pulse">
@@ -287,15 +295,9 @@ export default function Submit() {
                   name="url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-zinc-400">
-                        Project URL
-                      </FormLabel>
+                      <FormLabel className="text-zinc-400">Project URL</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          type="url"
-                          className="bg-zinc-900 border-zinc-700 text-white"
-                        />
+                        <Input {...field} type="url" className="bg-zinc-900 border-zinc-700 text-white" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
