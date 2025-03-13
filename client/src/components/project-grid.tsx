@@ -1,11 +1,11 @@
 import { ProjectCard } from "./project-card";
 import type { Project } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Edit } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { LoginDialog } from "./login-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,16 @@ import { useQuery } from "@tanstack/react-query";
 import { SkeletonCard } from "./skeleton-card";
 import { EditProjectDialog } from "./edit-project-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ProjectGridProps {
   projects: Project[];
@@ -36,6 +46,7 @@ export function ProjectGrid({
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
   const { data: userLikes = [] } = useQuery({
     queryKey: ["/api/users", user?.sub || user?.id, "likes"],
@@ -75,6 +86,36 @@ export function ProjectGrid({
 
   const handleEditClick = (project: Project) => {
     setProjectToEdit(project);
+  };
+
+  const handleDeleteClick = (project: Project) => {
+    setProjectToDelete(project);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!projectToDelete) return;
+
+    try {
+      const response = await apiRequest("DELETE", `/api/projects/${projectToDelete.id}`);
+      if (!response.ok) {
+        throw new Error("Failed to delete project");
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users", user?.sub || user?.id, "submissions"] });
+
+      toast({
+        title: "Success",
+        description: "Project deleted successfully",
+      });
+      setProjectToDelete(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete project",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleLikeClick = async (project: Project) => {
@@ -174,7 +215,7 @@ export function ProjectGrid({
               onLike={() => handleLikeClick(project)}
             />
             {showEditButton && (
-              <div className="absolute top-4 right-4 z-20">
+              <div className="absolute top-4 right-4 flex gap-2 z-20">
                 <Button
                   onClick={() => handleEditClick(project)}
                   variant="outline"
@@ -182,6 +223,14 @@ export function ProjectGrid({
                   className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
                 >
                   <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => handleDeleteClick(project)}
+                  className="z-20"
+                >
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             )}
@@ -200,6 +249,31 @@ export function ProjectGrid({
         open={!!projectToEdit}
         onOpenChange={(open) => !open && setProjectToEdit(null)}
       />
+
+      <AlertDialog open={!!projectToDelete} onOpenChange={() => setProjectToDelete(null)}>
+        <AlertDialogContent className="bg-black border-zinc-800">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white">Delete Project</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              Are you sure you want to delete "{projectToDelete?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => setProjectToDelete(null)}
+              className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-red-500 hover:bg-red-600 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

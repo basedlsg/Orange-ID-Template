@@ -272,6 +272,28 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
 
             <FormField
               control={form.control}
+              name="xHandle"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-zinc-400">X Handle (optional)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field}
+                      value={formState.xHandle}
+                      onChange={e => {
+                        field.onChange(e);
+                        setFormState(prev => ({ ...prev, xHandle: e.target.value }));
+                      }}
+                      className="bg-zinc-900 border-zinc-700 text-white"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="aiTools"
               render={({ field }) => (
                 <FormItem>
@@ -358,27 +380,6 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="xHandle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-zinc-400">X Handle (optional)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      {...field}
-                      value={formState.xHandle}
-                      onChange={e => {
-                        field.onChange(e);
-                        setFormState(prev => ({ ...prev, xHandle: e.target.value }));
-                      }}
-                      className="bg-zinc-900 border-zinc-700 text-white"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}
