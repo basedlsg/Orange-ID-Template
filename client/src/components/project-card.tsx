@@ -87,10 +87,7 @@ export function ProjectCard({
       onView();
     }
     const url = new URL(project.url);
-    url.searchParams.set('ref', 'vibecodinglist.com');
-    url.searchParams.set('utm_source', 'vibecodinglist');
-    url.searchParams.set('utm_medium', 'directory');
-    url.searchParams.set('utm_campaign', 'project_click');
+    url.searchParams.set('utm_source', 'vibecodinglist.com');
     window.open(url.toString(), "_blank");
   };
 
