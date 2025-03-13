@@ -50,17 +50,7 @@ export default function Submit() {
   const editingProjectId = params.get('edit');
   const isEditing = !!editingProjectId;
 
-  // Fetch existing project data if editing
-  const { data: existingProject, isLoading: isLoadingProject } = useQuery<Project>({
-    queryKey: ['/api/projects', editingProjectId],
-    queryFn: async () => {
-      const response = await fetch(`/api/projects/${editingProjectId}`);
-      if (!response.ok) throw new Error('Failed to fetch project');
-      return response.json();
-    },
-    enabled: isEditing,
-  });
-
+  // Initialize form with empty values
   const form = useForm<InsertProject>({
     resolver: zodResolver(insertProjectSchema),
     defaultValues: {
@@ -76,9 +66,22 @@ export default function Submit() {
     },
   });
 
+  // Fetch existing project data if editing
+  const { data: existingProject, isLoading: isLoadingProject } = useQuery({
+    queryKey: ['/api/projects', editingProjectId],
+    queryFn: async () => {
+      if (!editingProjectId) throw new Error('No project ID provided');
+      const response = await fetch(`/api/projects/${editingProjectId}`);
+      if (!response.ok) throw new Error('Failed to fetch project');
+      return response.json();
+    },
+    enabled: !!editingProjectId,
+  });
+
   // Update form with existing project data when available
   useEffect(() => {
     if (existingProject) {
+      console.log('Resetting form with existing project:', existingProject);
       form.reset({
         name: existingProject.name,
         description: existingProject.description,
@@ -102,6 +105,7 @@ export default function Submit() {
         throw new Error("User not authenticated");
       }
 
+      // Handle thumbnail upload if needed
       if (data.thumbnailFile instanceof File) {
         const formData = new FormData();
         formData.append("thumbnail", data.thumbnailFile);
@@ -121,8 +125,10 @@ export default function Submit() {
 
       delete projectData.thumbnailFile;
 
+      // Use PATCH for updates, POST for new submissions
       const method = isEditing ? "PATCH" : "POST";
       const endpoint = isEditing ? `/api/projects/${editingProjectId}` : "/api/projects";
+      console.log(`Submitting project with method ${method} to endpoint ${endpoint}`, projectData);
 
       const response = await apiRequest(method, endpoint, {
         ...projectData,
@@ -141,8 +147,7 @@ export default function Submit() {
     onError: (error) => {
       toast({
         title: "Error",
-        description:
-          error instanceof Error ? error.message : "Failed to submit project",
+        description: error instanceof Error ? error.message : "Failed to submit project",
         variant: "destructive",
       });
     },
@@ -550,7 +555,7 @@ export default function Submit() {
           </DialogHeader>
           <div className="py-4">
             <p className="text-zinc-400 mb-6">
-              {isEditing 
+              {isEditing
                 ? 'Your project has been updated successfully.'
                 : 'Your project has been submitted and will be reviewed soon.'}
             </p>

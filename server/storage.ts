@@ -22,6 +22,8 @@ export interface IStorage {
   incrementViews(id: number): Promise<void>;
   deleteProject(id: number): Promise<void>;
   createProjects(insertProjects: InsertProject[], userId: number): Promise<Project[]>;
+  getProjectById(id: number): Promise<Project | undefined>;
+  updateProject(id: number, project: InsertProject): Promise<Project>;
 
   // Like operations
   createLike(orangeId: string, projectId: number): Promise<Like>;
@@ -218,6 +220,35 @@ export class DatabaseStorage implements IStorage {
       .returning();
     if (!request) throw new Error("Advertising request not found");
     return request;
+  }
+
+  async getProjectById(id: number): Promise<Project | undefined> {
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project;
+  }
+
+  async updateProject(id: number, updateProject: InsertProject): Promise<Project> {
+    const aiToolsArray = `{${updateProject.aiTools.map(tool => `"${tool}"`).join(',')}}`;
+    const genresArray = `{${updateProject.genres.map(genre => `"${genre}"`).join(',')}}`;
+
+    const [project] = await db
+      .update(projects)
+      .set({
+        name: updateProject.name,
+        description: updateProject.description,
+        url: updateProject.url,
+        thumbnail: updateProject.thumbnail,
+        xHandle: updateProject.xHandle,
+        aiTools: sql`${aiToolsArray}::text[]`,
+        genres: sql`${genresArray}::text[]`,
+        sponsorshipEnabled: updateProject.sponsorshipEnabled || false,
+        sponsorshipUrl: updateProject.sponsorshipUrl,
+      })
+      .where(eq(projects.id, id))
+      .returning();
+
+    if (!project) throw new Error("Project not found");
+    return project;
   }
 }
 

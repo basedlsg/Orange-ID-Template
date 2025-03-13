@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Input } from "@/components/ui/input";
-import { Upload, Trash2, Check } from "lucide-react";
+import { Upload, Trash2, Check, Edit } from "lucide-react";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import {
   AlertDialog,
@@ -19,13 +19,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import { SkeletonCard } from "@/components/skeleton-card";
+import { useLocation } from "wouter";
 
 export default function Admin() {
   const { toast } = useToast();
   const { user } = useBedrockPassport();
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [, setLocation] = useLocation();
 
-  // Check if user is admin - always run this hook first
   const { data: isAdmin, isLoading: isCheckingAdmin } = useQuery({
     queryKey: ["/api/users/check-admin", user?.sub || user?.id],
     queryFn: async () => {
@@ -37,7 +38,6 @@ export default function Admin() {
     enabled: !!user,
   });
 
-  // Fetch advertising requests
   const { data: advertisingRequests, isLoading: isLoadingAds } = useQuery<AdvertisingRequest[]>({
     queryKey: ["/api/advertising-requests"],
     queryFn: async () => {
@@ -50,7 +50,6 @@ export default function Admin() {
     enabled: !!isAdmin && !!user,
   });
 
-  // Mark advertising request as processed
   const { mutate: markProcessed } = useMutation({
     mutationFn: async (id: number) => {
       const response = await apiRequest("POST", `/api/advertising-requests/${id}/process?orangeId=${user?.sub || user?.id}`);
@@ -75,7 +74,6 @@ export default function Admin() {
     },
   });
 
-  // These queries only run if user is admin
   const { data: pendingProjects, isLoading: isPendingLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects", { approved: false }],
     queryFn: async () => {
@@ -162,7 +160,6 @@ export default function Admin() {
       const formData = new FormData();
       formData.append('csv', file);
 
-      // Add orangeId to the FormData
       const orangeId = user?.sub || user?.id;
       if (!orangeId) {
         throw new Error("User not authenticated");
@@ -211,6 +208,10 @@ export default function Admin() {
     }
   };
 
+  const handleEditClick = (project: Project) => {
+    setLocation(`/submit?edit=${project.id}`);
+  };
+
   if (!isAdmin && !isCheckingAdmin) {
     return null;
   }
@@ -253,7 +254,6 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Advertising Requests Section */}
         <div className="mb-12">
           <h3 className="mb-4 text-xl font-semibold text-white">Advertising Requests</h3>
           <div className="bg-zinc-900 rounded-lg overflow-hidden">
@@ -327,7 +327,6 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Pending Approvals Section */}
         <div className="mb-12">
           <h3 className="mb-4 text-xl font-semibold text-white">Pending Approvals</h3>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -340,6 +339,13 @@ export default function Admin() {
                     className="bg-blue-500 hover:bg-blue-600 text-white z-20"
                   >
                     Approve
+                  </Button>
+                  <Button
+                    onClick={() => handleEditClick(project)}
+                    variant="outline"
+                    className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 z-20"
+                  >
+                    <Edit className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="destructive"
@@ -357,14 +363,20 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Approved Projects Section */}
         <div>
           <h3 className="mb-4 text-xl font-semibold text-white">Approved Projects</h3>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {approvedProjects?.map((project) => (
               <div key={project.id} className="relative">
                 <ProjectCard project={project} />
-                <div className="absolute inset-x-0 bottom-4 flex justify-center">
+                <div className="absolute inset-x-0 bottom-4 flex justify-center gap-2">
+                  <Button
+                    onClick={() => handleEditClick(project)}
+                    variant="outline"
+                    className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800 z-20"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="destructive"
                     onClick={() => setProjectToDelete(project)}
@@ -381,7 +393,6 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Delete Confirmation Dialog */}
         <AlertDialog open={!!projectToDelete} onOpenChange={() => setProjectToDelete(null)}>
           <AlertDialogContent className="bg-black border-zinc-800">
             <AlertDialogHeader>
