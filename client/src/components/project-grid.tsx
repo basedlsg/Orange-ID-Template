@@ -96,13 +96,18 @@ export function ProjectGrid({
     if (!projectToDelete) return;
 
     try {
-      const response = await apiRequest("DELETE", `/api/projects/${projectToDelete.id}`);
+      const response = await apiRequest(
+        "DELETE",
+        `/api/projects/${projectToDelete.id}`,
+      );
       if (!response.ok) {
         throw new Error("Failed to delete project");
       }
 
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users", user?.sub || user?.id, "submissions"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/users", user?.sub || user?.id, "submissions"],
+      });
 
       toast({
         title: "Success",
@@ -112,7 +117,8 @@ export function ProjectGrid({
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete project",
+        description:
+          error instanceof Error ? error.message : "Failed to delete project",
         variant: "destructive",
       });
     }
@@ -200,8 +206,12 @@ export function ProjectGrid({
               <div className="rounded-full bg-blue-500/10 p-4 mb-4">
                 <Plus className="h-8 w-8 text-blue-400" />
               </div>
-              <h3 className="text-lg font-semibold text-blue-400 mb-2">Submit Project</h3>
-              <p className="text-sm text-zinc-400">Share your AI-powered project with the community</p>
+              <h3 className="text-lg font-semibold text-blue-400 mb-2">
+                Submit Project
+              </h3>
+              <p className="text-sm text-zinc-400">
+                Share your AI-powered project with the community
+              </p>
             </CardContent>
           </Card>
         )}
@@ -250,12 +260,18 @@ export function ProjectGrid({
         onOpenChange={(open) => !open && setProjectToEdit(null)}
       />
 
-      <AlertDialog open={!!projectToDelete} onOpenChange={() => setProjectToDelete(null)}>
+      <AlertDialog
+        open={!!projectToDelete}
+        onOpenChange={() => setProjectToDelete(null)}
+      >
         <AlertDialogContent className="bg-black border-zinc-800">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Delete Project</AlertDialogTitle>
+            <AlertDialogTitle className="text-white">
+              Delete Project
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-zinc-400">
-              Are you sure you want to delete "{projectToDelete?.name}"? This action cannot be undone.
+              Are you sure you want to delete "{projectToDelete?.name}"? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
