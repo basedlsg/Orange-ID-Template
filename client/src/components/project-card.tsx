@@ -19,12 +19,7 @@ interface ProjectCardProps {
   onLike?: () => void;
 }
 
-export function ProjectCard({
-  project,
-  onView,
-  userLikes = [],
-  onLike,
-}: ProjectCardProps) {
+export function ProjectCard({ project, onView, userLikes = [], onLike }: ProjectCardProps) {
   const { isLoggedIn, user } = useBedrockPassport();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { toast } = useToast();
@@ -54,7 +49,7 @@ export function ProjectCard({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       if (user?.sub || user?.id) {
-        queryClient.invalidateQueries({
+        queryClient.invalidateQueries({ 
           queryKey: ["/api/users", user.sub || user.id, "likes"],
           exact: true,
         });
@@ -64,8 +59,7 @@ export function ProjectCard({
     onError: (error) => {
       toast({
         title: "Error",
-        description:
-          error instanceof Error ? error.message : "Failed to update like",
+        description: error instanceof Error ? error.message : "Failed to update like",
         variant: "destructive",
       });
     },
