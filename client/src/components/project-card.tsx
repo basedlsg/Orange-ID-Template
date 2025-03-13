@@ -103,7 +103,7 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
 
   return (
     <>
-      <Card className="group relative overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 h-[520px] flex flex-col">
+      <Card className="rounded-lg border text-card-foreground shadow-sm group relative overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 h-[520px]">
         <div className="aspect-video overflow-hidden bg-zinc-900 h-48">
           <img
             src={project.thumbnail || defaultThumbnail}
