@@ -104,8 +104,8 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
 
   return (
     <>
-      <Card className="group relative overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800">
-        <div className="aspect-video overflow-hidden bg-zinc-900">
+      <Card className="group relative overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 h-[520px] flex flex-col">
+        <div className="aspect-video overflow-hidden bg-zinc-900 h-48">
           <img
             src={project.thumbnail || defaultThumbnail}
             alt={project.name}
@@ -114,7 +114,7 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
         </div>
         <CardHeader className="p-4">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-white">{project.name}</CardTitle>
+            <CardTitle className="text-white line-clamp-1">{project.name}</CardTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -129,9 +129,9 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-4 pt-0">
-          <p className="mb-4 text-sm text-zinc-400">{project.description}</p>
-          <div className="flex flex-wrap gap-2 mb-4">
+        <CardContent className="p-4 pt-0 flex-1 flex flex-col">
+          <p className="mb-4 text-sm text-zinc-400 line-clamp-3 h-[60px]">{project.description}</p>
+          <div className="flex flex-wrap gap-2 mb-4 flex-1">
             {project.sponsorshipEnabled && (
               <Badge
                 variant="secondary"
@@ -161,7 +161,7 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
               </Badge>
             ))}
           </div>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 mt-auto">
             <div className="flex items-center gap-4 text-sm text-zinc-400">
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
@@ -172,7 +172,7 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
                   variant="ghost"
                   size="sm"
                   onClick={handleXClick}
-                  className="text-zinc-400 hover:text-blue-400 p-0 h-auto z-30"
+                  className="text-zinc-400 hover:text-blue-400 p-0 h-auto"
                 >
                   <SiX className="h-4 w-4" />
                 </Button>
@@ -184,7 +184,7 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
                   variant="ghost"
                   size="sm"
                   onClick={handleEditClick}
-                  className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
+                  className="text-zinc-400 hover:text-white hover:bg-zinc-800"
                 >
                   Edit
                 </Button>
@@ -193,7 +193,7 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
                 variant="ghost"
                 size="sm"
                 onClick={handleClick}
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
+                className="text-zinc-400 hover:text-white hover:bg-zinc-800"
               >
                 <ExternalLink className="mr-2 h-4 w-4" />
                 Visit
