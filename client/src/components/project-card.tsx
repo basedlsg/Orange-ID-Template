@@ -48,7 +48,6 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate both the projects list and the specific user's likes
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       if (user?.sub || user?.id) {
         queryClient.invalidateQueries({ 
@@ -129,9 +128,9 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-4 pt-0 flex-1 flex flex-col">
+        <CardContent className="p-4 pt-0 flex flex-col h-full">
           <p className="mb-4 text-sm text-zinc-400 line-clamp-3 h-[60px]">{project.description}</p>
-          <div className="flex flex-wrap gap-2 mb-4 flex-1">
+          <div className="flex flex-wrap gap-2 mb-4">
             {project.sponsorshipEnabled && (
               <Badge
                 variant="secondary"
@@ -161,7 +160,7 @@ export function ProjectCard({ project, onView, userLikes = [], onEdit }: Project
               </Badge>
             ))}
           </div>
-          <div className="flex items-center justify-between gap-4 mt-auto">
+          <div className="mt-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 text-sm text-zinc-400">
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />
