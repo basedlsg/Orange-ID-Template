@@ -10,8 +10,9 @@ import { useState } from "react";
 import { LoginDialog } from "./login-dialog";
 import { Badge } from "@/components/ui/badge";
 import { PREDEFINED_GENRES } from "@shared/schema";
-import { useQuery, QueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { SkeletonCard } from "./skeleton-card";
+import { EditProjectDialog } from "./edit-project-dialog";
 
 interface ProjectGridProps {
   projects: Project[];
@@ -33,7 +34,7 @@ export function ProjectGrid({
   const [, setLocation] = useLocation();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
-  const queryClient = new QueryClient(); //added queryClient
+  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
 
   const { data: userLikes = [] } = useQuery({
     queryKey: ["/api/users", user?.sub || user?.id, "likes"],
@@ -45,7 +46,6 @@ export function ProjectGrid({
     },
     enabled: isLoggedIn,
     staleTime: 30000,
-    cacheTime: 5 * 60 * 1000,
   });
 
   const handleView = async (project: Project) => {
@@ -73,7 +73,7 @@ export function ProjectGrid({
   };
 
   const handleEditClick = (project: Project) => {
-    setLocation(`/submit?edit=${project.id}`);
+    setProjectToEdit(project);
   };
 
   const handleLikeClick = async (project: Project) => {
@@ -84,7 +84,6 @@ export function ProjectGrid({
 
     try {
       await apiRequest("POST", `/api/projects/${project.id}/like`);
-      queryClient.invalidateQueries(["/api/users", user?.sub || user?.id, "likes"]);
       toast({
         title: "Success",
         description: "Project liked successfully!",
@@ -170,15 +169,22 @@ export function ProjectGrid({
             onView={() => handleView(project)}
             userLikes={userLikes}
             onEdit={showEditButton ? () => handleEditClick(project) : undefined}
-            onLike={handleLikeClick} //added onLike prop
+            onLike={() => handleLikeClick(project)}
           />
         ))}
-        <LoginDialog
-          open={showLoginDialog}
-          onOpenChange={setShowLoginDialog}
-          message="Please log in to like this project"
-        />
       </div>
+
+      <LoginDialog
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+        message="Please log in to continue"
+      />
+
+      <EditProjectDialog
+        project={projectToEdit}
+        open={!!projectToEdit}
+        onOpenChange={(open) => !open && setProjectToEdit(null)}
+      />
     </div>
   );
 }

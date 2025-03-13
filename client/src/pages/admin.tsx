@@ -20,11 +20,13 @@ import {
 import { useState } from "react";
 import { SkeletonCard } from "@/components/skeleton-card";
 import { useLocation } from "wouter";
+import { EditProjectDialog } from "@/components/edit-project-dialog";
 
 export default function Admin() {
   const { toast } = useToast();
   const { user } = useBedrockPassport();
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
   const [, setLocation] = useLocation();
 
   const { data: isAdmin, isLoading: isCheckingAdmin } = useQuery({
@@ -209,7 +211,7 @@ export default function Admin() {
   };
 
   const handleEditClick = (project: Project) => {
-    setLocation(`/submit?edit=${project.id}`);
+    setProjectToEdit(project);
   };
 
   if (!isAdmin && !isCheckingAdmin) {
@@ -422,6 +424,12 @@ export default function Admin() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <EditProjectDialog
+          project={projectToEdit}
+          open={!!projectToEdit}
+          onOpenChange={(open) => !open && setProjectToEdit(null)}
+        />
       </div>
     </div>
   );
