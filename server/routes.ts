@@ -379,6 +379,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update project endpoint
+  app.patch("/api/projects/:id", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const user = await getUserFromRequest(req);
+
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Get the project to check permissions
+      const project = await storage.getProjectById(projectId);
+      if (!project) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+
+      // Check if user is admin or project owner
+      const dbUser = await storage.getUserByOrangeId(user.orangeId);
+      if (!dbUser?.isAdmin && project.userId !== dbUser?.id) {
+        return res.status(403).json({ error: "Not authorized to edit this project" });
+      }
+
+      console.log("Received project update data:", JSON.stringify(req.body, null, 2));
+
+      // Validate the project data
+      const validatedData = insertProjectSchema.parse({
+        name: req.body.name,
+        description: req.body.description,
+        url: req.body.url,
+        aiTools: req.body.aiTools,
+        genres: req.body.genres,
+        thumbnail: req.body.thumbnail || undefined,
+        xHandle: req.body.xHandle || undefined,
+        sponsorshipEnabled: req.body.sponsorshipEnabled,
+        sponsorshipUrl: req.body.sponsorshipUrl,
+      });
+
+      console.log("Validated project update data:", JSON.stringify(validatedData, null, 2));
+
+      // Update project while maintaining the approved status and user ID
+      const updatedProject = await storage.updateProject(projectId, validatedData);
+      res.json(updatedProject);
+    } catch (error) {
+      console.error("Project update error:", error);
+      const validationError = fromZodError(error as any);
+      res.status(400).json({ error: validationError.message });
+    }
+  });
+
+  // Add the GET endpoint for a single project
+  app.get("/api/projects/:id", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const project = await storage.getProjectById(projectId);
+
+      if (!project) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+
+      res.json(project);
+    } catch (error) {
+      console.error("Error fetching project:", error);
+      res.status(500).json({ error: "Failed to fetch project" });
+    }
+  });
+
   // Sitemap endpoint
   app.get("/sitemap.xml", async (req, res) => {
     try {
