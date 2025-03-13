@@ -52,7 +52,7 @@ export function ProjectCard({ project, onView, userLikes = [], onLike }: Project
       if (user?.sub || user?.id) {
         queryClient.invalidateQueries({ 
           queryKey: ["/api/users", user.sub || user.id, "likes"],
-          exact: true,
+          exact: true 
         });
       }
       setIsLiked(!isLiked);
