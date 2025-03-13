@@ -33,6 +33,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
     aiTools: [],
     genres: [],
     thumbnail: "",
+    thumbnailFile: undefined,
     xHandle: "",
     sponsorshipEnabled: false,
     sponsorshipUrl: "",
@@ -49,6 +50,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
         aiTools: project.aiTools || [],
         genres: project.genres || [],
         thumbnail: project.thumbnail || "",
+        thumbnailFile: undefined,
         xHandle: project.xHandle || "",
         sponsorshipEnabled: project.sponsorshipEnabled || false,
         sponsorshipUrl: project.sponsorshipUrl || "",
@@ -67,20 +69,55 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
       const orangeId = user?.sub || user?.id;
       if (!orangeId) throw new Error("User not authenticated");
 
-      console.log('Updating project with data:', data);
-      const response = await apiRequest("PATCH", `/api/projects/${project.id}?orangeId=${orangeId}`, data);
+      let projectData = { ...data };
+
+      // Handle thumbnail upload if needed
+      if (data.thumbnailFile instanceof File) {
+        const formData = new FormData();
+        formData.append("thumbnail", data.thumbnailFile);
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadRes.ok) throw new Error("Failed to upload thumbnail");
+        const { url } = await uploadRes.json();
+        projectData.thumbnail = url;
+      }
+
+      delete projectData.thumbnailFile;
+
+      console.log('Updating project with data:', projectData);
+      const response = await apiRequest("PATCH", `/api/projects/${project.id}?orangeId=${orangeId}`, projectData);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || "Failed to update project");
       }
       return response.json();
     },
-    onSuccess: () => {
-      // Invalidate all relevant queries
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", project?.id] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users", user?.sub || user?.id, "submissions"] });
+    onSuccess: (updatedProject) => {
+      // Update the cache with the new data
+      queryClient.setQueryData<Project>(
+        ['/api/projects', project?.id],
+        updatedProject
+      );
+
+      // Update the project in any list queries
+      queryClient.setQueryData<Project[]>(
+        ['/api/projects', { approved: true }],
+        (old) => old?.map(p => p.id === project?.id ? updatedProject : p) || []
+      );
+
+      queryClient.setQueryData<Project[]>(
+        ['/api/projects', { approved: false }],
+        (old) => old?.map(p => p.id === project?.id ? updatedProject : p) || []
+      );
+
+      queryClient.setQueryData<Project[]>(
+        ['/api/users', user?.sub || user?.id, 'submissions'],
+        (old) => old?.map(p => p.id === project?.id ? updatedProject : p) || []
+      );
 
       toast({
         title: "Success",
@@ -199,6 +236,33 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
                         setFormState(prev => ({ ...prev, url: e.target.value }));
                       }}
                       className="bg-zinc-900 border-zinc-700 text-white" 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="thumbnailFile"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-zinc-400">
+                    Thumbnail Image
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        field.onChange(file);
+                        if (file) {
+                          setFormState(prev => ({ ...prev, thumbnailFile: file }));
+                        }
+                      }}
+                      className="bg-zinc-900 border-zinc-700 text-white"
                     />
                   </FormControl>
                   <FormMessage />
