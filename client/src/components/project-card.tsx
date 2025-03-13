@@ -43,7 +43,8 @@ export function ProjectCard({
       const orangeId = user.sub || user.id;
       const response = await apiRequest(
         "POST",
-        `/api/projects/${project.id}/like?orangeId=${orangeId}`
+        `/api/projects/${project.id}/like`,
+        { orangeId }
       );
       if (!response.ok) {
         throw new Error("Failed to toggle like");
