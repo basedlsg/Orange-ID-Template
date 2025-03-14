@@ -121,11 +121,12 @@ function ProtectedRoute({
   component: React.ComponentType;
   requiresAdmin?: boolean;
 }) {
-  const { isLoggedIn, loading, user } = useBedrockPassport();
+  const { isLoggedIn, user } = useBedrockPassport();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  if (loading) {
+  // Loading state can be determined from isLoggedIn being null
+  if (isLoggedIn === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-orange-400">Loading...</div>
@@ -141,7 +142,7 @@ function ProtectedRoute({
   // Check admin status only if this is an admin route
   if (requiresAdmin && user) {
     // Get the user data from our database to check admin status
-    fetch(`/api/users/check-admin?orangeId=${user.sub || user.id}`)
+    fetch(`/api/users/check-admin?orangeId=${user.id}`)
       .then((response) => response.json())
       .then((data) => {
         if (!data.isAdmin) {

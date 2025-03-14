@@ -124,7 +124,7 @@ export default function Submit() {
 
   const { mutate: submitProject, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {
-      const orangeId = user?.sub || user?.id;
+      const orangeId = user?.id;
       if (!orangeId) throw new Error("User not authenticated");
 
       let projectData = { ...data };
