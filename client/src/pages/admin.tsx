@@ -395,6 +395,14 @@ export default function Admin() {
                 <ProjectCard project={project} />
                 <div className="absolute top-4 right-4 flex gap-2 z-20">
                   <Button
+                    onClick={() => approveProject(project.id)}
+                    variant="outline"
+                    size="icon"
+                    className="border-green-700 text-green-400 hover:text-white hover:bg-green-800"
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
+                  <Button
                     onClick={() => handleEditClick(project)}
                     variant="outline"
                     size="icon"
