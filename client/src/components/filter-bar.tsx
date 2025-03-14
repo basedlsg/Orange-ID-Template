@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PREDEFINED_AI_TOOLS } from "@shared/schema";
+import { PREDEFINED_AI_TOOLS, PREDEFINED_GENRES } from "@shared/schema";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -14,10 +14,12 @@ import { Search } from "lucide-react";
 interface FilterBarProps {
   sortBy: string;
   aiTool: string;
+  genre: string;
   sponsorshipFilter: boolean;
   searchQuery: string;
   onSortChange: (value: string) => void;
   onAiToolChange: (value: string) => void;
+  onGenreChange: (value: string) => void;
   onSponsorshipFilterChange: (value: boolean) => void;
   onSearchChange: (value: string) => void;
 }
@@ -25,10 +27,12 @@ interface FilterBarProps {
 export function FilterBar({
   sortBy,
   aiTool,
+  genre,
   sponsorshipFilter,
   searchQuery,
   onSortChange,
   onAiToolChange,
+  onGenreChange,
   onSponsorshipFilterChange,
   onSearchChange,
 }: FilterBarProps) {
@@ -67,6 +71,20 @@ export function FilterBar({
               {PREDEFINED_AI_TOOLS.map((tool) => (
                 <SelectItem key={tool} value={tool}>
                   {tool}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={genre} onValueChange={onGenreChange}>
+            <SelectTrigger className="w-full sm:w-[140px]">
+              <SelectValue placeholder="Filter by Genre..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Genres</SelectItem>
+              {PREDEFINED_GENRES.map((g) => (
+                <SelectItem key={g} value={g}>
+                  {g}
                 </SelectItem>
               ))}
             </SelectContent>
