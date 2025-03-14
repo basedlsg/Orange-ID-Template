@@ -49,10 +49,10 @@ export function ProjectGrid({
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
 
   const { data: userLikes = [] } = useQuery({
-    queryKey: ["/api/users", user?.sub || user?.id, "likes"],
+    queryKey: ["/api/users", user?.id, "likes"],
     queryFn: async () => {
-      if (!user?.sub && !user?.id) return [];
-      const response = await fetch(`/api/users/${user.sub || user.id}/likes`);
+      if (!user?.id) return [];
+      const response = await fetch(`/api/users/${user.id}/likes`);
       if (!response.ok) throw new Error("Failed to fetch likes");
       return response.json();
     },
@@ -106,7 +106,7 @@ export function ProjectGrid({
 
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({
-        queryKey: ["/api/users", user?.sub || user?.id, "submissions"],
+        queryKey: ["/api/users", user?.id, "submissions"],
       });
 
       toast({
@@ -216,7 +216,7 @@ export function ProjectGrid({
           </Card>
         )}
 
-        {projects.map((project) => (
+        {filteredProjects.map((project) => (
           <div key={project.id} className="relative h-full">
             <ProjectCard
               project={project}
