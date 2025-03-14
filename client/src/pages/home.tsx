@@ -9,6 +9,7 @@ import { SiX } from "react-icons/si";
 export default function Home() {
   const [sortBy, setSortBy] = useState("likes");
   const [aiTool, setAiTool] = useState("all");
+  const [genre, setGenre] = useState("all");
   const [sponsorshipFilter, setSponsorshipFilter] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -42,6 +43,7 @@ export default function Home() {
       }
       if (sponsorshipFilter && !project.sponsorshipEnabled) return false;
       if (aiTool !== "all" && !project.aiTools?.includes(aiTool)) return false;
+      if (genre !== "all" && !project.genres?.includes(genre)) return false;
       return true;
     })
     .sort((a, b) => {
@@ -74,10 +76,12 @@ export default function Home() {
         <FilterBar 
           sortBy={sortBy} 
           aiTool={aiTool}
+          genre={genre}
           sponsorshipFilter={sponsorshipFilter}
           searchQuery={searchQuery}
           onSortChange={setSortBy}
           onAiToolChange={setAiTool}
+          onGenreChange={setGenre}
           onSponsorshipFilterChange={setSponsorshipFilter}
           onSearchChange={setSearchQuery}
         />
