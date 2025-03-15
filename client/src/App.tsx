@@ -191,15 +191,14 @@ function Navigation() {
     }
   };
 
-  // Temporarily disabled - uncomment to re-enable
-  /*const AdvertiseButton = () => (
+  const AdvertiseButton = () => (
     <Button
       variant="outline"
       onClick={() => setLocation("/advertise")}
       className="text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
     >
       Advertise Across Projects
-    </Button>*/
+    </Button>
   );
 
   return (
@@ -247,7 +246,6 @@ function Navigation() {
           variant="outline"
           onClick={() => setLocation("/advertise")}
           className="w-full text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
-          style={{ display: 'none' }} // Temporarily hidden - remove style to re-enable
         >
           Advertise Across Projects
         </Button>
