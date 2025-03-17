@@ -1,0 +1,55 @@
+# Robots.txt for AI Project Discovery Platform
+
+# Allow all good bots
+User-agent: *
+Allow: /
+Allow: /projects
+Allow: /explore
+Allow: /about
+Allow: /blog
+Allow: /categories
+Allow: /tags
+
+# Prevent indexing of sensitive routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /internal/
+Disallow: /dev/
+Disallow: /*?*query=
+Disallow: /*?*filter=
+Disallow: /*?*sort=
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Allow: /*.js
+Allow: /*.css
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.gif
+Allow: /*.svg
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 2
+
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 2
+
+# Reference to sitemap
+Sitemap: https://your-domain.replit.app/sitemap.xml
+
+# Optimize for social media crawlers
+User-agent: Twitterbot
+Allow: /
+Allow: /*.jpg
+Allow: /*.png
+Allow: /*.gif
+
+User-agent: facebookexternalhit
+Allow: /
+Allow: /*.jpg
+Allow: /*.png
+Allow: /*.gif
