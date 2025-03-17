@@ -35,6 +35,7 @@ export default function Home() {
 
   const sortedAndFilteredProjects = projects
     ?.filter((project) => {
+      // Apply search filter
       if (searchQuery && !project.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
           !project.description.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
@@ -52,7 +53,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Social Banner - Commented out, uncomment to re-enable X/Twitter CTA
+      {/* Social Banner */}
       <div className="border-b border-zinc-800 bg-gradient-to-r from-zinc-900 to-black">
         <div className="container mx-auto px-4 py-3">
           <a 
@@ -68,7 +69,6 @@ export default function Home() {
           </a>
         </div>
       </div>
-      */}
 
       <div className="container mx-auto px-4 py-8">
         <FilterBar 

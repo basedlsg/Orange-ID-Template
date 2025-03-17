@@ -192,15 +192,13 @@ function Navigation() {
   };
 
   const AdvertiseButton = () => (
-    // To re-enable advertising, uncomment the Button component below
-    // <Button
-    //   variant="outline"
-    //   onClick={() => setLocation("/advertise")}
-    //   className="text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
-    // >
-    //   Advertise Across Projects
-    // </Button>
-    null
+    <Button
+      variant="outline"
+      onClick={() => setLocation("/advertise")}
+      className="text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
+    >
+      Advertise Across Projects
+    </Button>
   );
 
   return (
@@ -244,14 +242,13 @@ function Navigation() {
       </nav>
       {/* Show on mobile only */}
       <div className="sm:hidden container mx-auto px-4 py-2">
-        {/* To re-enable mobile advertising button, uncomment the Button component below */}
-        {/* <Button
+        <Button
           variant="outline"
           onClick={() => setLocation("/advertise")}
           className="w-full text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
         >
           Advertise Across Projects
-        </Button> */}
+        </Button>
       </div>
     </>
   );
