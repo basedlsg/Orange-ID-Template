@@ -37,6 +37,16 @@ export default function ProjectPage() {
     );
   }
 
+  const absoluteUrl = (relativeUrl: string) => {
+    const baseUrl = window.location.origin;
+    if (relativeUrl.startsWith('http')) {
+      return relativeUrl;
+    }
+    return `${baseUrl}${relativeUrl.startsWith('/') ? '' : '/'}${relativeUrl}`;
+  };
+
+  const thumbnailUrl = absoluteUrl(project.thumbnail || '/default-thumbnail.png');
+
   return (
     <div className="min-h-screen bg-black">
       <Helmet>
@@ -47,7 +57,7 @@ export default function ProjectPage() {
         {/* OpenGraph Meta Tags */}
         <meta property="og:title" content={`${project.name} - VibeCodingList`} />
         <meta property="og:description" content={project.description} />
-        <meta property="og:image" content={project.thumbnail || '/default-thumbnail.png'} />
+        <meta property="og:image" content={thumbnailUrl} />
         <meta property="og:url" content={window.location.href} />
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="VibeCodingList" />
@@ -57,13 +67,13 @@ export default function ProjectPage() {
         <meta name="twitter:site" content="@vibecodinglist" />
         <meta name="twitter:title" content={`${project.name} - VibeCodingList`} />
         <meta name="twitter:description" content={project.description} />
-        <meta name="twitter:image" content={project.thumbnail || '/default-thumbnail.png'} />
+        <meta name="twitter:image" content={thumbnailUrl} />
         <meta name="twitter:creator" content={project.xHandle || '@vibecodinglist'} />
 
         {/* Additional SEO Meta Tags */}
         <meta name="robots" content="index, follow" />
         <meta name="author" content={project.xHandle || 'VibeCodingList'} />
-        <meta name="keywords" content={`${project.genres.join(', ')}, ${project.aiTools.join(', ')}, AI Projects, Coding Projects`} />
+        <meta name="keywords" content={`${project.genres?.join(', ')}, ${project.aiTools?.join(', ')}, AI Projects, Coding Projects`} />
       </Helmet>
 
       <div className="container mx-auto px-4 py-8">
