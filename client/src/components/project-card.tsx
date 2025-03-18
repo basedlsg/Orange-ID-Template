@@ -11,12 +11,14 @@ import { useEffect, useState } from "react";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { LoginDialog } from "./login-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 interface ProjectCardProps {
   project: Project;
   onView?: () => void;
   userLikes?: number[];
   onEdit?: () => void;
+  expanded?: boolean;
 }
 
 export function ProjectCard({
@@ -24,12 +26,14 @@ export function ProjectCard({
   onView,
   userLikes = [],
   onEdit,
+  expanded = false,
 }: ProjectCardProps) {
   const { isLoggedIn, user } = useBedrockPassport();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLiked, setIsLiked] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     setIsLiked(userLikes.includes(project.id));
@@ -53,7 +57,6 @@ export function ProjectCard({
       return response.json();
     },
     onSuccess: () => {
-      // Invalidate both the projects list and the specific user's likes
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       if (user?.sub || user?.id) {
         queryClient.invalidateQueries({
@@ -82,13 +85,19 @@ export function ProjectCard({
     toggleLike();
   };
 
-  const handleClick = async () => {
-    if (onView) {
-      onView();
+  const handleClick = async (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
     }
-    const url = new URL(project.url);
-    url.searchParams.set('utm_source', 'vibecodinglist.com');
-    window.open(url.toString(), "_blank");
+
+    if (!expanded) {
+      setLocation(`/projects/${project.id}`);
+    } else if (onView) {
+      onView();
+      const url = new URL(project.url);
+      url.searchParams.set('utm_source', 'vibecodinglist.com');
+      window.open(url.toString(), "_blank");
+    }
   };
 
   const handleXClick = (e: React.MouseEvent) => {
@@ -112,8 +121,13 @@ export function ProjectCard({
 
   return (
     <>
-      <Card className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 h-full flex flex-col">
-        <div className="aspect-video overflow-hidden bg-zinc-900">
+      <Card
+        className={`group cursor-pointer overflow-hidden transition-all hover:shadow-lg bg-black border-zinc-800 h-full flex flex-col ${
+          expanded ? 'shadow-lg' : ''
+        }`}
+        onClick={handleClick}
+      >
+        <div className={`aspect-video overflow-hidden bg-zinc-900 ${expanded ? 'sm:aspect-[2/1]' : ''}`}>
           <img
             src={project.thumbnail || defaultThumbnail}
             alt={project.name}
@@ -122,7 +136,9 @@ export function ProjectCard({
         </div>
         <CardHeader className="p-4">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-white">{project.name}</CardTitle>
+            <CardTitle className={`text-white ${expanded ? 'text-2xl' : ''}`}>
+              {project.name}
+            </CardTitle>
             <Button
               variant="ghost"
               size="icon"
@@ -137,8 +153,10 @@ export function ProjectCard({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="p-4 pt-0 flex-grow flex flex-col">
-          <p className="mb-4 text-sm text-zinc-400">{project.description}</p>
+        <CardContent className={`p-4 pt-0 flex-grow flex flex-col ${expanded ? 'gap-6' : ''}`}>
+          <p className={`mb-4 text-zinc-400 ${expanded ? 'text-lg' : 'text-sm'}`}>
+            {project.description}
+          </p>
           <div className="flex flex-wrap gap-2 mb-4">
             {project.sponsorshipEnabled && (
               <Badge
@@ -200,11 +218,18 @@ export function ProjectCard({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleClick}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (expanded) {
+                    window.open(project.url, "_blank");
+                  } else {
+                    handleClick(e);
+                  }
+                }}
                 className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
               >
                 <ExternalLink className="mr-2 h-4 w-4" />
-                Visit
+                {expanded ? 'Visit Project' : 'View Details'}
               </Button>
             </div>
           </div>

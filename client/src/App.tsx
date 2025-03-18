@@ -18,6 +18,7 @@ import AuthCallback from "@/pages/AuthCallback";
 import { LoginDialog } from "@/components/login-dialog";
 import React from "react";
 import Profile from "@/pages/profile";
+import Project from "@/pages/project";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -267,6 +268,7 @@ function Router() {
       <Route path="/profile">
         <ProtectedRoute component={Profile} />
       </Route>
+      <Route path="/projects/:id" component={Project} />
       <Route path="/advertise" component={Advertise} />
       <Route path="/auth/callback" component={AuthCallback} />
       <Route component={NotFound} />
