@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Eye, Sparkles, Heart } from "lucide-react";
+import { ExternalLink, Eye, Sparkles, Heart, Share2 } from "lucide-react";
 import { SiX } from "react-icons/si";
 import type { Project } from "@shared/schema";
 import defaultThumbnail from "../logocode.png";
@@ -92,11 +92,24 @@ export function ProjectCard({
 
     if (!expanded) {
       setLocation(`/projects/${project.id}`);
-    } else if (onView) {
-      onView();
-      const url = new URL(project.url);
-      url.searchParams.set('utm_source', 'vibecodinglist.com');
-      window.open(url.toString(), "_blank");
+    }
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/projects/${project.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({
+        title: "Link copied",
+        description: "Project link has been copied to clipboard",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy link",
+        variant: "destructive",
+      });
     }
   };
 
@@ -116,6 +129,16 @@ export function ProjectCard({
     e.stopPropagation();
     if (onEdit) {
       onEdit();
+    }
+  };
+
+  const handleVisit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = new URL(project.url);
+    url.searchParams.set('utm_source', 'vibecodinglist.com');
+    window.open(url.toString(), "_blank");
+    if (onView) {
+      onView();
     }
   };
 
@@ -139,18 +162,28 @@ export function ProjectCard({
             <CardTitle className={`text-white ${expanded ? 'text-2xl' : ''}`}>
               {project.name}
             </CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`${
-                isLiked ? "text-red-500" : "text-zinc-400 hover:text-red-500"
-              } transition-colors`}
-              onClick={handleLikeClick}
-              disabled={isLiking}
-            >
-              <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
-              <span className="ml-1 text-sm">{project.likeCount || 0}</span>
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleShare}
+                className="text-zinc-400 hover:text-white"
+              >
+                <Share2 className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`${
+                  isLiked ? "text-red-500" : "text-zinc-400 hover:text-red-500"
+                } transition-colors`}
+                onClick={handleLikeClick}
+                disabled={isLiking}
+              >
+                <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
+                <span className="ml-1 text-sm">{project.likeCount || 0}</span>
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className={`p-4 pt-0 flex-grow flex flex-col ${expanded ? 'gap-6' : ''}`}>
@@ -218,18 +251,11 @@ export function ProjectCard({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (expanded) {
-                    window.open(project.url, "_blank");
-                  } else {
-                    handleClick(e);
-                  }
-                }}
+                onClick={handleVisit}
                 className="text-zinc-400 hover:text-white hover:bg-zinc-800 z-10"
               >
                 <ExternalLink className="mr-2 h-4 w-4" />
-                {expanded ? 'Visit Project' : 'View Details'}
+                Visit
               </Button>
             </div>
           </div>
