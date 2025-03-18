@@ -67,7 +67,9 @@ export const projects = pgTable("projects", {
 export const likes = pgTable("likes", {
   id: serial("id").primaryKey(),
   orangeId: text("orange_id").notNull(),
-  projectId: integer("project_id").notNull().references(() => projects.id),
+  projectId: integer("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (table) => ({
   userProjectUnique: unique().on(table.orangeId, table.projectId),
