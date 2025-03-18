@@ -4,7 +4,7 @@ import type { Project } from "@shared/schema";
 import { ProjectCard } from "@/components/project-card";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
-import { Share2, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
@@ -23,23 +23,6 @@ export default function ProjectPage() {
       return response.json();
     },
   });
-
-  const handleShare = async () => {
-    const url = window.location.href;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast({
-        title: "Link copied",
-        description: "Project link has been copied to clipboard",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to copy link",
-        variant: "destructive",
-      });
-    }
-  };
 
   if (isLoading || !project) {
     return (
@@ -75,7 +58,7 @@ export default function ProjectPage() {
       </Helmet>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center mb-8">
           <Button
             variant="ghost"
             className="text-zinc-400 hover:text-white"
@@ -83,14 +66,6 @@ export default function ProjectPage() {
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Projects
-          </Button>
-          <Button
-            variant="outline"
-            className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
-            onClick={handleShare}
-          >
-            <Share2 className="h-4 w-4 mr-2" />
-            Share Project
           </Button>
         </div>
 
