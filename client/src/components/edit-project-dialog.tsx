@@ -154,36 +154,38 @@ export function EditProjectDialog({
 
   const handleAddTool = (tool: string) => {
     if (!tool.trim()) return;
-    const currentTools = formState.aiTools || [];
+    const currentTools = form.getValues("aiTools") || [];
     if (!currentTools.includes(tool)) {
       const newTools = [...currentTools, tool];
       setFormState((prev) => ({ ...prev, aiTools: newTools }));
-      form.setValue("aiTools", newTools);
+      form.setValue("aiTools", newTools, { shouldValidate: true });
     }
     setNewTool("");
   };
 
   const handleAddGenre = (genre: string) => {
     if (!genre.trim()) return;
-    const currentGenres = formState.genres || [];
+    const currentGenres = form.getValues("genres") || [];
     if (!currentGenres.includes(genre)) {
       const newGenres = [...currentGenres, genre];
       setFormState((prev) => ({ ...prev, genres: newGenres }));
-      form.setValue("genres", newGenres);
+      form.setValue("genres", newGenres, { shouldValidate: true });
     }
     setNewGenre("");
   };
 
   const handleRemoveTool = (tool: string) => {
-    const newTools = formState.aiTools.filter((t) => t !== tool);
+    const currentTools = form.getValues("aiTools") || [];
+    const newTools = currentTools.filter((t) => t !== tool);
     setFormState((prev) => ({ ...prev, aiTools: newTools }));
-    form.setValue("aiTools", newTools);
+    form.setValue("aiTools", newTools, { shouldValidate: true });
   };
 
   const handleRemoveGenre = (genre: string) => {
-    const newGenres = formState.genres.filter((g) => g !== genre);
+    const currentGenres = form.getValues("genres") || [];
+    const newGenres = currentGenres.filter((g) => g !== genre);
     setFormState((prev) => ({ ...prev, genres: newGenres }));
-    form.setValue("genres", newGenres);
+    form.setValue("genres", newGenres, { shouldValidate: true });
   };
 
   return (
@@ -306,7 +308,7 @@ export function EditProjectDialog({
                         value={newTool}
                         onChange={(e) => setNewTool(e.target.value)}
                         onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
+                          if (e.key === "Enter") {
                             e.preventDefault();
                             handleAddTool(newTool);
                           }
@@ -374,7 +376,7 @@ export function EditProjectDialog({
                         value={newGenre}
                         onChange={(e) => setNewGenre(e.target.value)}
                         onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
+                          if (e.key === "Enter") {
                             e.preventDefault();
                             handleAddGenre(newGenre);
                           }
