@@ -6,6 +6,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, sql } from "drizzle-orm";
+import { generateUniqueSlug } from "./utils/slug";
 
 export interface IStorage {
   // User operations
@@ -78,10 +79,14 @@ export class DatabaseStorage implements IStorage {
     const aiToolsArray = `{${insertProject.aiTools.map(tool => `"${tool}"`).join(',')}}`;
     const genresArray = `{${insertProject.genres.map(genre => `"${genre}"`).join(',')}}`;
 
+    // Generate a unique slug from the project name
+    const slug = await generateUniqueSlug(insertProject.name);
+
     const [project] = await db
       .insert(projects)
       .values({
         name: insertProject.name,
+        slug,
         description: insertProject.description,
         url: insertProject.url,
         thumbnail: insertProject.thumbnail,
@@ -101,17 +106,21 @@ export class DatabaseStorage implements IStorage {
       throw new Error("User ID is required to create projects");
     }
 
-    const values = insertProjects.map(project => ({
-      name: project.name,
-      description: project.description,
-      url: project.url,
-      thumbnail: project.thumbnail,
-      xHandle: project.xHandle,
-      userId,
-      aiTools: sql`${`{${project.aiTools.map(tool => `"${tool}"`).join(',')}}`}::text[]`,
-      genres: sql`${`{${project.genres.map(genre => `"${genre}"`).join(',')}}`}::text[]`,
-      sponsorshipEnabled: project.sponsorshipEnabled || false,
-      sponsorshipUrl: project.sponsorshipUrl,
+    const values = await Promise.all(insertProjects.map(async project => {
+      const slug = await generateUniqueSlug(project.name);
+      return {
+        name: project.name,
+        slug,
+        description: project.description,
+        url: project.url,
+        thumbnail: project.thumbnail,
+        xHandle: project.xHandle,
+        userId,
+        aiTools: sql`${`{${project.aiTools.map(tool => `"${tool}"`).join(',')}}`}::text[]`,
+        genres: sql`${`{${project.genres.map(genre => `"${genre}"`).join(',')}}`}::text[]`,
+        sponsorshipEnabled: project.sponsorshipEnabled || false,
+        sponsorshipUrl: project.sponsorshipUrl,
+      };
     }));
 
     return db.insert(projects).values(values).returning();

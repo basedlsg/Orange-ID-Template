@@ -18,7 +18,7 @@ import { parse } from 'csv-parse/sync';
 import fetch from 'node-fetch';
 import { uploadToGCS } from "./utils/storage";
 import { insertAdvertisingRequestSchema } from "@shared/schema"; // Assuming this schema exists
-
+import { fromError } from "zod-validation-error";
 
 // Configure multer for memory storage
 const upload = multer({
@@ -339,9 +339,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const project = await storage.createProject(validatedData, user.userId);
       res.json(project);
     } catch (error) {
-      console.error("Project validation error:", error);
-      const validationError = fromZodError(error as any);
-      res.status(400).json({ error: validationError.message });
+      console.error("Project creation error:", error);
+
+      if (error instanceof Error) {
+        // Use fromError instead of fromZodError for general errors
+        const validationError = fromError(error);
+        res.status(400).json({ error: validationError.message });
+      } else {
+        res.status(500).json({ error: "Failed to create project" });
+      }
     }
   });
 
