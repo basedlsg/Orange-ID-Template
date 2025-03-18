@@ -451,6 +451,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add the GET endpoint for fetching a project by slug
+  app.get("/api/projects/by-slug/:slug", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const projects = await storage.getProjects();
+      const project = projects.find(p => p.slug === slug);
+
+      if (!project) {
+        return res.status(404).json({ error: "Project not found" });
+      }
+
+      // Increment view count
+      await storage.incrementViews(project.id);
+
+      res.json(project);
+    } catch (error) {
+      console.error("Error fetching project by slug:", error);
+      res.status(500).json({ error: "Failed to fetch project" });
+    }
+  });
+
   // Sitemap endpoint
   app.get("/sitemap.xml", async (req, res) => {
     try {
