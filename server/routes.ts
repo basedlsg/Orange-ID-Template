@@ -497,7 +497,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   </url>
   ${approvedProjects.map(project => `
   <url>
-    <loc>${baseUrl}/projects/${project.id}</loc>
+    <loc>${baseUrl}/projects/${project.slug}</loc>
     <lastmod>${new Date(project.createdAt).toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>

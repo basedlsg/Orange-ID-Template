@@ -1,6 +1,7 @@
 # Global rules for AI Project Discovery Platform
 User-agent: *
 Allow: /
+Allow: /projects/*
 
 # Block sensitive routes
 Disallow: /api/
