@@ -91,13 +91,13 @@ export function ProjectCard({
     }
 
     if (!expanded) {
-      setLocation(`/projects/${project.id}`);
+      setLocation(`/projects/${project.slug}`);
     }
   };
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/projects/${project.id}`;
+    const url = `${window.location.origin}/projects/${project.slug}`;
     try {
       await navigator.clipboard.writeText(url);
       toast({

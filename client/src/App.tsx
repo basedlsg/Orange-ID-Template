@@ -268,7 +268,7 @@ function Router() {
       <Route path="/profile">
         <ProtectedRoute component={Profile} />
       </Route>
-      <Route path="/projects/:id" component={Project} />
+      <Route path="/projects/:slug" component={Project} />
       <Route path="/advertise" component={Advertise} />
       <Route path="/auth/callback" component={AuthCallback} />
       <Route component={NotFound} />

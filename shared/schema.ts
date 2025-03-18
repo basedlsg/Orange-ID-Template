@@ -49,6 +49,7 @@ export const users = pgTable("users", {
 export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
   description: text("description").notNull(),
   url: text("url").notNull(),
   aiTools: text("ai_tools").array(),
@@ -93,6 +94,7 @@ export const insertProjectSchema = createInsertSchema(projects)
     views: true,
     likeCount: true,
     createdAt: true,
+    slug: true, // Omit slug as it will be generated from name
   })
   .extend({
     description: z
