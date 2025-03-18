@@ -11,7 +11,7 @@ Disallow: /*?query=
 Disallow: /*?filter=
 Disallow: /*?sort=
 
-# Specific rules for search engines
+# Specific rules for Googlebot (Note: Google ignores 'Crawl-delay')
 User-agent: Googlebot
 Allow: /*.js
 Allow: /*.css
@@ -21,9 +21,11 @@ Allow: /*.gif
 Allow: /*.svg
 Crawl-delay: 1
 
+# Specific rules for Bingbot
 User-agent: Bingbot
 Crawl-delay: 2
 
+# Specific rules for DuckDuckBot
 User-agent: DuckDuckBot
 Crawl-delay: 2
 
@@ -39,4 +41,4 @@ Allow: /*.png
 Allow: /*.gif
 
 # Reference to sitemap
-Sitemap: https://ai-project-discovery.replit.app/sitemap.xml
+Sitemap: https://vibecodinglist.com/sitemap.xml
