@@ -9,14 +9,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 
 export default function ProjectPage() {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   const { data: project, isLoading } = useQuery<Project>({
-    queryKey: ["/api/projects", parseInt(id)],
+    queryKey: ["/api/projects/by-slug", slug],
     queryFn: async () => {
-      const response = await fetch(`/api/projects/${id}`);
+      const response = await fetch(`/api/projects/by-slug/${slug}`);
       if (!response.ok) {
         throw new Error("Failed to fetch project");
       }
@@ -59,14 +59,14 @@ export default function ProjectPage() {
       <Helmet>
         <title>{project.name} - VibeCodingList</title>
         <meta name="description" content={project.description} />
-        
+
         {/* OpenGraph Meta Tags */}
         <meta property="og:title" content={project.name} />
         <meta property="og:description" content={project.description} />
         <meta property="og:image" content={project.thumbnail || '/default-thumbnail.png'} />
         <meta property="og:url" content={window.location.href} />
         <meta property="og:type" content="website" />
-        
+
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={project.name} />
