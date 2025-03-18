@@ -88,8 +88,8 @@ export function EditProjectDialog({
   const { mutate: updateProject, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {
       if (!project) throw new Error("No project to update");
-      const userId = user?.id;
-      if (!userId) throw new Error("User not authenticated");
+      const orangeId = user?.sub;
+      if (!orangeId) throw new Error("User not authenticated");
 
       let projectData = { ...data };
 
@@ -113,7 +113,7 @@ export function EditProjectDialog({
       console.log("Updating project with data:", projectData);
       const response = await apiRequest(
         "PATCH",
-        `/api/projects/${project.id}?userId=${userId}`,
+        `/api/projects/${project.id}?orangeId=${orangeId}`,
         projectData,
       );
       if (!response.ok) {
