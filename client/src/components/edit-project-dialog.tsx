@@ -20,7 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useMutation } from "@tanstack/react-query";
@@ -88,8 +88,8 @@ export function EditProjectDialog({
   const { mutate: updateProject, isPending } = useMutation({
     mutationFn: async (data: InsertProject) => {
       if (!project) throw new Error("No project to update");
-      const orangeId = user?.sub || user?.id;
-      if (!orangeId) throw new Error("User not authenticated");
+      const userId = user?.id;
+      if (!userId) throw new Error("User not authenticated");
 
       let projectData = { ...data };
 
@@ -113,7 +113,7 @@ export function EditProjectDialog({
       console.log("Updating project with data:", projectData);
       const response = await apiRequest(
         "PATCH",
-        `/api/projects/${project.id}?orangeId=${orangeId}`,
+        `/api/projects/${project.id}?userId=${userId}`,
         projectData,
       );
       if (!response.ok) {
@@ -132,18 +132,6 @@ export function EditProjectDialog({
       // Update the project in any list queries
       queryClient.setQueryData<Project[]>(
         ["/api/projects", { approved: true }],
-        (old) =>
-          old?.map((p) => (p.id === project?.id ? updatedProject : p)) || [],
-      );
-
-      queryClient.setQueryData<Project[]>(
-        ["/api/projects", { approved: false }],
-        (old) =>
-          old?.map((p) => (p.id === project?.id ? updatedProject : p)) || [],
-      );
-
-      queryClient.setQueryData<Project[]>(
-        ["/api/users", user?.sub || user?.id, "submissions"],
         (old) =>
           old?.map((p) => (p.id === project?.id ? updatedProject : p)) || [],
       );
@@ -310,6 +298,30 @@ export function EditProjectDialog({
                         </Badge>
                       ))}
                     </div>
+                    {/* Custom Tool Input */}
+                    <div className="flex gap-2">
+                      <Input
+                        type="text"
+                        placeholder="Add custom AI tool..."
+                        value={newTool}
+                        onChange={(e) => setNewTool(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddTool(newTool);
+                          }
+                        }}
+                        className="bg-zinc-900 border-zinc-700 text-white flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => handleAddTool(newTool)}
+                        className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <div className="grid grid-cols-2 gap-2">
                       {PREDEFINED_AI_TOOLS.map((tool) => (
                         <Button
@@ -334,9 +346,7 @@ export function EditProjectDialog({
               name="genres"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-zinc-400">
-                    Project Genres
-                  </FormLabel>
+                  <FormLabel className="text-zinc-400">Project Genres</FormLabel>
                   <div className="space-y-4">
                     <div className="flex flex-wrap gap-2 min-h-[2.5rem] p-2 bg-zinc-900 border border-zinc-700 rounded-md">
                       {formState.genres?.map((genre) => (
@@ -355,6 +365,30 @@ export function EditProjectDialog({
                           </button>
                         </Badge>
                       ))}
+                    </div>
+                    {/* Custom Genre Input */}
+                    <div className="flex gap-2">
+                      <Input
+                        type="text"
+                        placeholder="Add custom genre..."
+                        value={newGenre}
+                        onChange={(e) => setNewGenre(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddGenre(newGenre);
+                          }
+                        }}
+                        className="bg-zinc-900 border-zinc-700 text-white flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => handleAddGenre(newGenre)}
+                        className="border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       {PREDEFINED_GENRES.map((genre) => (
