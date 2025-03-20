@@ -19,6 +19,7 @@ import { LoginDialog } from "@/components/login-dialog";
 import React from "react";
 import Profile from "@/pages/profile";
 import Project from "@/pages/project";
+import Creator from "@/pages/creator"; // Add Creator import
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -283,6 +284,7 @@ function Router() {
       <Route path="/projects/:slug" component={Project} />
       <Route path="/advertise" component={Advertise} />
       <Route path="/leaderboard" component={Leaderboard} />
+      <Route path="/creator/:handle" component={Creator} /> {/* Add Creator route */}
       <Route path="/auth/callback" component={AuthCallback} />
       <Route component={NotFound} />
     </Switch>
