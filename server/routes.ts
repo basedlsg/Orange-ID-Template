@@ -593,6 +593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           SUM(like_count) as total_likes
         FROM projects 
         WHERE x_handle IS NOT NULL 
+          AND x_handle != ''
         GROUP BY x_handle
         ORDER BY total_likes DESC, total_projects DESC
       `;
