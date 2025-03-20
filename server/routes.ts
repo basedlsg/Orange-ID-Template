@@ -176,8 +176,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(user);
     } catch (error) {
       console.error("User creation error:", error);
-      const validationError = fromZodError(error as any);
-      res.status(400).json({ error: validationError.message });
+      if (error instanceof Error) {
+        const validationError = fromError(error);
+        res.status(400).json({ error: validationError.message });
+      } else {
+        res.status(500).json({ error: "Unexpected error occurred" });
+      }
     }
   });
 
