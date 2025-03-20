@@ -6,7 +6,6 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, sql } from "drizzle-orm";
-import { generateUniqueSlug } from "./utils/slug";
 
 export interface IStorage {
   // User operations
@@ -36,6 +35,8 @@ export interface IStorage {
   createAdvertisingRequest(request: InsertAdvertisingRequest): Promise<AdvertisingRequest>;
   getAdvertisingRequests(): Promise<AdvertisingRequest[]>;
   markAdvertisingRequestProcessed(id: number): Promise<AdvertisingRequest>;
+  // Add new method for updating X handle
+  updateUserXHandle(orangeId: string, xHandle: string): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -258,6 +259,16 @@ export class DatabaseStorage implements IStorage {
 
     if (!project) throw new Error("Project not found");
     return project;
+  }
+
+  async updateUserXHandle(orangeId: string, xHandle: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ xHandle })
+      .where(eq(users.orangeId, orangeId))
+      .returning();
+    if (!user) throw new Error("User not found");
+    return user;
   }
 }
 

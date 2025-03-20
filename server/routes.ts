@@ -635,6 +635,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/users/x-handle", async (req, res) => {
+    try {
+      const user = await getUserFromRequest(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { xHandle } = req.body;
+      if (!xHandle) {
+        return res.status(400).json({ error: "X handle is required" });
+      }
+
+      // Remove @ symbol if present
+      const cleanXHandle = xHandle.replace(/^@/, '');
+
+      // Update the user's X handle
+      const updatedUser = await storage.updateUserXHandle(user.orangeId, cleanXHandle);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating X handle:", error);
+      res.status(500).json({ error: "Failed to update X handle" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
