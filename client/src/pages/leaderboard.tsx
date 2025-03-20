@@ -1,5 +1,6 @@
 import { Helmet } from "react-helmet";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import {
   Table,
   TableBody,
@@ -9,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SiX } from "react-icons/si";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 type LeaderboardEntry = {
   x_handle: string;
@@ -20,16 +21,6 @@ type LeaderboardEntry = {
 export default function LeaderboardPage() {
   const { data: leaderboard, isLoading } = useQuery<LeaderboardEntry[]>({
     queryKey: ["/api/leaderboard"],
-    queryFn: async () => {
-      console.log("Fetching leaderboard data...");
-      const response = await fetch("/api/leaderboard");
-      if (!response.ok) {
-        throw new Error("Failed to fetch leaderboard");
-      }
-      const data = await response.json();
-      console.log("Received leaderboard data:", data);
-      return data;
-    },
   });
 
   if (isLoading) {
@@ -69,15 +60,19 @@ export default function LeaderboardPage() {
                 {leaderboard?.map((entry) => (
                   <TableRow key={entry.x_handle} className="border-zinc-800">
                     <TableCell className="font-medium text-white">
-                      <a
-                        href={`https://x.com/${entry.x_handle}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 hover:text-blue-400"
-                      >
-                        <SiX className="h-4 w-4" />
-                        @{entry.x_handle}
-                      </a>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/creator/${entry.x_handle}`} className="flex items-center gap-1 hover:text-blue-400">
+                          @{entry.x_handle}
+                        </Link>
+                        <a
+                          href={`https://x.com/${entry.x_handle}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-zinc-500 hover:text-blue-400"
+                        >
+                          <SiX className="h-4 w-4" />
+                        </a>
+                      </div>
                     </TableCell>
                     <TableCell className="text-right text-zinc-300">
                       {entry.total_projects}
