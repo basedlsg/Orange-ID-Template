@@ -155,23 +155,6 @@ export const insertAdvertisingRequestSchema = createInsertSchema(advertisingRequ
     createdAt: true,
   });
 
-export const verifiedCreators = pgTable("verified_creators", {
-  id: serial("id").primaryKey(),
-  xHandle: text("x_handle").notNull().unique(),
-  orangeId: text("orange_id").notNull(),
-  profileImageUrl: text("profile_image_url"),
-  verificationToken: text("verification_token"),
-  verifiedAt: timestamp("verified_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-export const insertVerifiedCreatorSchema = createInsertSchema(verifiedCreators)
-  .omit({
-    id: true,
-    verifiedAt: true,
-    createdAt: true,
-  });
-
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type InsertLike = z.infer<typeof insertLikeSchema>;
@@ -180,5 +163,3 @@ export type Project = typeof projects.$inferSelect;
 export type Like = typeof likes.$inferSelect;
 export type InsertAdvertisingRequest = z.infer<typeof insertAdvertisingRequestSchema>;
 export type AdvertisingRequest = typeof advertisingRequests.$inferSelect;
-export type InsertVerifiedCreator = z.infer<typeof insertVerifiedCreatorSchema>;
-export type VerifiedCreator = typeof verifiedCreators.$inferSelect;
