@@ -10,6 +10,8 @@ import {
   type InsertUser,
   projects
 } from "@shared/schema";
+import { sql } from "drizzle-orm";
+import { db } from "./db";
 import multer from "multer";
 import path from "path";
 import express from 'express';
@@ -17,7 +19,7 @@ import { fromZodError } from "zod-validation-error";
 import { parse } from 'csv-parse/sync';
 import fetch from 'node-fetch';
 import { uploadToGCS } from "./utils/storage";
-import { insertAdvertisingRequestSchema } from "@shared/schema"; // Assuming this schema exists
+import { insertAdvertisingRequestSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 
 // Configure multer for memory storage
