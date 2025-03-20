@@ -269,10 +269,10 @@ export class DatabaseStorage implements IStorage {
 
     if (timeFilter === 'weekly') {
       const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      dateFilter = sql`${projects.createdAt} >= ${weekAgo}`;
+      dateFilter = sql`p.created_at >= ${weekAgo}`;
     } else if (timeFilter === 'monthly') {
       const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      dateFilter = sql`${projects.createdAt} >= ${monthAgo}`;
+      dateFilter = sql`p.created_at >= ${monthAgo}`;
     }
 
     const result = await db.execute<LeaderboardEntry>(sql`
