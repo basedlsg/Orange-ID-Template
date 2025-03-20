@@ -8,7 +8,7 @@ import { useBedrockPassport } from "@bedrock_org/passport";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { X, Plus, User } from "lucide-react";
+import { X, Plus, User, Trophy } from "lucide-react";
 import { Logo } from "@/components/logo";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -19,6 +19,7 @@ import { LoginDialog } from "@/components/login-dialog";
 import React from "react";
 import Profile from "@/pages/profile";
 import Project from "@/pages/project";
+import Leaderboard from "@/pages/leaderboard";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -209,8 +210,15 @@ function Navigation() {
           <Link href="/">
             <Logo className="cursor-pointer" />
           </Link>
+          <div className="flex items-center space-x-4 ml-8">
+            <Link href="/leaderboard">
+              <Button variant="ghost" size="sm" className="text-sm font-medium hover:text-primary">
+                <Trophy className="h-4 w-4 mr-2" />
+                <span>Leaderboard</span>
+              </Button>
+            </Link>
+          </div>
           <div className="ml-auto flex items-center space-x-4">
-            {/* Hide on mobile, show on desktop */}
             <div className="hidden sm:block">
               <AdvertiseButton />
             </div>
@@ -241,7 +249,6 @@ function Navigation() {
           </div>
         </div>
       </nav>
-      {/* Show on mobile only */}
       <div className="sm:hidden container mx-auto px-4 py-2">
         <Button
           variant="outline"
@@ -271,6 +278,7 @@ function Router() {
       <Route path="/projects/:slug" component={Project} />
       <Route path="/advertise" component={Advertise} />
       <Route path="/auth/callback" component={AuthCallback} />
+      <Route path="/leaderboard" component={Leaderboard} />
       <Route component={NotFound} />
     </Switch>
   );
