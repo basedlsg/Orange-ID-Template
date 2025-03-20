@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Advertise from "@/pages/advertise";
 import Leaderboard from "@/pages/leaderboard"; // Import Leaderboard component
+import Creator from "@/pages/creator"; // Add this import
 
 async function storeUserInDB(user: any) {
   if (!user) {
@@ -283,6 +284,7 @@ function Router() {
       <Route path="/projects/:slug" component={Project} />
       <Route path="/advertise" component={Advertise} />
       <Route path="/leaderboard" component={Leaderboard} />
+      <Route path="/creator/:handle" component={Creator} />
       <Route path="/auth/callback" component={AuthCallback} />
       <Route component={NotFound} />
     </Switch>
