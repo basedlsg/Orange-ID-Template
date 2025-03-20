@@ -8,7 +8,7 @@ import { useBedrockPassport } from "@bedrock_org/passport";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { X, Plus, User, Trophy } from "lucide-react";
+import { X, Plus, User } from "lucide-react";
 import { Logo } from "@/components/logo";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -19,7 +19,6 @@ import { LoginDialog } from "@/components/login-dialog";
 import React from "react";
 import Profile from "@/pages/profile";
 import Project from "@/pages/project";
-import LeaderboardPage from "@/pages/leaderboard-page";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -210,17 +209,8 @@ function Navigation() {
           <Link href="/">
             <Logo className="cursor-pointer" />
           </Link>
-          <div className="flex items-center space-x-4 ml-6">
-            <Button
-              variant="ghost"
-              onClick={() => setLocation("/leaderboard")}
-              className="text-sm font-medium hover:text-primary"
-            >
-              <Trophy className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Leaderboard</span>
-            </Button>
-          </div>
           <div className="ml-auto flex items-center space-x-4">
+            {/* Hide on mobile, show on desktop */}
             <div className="hidden sm:block">
               <AdvertiseButton />
             </div>
@@ -251,6 +241,7 @@ function Navigation() {
           </div>
         </div>
       </nav>
+      {/* Show on mobile only */}
       <div className="sm:hidden container mx-auto px-4 py-2">
         <Button
           variant="outline"
@@ -268,7 +259,6 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/leaderboard" component={LeaderboardPage} />
       <Route path="/submit">
         <ProtectedRoute component={Submit} />
       </Route>
