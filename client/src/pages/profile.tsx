@@ -63,7 +63,7 @@ export default function Profile() {
     const top = window.screen.height / 2 - height / 2;
 
     const popup = window.open(
-      `/api/auth/twitter`,
+      `/api/auth/twitter?orangeId=${orangeId}`,
       'Twitter Auth',
       `width=${width},height=${height},left=${left},top=${top}`
     );

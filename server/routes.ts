@@ -25,51 +25,21 @@ import OAuth from 'oauth';
 import session from "express-session";
 import { MemoryStore } from "express-session";
 
-// Add this before registerRoutes function
-const oauth = new OAuth.OAuth(
-  'https://api.twitter.com/oauth/request_token',
-  'https://api.twitter.com/oauth/access_token',
-  process.env.TWITTER_API_KEY!,
-  process.env.TWITTER_API_SECRET!,
-  '1.0A',
-  'http://localhost:5000/api/auth/twitter/callback',
-  'HMAC-SHA1'
-);
-
-// Configure multer for memory storage
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+// Configure session middleware first
+const sessionMiddleware = session({
+  secret: "your-secret-key",
+  resave: false,
+  saveUninitialized: true,
+  store: new MemoryStore(),
+  cookie: {
+    secure: false, // Set to true if using HTTPS
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 });
 
-async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId: string } | null> {
-  // Get orangeId from the authenticated user's token
-  const orangeId = req.body.orangeId || req.query.orangeId;
-  if (!orangeId) {
-    return null;
-  }
-
-  // Get the user from our database
-  const user = await storage.getUserByOrangeId(orangeId);
-  if (!user) {
-    return null;
-  }
-
-  return { userId: user.id, orangeId };
-}
-
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Add session middleware before routes
-  app.use(
-    session({
-      secret: "your-secret-key", // Replace with a strong, randomly generated secret
-      resave: false,
-      saveUninitialized: false,
-      store: new MemoryStore(),
-    })
-  );
+  // Add session middleware before any routes
+  app.use(sessionMiddleware);
 
   // Ensure uploads directory exists
   app.use('/uploads', express.static('uploads'));
@@ -647,6 +617,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Store tokens in session
+        if (!req.session) {
+          console.error('No session available');
+          return res.status(500).json({ error: "Session not available" });
+        }
+
         req.session.oauth_token = oauth_token;
         req.session.oauth_token_secret = oauth_token_secret;
 
@@ -663,15 +638,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/auth/twitter/callback", async (req, res) => {
     try {
+      console.log("Received callback with query params:", req.query);
+
+      if (!req.session) {
+        console.error('No session available in callback');
+        return res.status(500).send(`
+          <script>
+            window.opener.postMessage({ type: 'TWITTER_AUTH_ERROR' }, '*');
+            window.close();
+          </script>
+        `);
+      }
+
       const { oauth_token, oauth_verifier } = req.query;
       const oauth_token_secret = req.session.oauth_token_secret;
       const oauth_token_from_session = req.session.oauth_token;
 
+      console.log('Session tokens:', {
+        stored_token: oauth_token_from_session,
+        received_token: oauth_token,
+        has_secret: !!oauth_token_secret
+      });
+
       if (!oauth_token_secret || !oauth_token_from_session) {
-        throw new Error("No OAuth token secret found in session");
+        console.error('Missing session tokens');
+        return res.status(500).send(`
+          <script>
+            window.opener.postMessage({ type: 'TWITTER_AUTH_ERROR', message: 'Session expired' }, '*');
+            window.close();
+          </script>
+        `);
       }
 
-      oauth.getOAuthAccessToken(
+      const oauthInstance = new OAuth.OAuth(
+        'https://api.twitter.com/oauth/request_token',
+        'https://api.twitter.com/oauth/access_token',
+        process.env.TWITTER_API_KEY!,
+        process.env.TWITTER_API_SECRET!,
+        '1.0A',
+        `${req.protocol}://${req.get('host')}/api/auth/twitter/callback`,
+        'HMAC-SHA1'
+      );
+
+      oauthInstance.getOAuthAccessToken(
         oauth_token_from_session,
         oauth_token_secret,
         oauth_verifier as string,
@@ -688,26 +697,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           try {
             // Get user's Twitter info
-            oauth.get(
+            oauthInstance.get(
               'https://api.twitter.com/1.1/account/verify_credentials.json',
               oauth_access_token,
               oauth_access_token_secret,
               async (error, data) => {
                 if (error) {
+                  console.error('Error verifying credentials:', error);
                   throw error;
                 }
 
                 const userInfo = JSON.parse(data as string);
                 const xHandle = userInfo.screen_name;
 
-                // Get user from the request
-                const user = await getUserFromRequest(req);
-                if (!user) {
-                  throw new Error("User not found");
+                // Get orangeId from session or query params
+                const orangeId = req.query.orangeId || req.session.orangeId;
+                if (!orangeId) {
+                  throw new Error("User ID not found");
                 }
 
                 // Update user's X handle in the database
-                await storage.updateUserXHandle(user.orangeId, xHandle);
+                await storage.updateUserXHandle(orangeId as string, xHandle);
 
                 // Send success message back to opener
                 res.send(`
@@ -766,7 +776,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-    // Add this new endpoint after the existing ones and before the http server creation
+  // Add this new endpoint after the existing ones and before the http server creation
   app.get("/api/creators/:handle", async (req, res) => {
     try {
       const { handle } = req.params;
@@ -822,3 +832,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   return httpServer;
 }
+
+async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId: string } | null> {
+  // Get orangeId from the authenticated user's token
+  const orangeId = req.body.orangeId || req.query.orangeId || req.session?.orangeId;
+  if (!orangeId) {
+    return null;
+  }
+
+  // Get the user from our database
+  const user = await storage.getUserByOrangeId(orangeId);
+  if (!user) {
+    return null;
+  }
+
+  return { userId: user.id, orangeId };
+}
+
+// Configure multer for memory storage
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  }
+});
