@@ -286,6 +286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const approved = req.query.approved === "true" ? true :
                       req.query.approved === "false" ? false : undefined;
       const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
+      const xHandle = req.query.xHandle as string;
       const sortBy = req.query.sortBy as string;
 
       console.log("Fetching projects with approved:", approved, "userId:", userId);
@@ -294,6 +295,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Filter by userId if provided
       if (userId) {
         projects = projects.filter(project => project.userId === userId);
+      }
+
+      // Filter by xHandle if provided
+      if (xHandle) {
+        projects = projects.filter(project => 
+          project.xHandle?.toLowerCase() === xHandle.toLowerCase()
+        );
       }
 
       // Apply sorting
