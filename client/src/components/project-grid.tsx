@@ -30,6 +30,7 @@ interface ProjectGridProps {
   onProjectView?: (id: number) => void;
   showEditButton?: boolean;
   showSubmitCard?: boolean;
+  showFilters?: boolean; // Added showFilters prop
   isLoading?: boolean;
 }
 
@@ -37,7 +38,8 @@ export function ProjectGrid({
   projects,
   onProjectView,
   showEditButton = false,
-  showSubmitCard = true,
+  showSubmitCard = false,
+  showFilters = true, // Added default value for showFilters
   isLoading = false,
 }: ProjectGridProps) {
   const { toast } = useToast();
@@ -171,29 +173,30 @@ export function ProjectGrid({
 
   return (
     <div>
-      {/* Genre filters */}
-      <div className="mb-6">
-        <div className="flex flex-wrap gap-2">
-          <Badge
-            key="all"
-            variant="secondary"
-            className={`cursor-pointer ${!selectedGenre ? "bg-blue-500 text-white" : "bg-zinc-800 text-zinc-400"}`}
-            onClick={() => setSelectedGenre(null)}
-          >
-            All
-          </Badge>
-          {PREDEFINED_GENRES.map((genre) => (
+      {showFilters && ( // Conditional rendering of genre filters
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2">
             <Badge
-              key={genre}
+              key="all"
               variant="secondary"
-              className={`cursor-pointer ${selectedGenre === genre ? "bg-blue-500 text-white" : "bg-zinc-800 text-zinc-400"}`}
-              onClick={() => setSelectedGenre(genre)}
+              className={`cursor-pointer ${!selectedGenre ? "bg-blue-500 text-white" : "bg-zinc-800 text-zinc-400"}`}
+              onClick={() => setSelectedGenre(null)}
             >
-              {genre}
+              All
             </Badge>
-          ))}
+            {PREDEFINED_GENRES.map((genre) => (
+              <Badge
+                key={genre}
+                variant="secondary"
+                className={`cursor-pointer ${selectedGenre === genre ? "bg-blue-500 text-white" : "bg-zinc-800 text-zinc-400"}`}
+                onClick={() => setSelectedGenre(genre)}
+              >
+                {genre}
+              </Badge>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 h-full">
         {showSubmitCard && (
