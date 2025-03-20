@@ -612,9 +612,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Inside registerRoutes, update the Twitter auth routes
+  // Add debug logging to the Twitter auth route
   app.get("/api/auth/twitter", async (req, res) => {
     try {
-      oauth.getOAuthRequestToken((error, oauth_token, oauth_token_secret, results) => {
+      console.log('Initiating Twitter authentication...');
+      console.log('API Key available:', !!process.env.TWITTER_API_KEY);
+      console.log('API Secret available:', !!process.env.TWITTER_API_SECRET);
+
+      // Get the current host from the request
+      const protocol = req.protocol;
+      const host = req.get('host');
+      const callbackUrl = `${protocol}://${host}/api/auth/twitter/callback`;
+
+      console.log('Using callback URL:', callbackUrl);
+
+      const oauthInstance = new OAuth.OAuth(
+        'https://api.twitter.com/oauth/request_token',
+        'https://api.twitter.com/oauth/access_token',
+        process.env.TWITTER_API_KEY!,
+        process.env.TWITTER_API_SECRET!,
+        '1.0A',
+        callbackUrl,
+        'HMAC-SHA1'
+      );
+
+      oauthInstance.getOAuthRequestToken((error, oauth_token, oauth_token_secret, results) => {
         if (error) {
           console.error('Error getting OAuth request token:', error);
           return res.status(500).json({ error: "Failed to initiate Twitter authentication" });
@@ -631,6 +653,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Redirect to Twitter auth page
         const authUrl = `https://api.twitter.com/oauth/authenticate?oauth_token=${oauth_token}`;
+        console.log('Redirecting to:', authUrl);
         res.redirect(authUrl);
       });
     } catch (error) {
