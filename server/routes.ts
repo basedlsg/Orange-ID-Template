@@ -21,6 +21,18 @@ import fetch from 'node-fetch';
 import { uploadToGCS } from "./utils/storage";
 import { insertAdvertisingRequestSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
+import OAuth from 'oauth';
+
+// Add this before registerRoutes function
+const oauth = new OAuth.OAuth(
+  'https://api.twitter.com/oauth/request_token',
+  'https://api.twitter.com/oauth/access_token',
+  process.env.TWITTER_API_KEY!,
+  process.env.TWITTER_API_SECRET!,
+  '1.0A',
+  'http://localhost:5000/api/auth/twitter/callback',
+  'HMAC-SHA1'
+);
 
 // Configure multer for memory storage
 const upload = multer({
@@ -584,6 +596,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error processing advertising request:", error);
       res.status(500).json({ error: "Failed to process advertising request" });
+    }
+  });
+
+  // Inside registerRoutes, update the Twitter auth routes
+  app.get("/api/auth/twitter", async (req, res) => {
+    try {
+      oauth.getOAuthRequestToken((error, oauth_token, oauth_token_secret, results) => {
+        if (error) {
+          console.error('Error getting OAuth request token:', error);
+          return res.status(500).json({ error: "Failed to initiate Twitter authentication" });
+        }
+
+        // Store oauth_token_secret in session for verification during callback
+        req.session.oauth_token_secret = oauth_token_secret;
+
+        // Redirect user to Twitter auth page
+        const authUrl = `https://api.twitter.com/oauth/authenticate?oauth_token=${oauth_token}`;
+        res.redirect(authUrl);
+      });
+    } catch (error) {
+      console.error("Error initiating Twitter auth:", error);
+      res.status(500).json({ error: "Failed to initiate Twitter authentication" });
+    }
+  });
+
+  app.get("/api/auth/twitter/callback", async (req, res) => {
+    try {
+      const { oauth_token, oauth_verifier } = req.query;
+      const oauth_token_secret = req.session.oauth_token_secret;
+
+      if (!oauth_token_secret) {
+        throw new Error("No OAuth token secret found in session");
+      }
+
+      oauth.getOAuthAccessToken(
+        oauth_token as string,
+        oauth_token_secret,
+        oauth_verifier as string,
+        async (error, oauth_access_token, oauth_access_token_secret, results) => {
+          if (error) {
+            console.error('Error getting OAuth access token:', error);
+            return res.status(500).send(`
+              <script>
+                window.opener.postMessage({ type: 'TWITTER_AUTH_ERROR' }, '*');
+                window.close();
+              </script>
+            `);
+          }
+
+          try {
+            // Get user's Twitter info
+            oauth.get(
+              'https://api.twitter.com/1.1/account/verify_credentials.json',
+              oauth_access_token,
+              oauth_access_token_secret,
+              async (error, data) => {
+                if (error) {
+                  throw error;
+                }
+
+                const userInfo = JSON.parse(data as string);
+                const xHandle = userInfo.screen_name;
+
+                // Get user from the request
+                const user = await getUserFromRequest(req);
+                if (!user) {
+                  throw new Error("User not found");
+                }
+
+                // Update user's X handle in the database
+                await storage.updateUserXHandle(user.orangeId, xHandle);
+
+                // Send success message back to opener
+                res.send(`
+                  <script>
+                    window.opener.postMessage({ 
+                      type: 'TWITTER_AUTH_SUCCESS', 
+                      screen_name: '${xHandle}'
+                    }, '*');
+                    window.close();
+                  </script>
+                `);
+              }
+            );
+          } catch (error) {
+            console.error('Error verifying credentials:', error);
+            res.status(500).send(`
+              <script>
+                window.opener.postMessage({ type: 'TWITTER_AUTH_ERROR' }, '*');
+                window.close();
+              </script>
+            `);
+          }
+        }
+      );
+    } catch (error) {
+      console.error("Error handling Twitter callback:", error);
+      res.status(500).send(`
+        <script>
+          window.opener.postMessage({ type: 'TWITTER_AUTH_ERROR' }, '*');
+          window.close();
+        </script>
+      `);
     }
   });
 
