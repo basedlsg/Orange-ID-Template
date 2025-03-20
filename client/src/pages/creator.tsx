@@ -6,10 +6,18 @@ import { SiX } from "react-icons/si";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Project } from "@shared/schema";
 
+type CreatorData = {
+  projects: Project[];
+  stats: {
+    totalProjects: number;
+    totalLikes: number;
+  };
+};
+
 export default function CreatorPage() {
   const { handle } = useParams<{ handle: string }>();
 
-  const { data: projects, isLoading } = useQuery<Project[]>({
+  const { data: creatorData, isLoading } = useQuery<CreatorData>({
     queryKey: ["/api/creators", handle],
     queryFn: async () => {
       const response = await fetch(`/api/creators/${handle}`);
@@ -45,15 +53,21 @@ export default function CreatorPage() {
         <Card className="bg-black border-zinc-800 mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
-              <SiX className="h-6 w-6" />
-              <span>@{handle}</span>
+              <div className="flex items-center gap-2">
+                <SiX className="h-6 w-6" />
+                <span>@{handle}</span>
+              </div>
+              <div className="ml-auto flex gap-4 text-sm text-zinc-400">
+                <span>{creatorData?.stats.totalProjects} Projects</span>
+                <span>{creatorData?.stats.totalLikes} Likes</span>
+              </div>
             </CardTitle>
           </CardHeader>
         </Card>
 
         <h2 className="text-2xl font-bold mb-6 text-white">Projects</h2>
-        {projects && projects.length > 0 ? (
-          <ProjectGrid projects={projects} />
+        {creatorData?.projects && creatorData.projects.length > 0 ? (
+          <ProjectGrid projects={creatorData.projects} />
         ) : (
           <p className="text-zinc-400">No projects found.</p>
         )}
