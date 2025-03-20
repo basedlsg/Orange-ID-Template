@@ -70,13 +70,13 @@ export default function LeaderboardPage() {
                   <TableRow key={entry.x_handle} className="border-zinc-800">
                     <TableCell className="font-medium text-white">
                       <a
-                        href={`https://x.com/${entry.x_handle.replace('@', '')}`}
+                        href={`https://x.com/${entry.x_handle}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 hover:text-blue-400"
                       >
                         <SiX className="h-4 w-4" />
-                        {entry.x_handle}
+                        @{entry.x_handle}
                       </a>
                     </TableCell>
                     <TableCell className="text-right text-zinc-300">
