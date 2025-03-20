@@ -5,6 +5,19 @@ import { ProjectGrid } from "@/components/project-grid";
 import { SiX } from "react-icons/si";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Project } from "@shared/schema";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useBedrockPassport } from "@bedrock_org/passport";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 type CreatorData = {
   projects: Project[];
@@ -16,6 +29,11 @@ type CreatorData = {
 
 export default function CreatorPage() {
   const { handle } = useParams<{ handle: string }>();
+  const { toast } = useToast();
+  const { isLoggedIn, user } = useBedrockPassport();
+  const [verifyDialogOpen, setVerifyDialogOpen] = useState(false);
+  const [verificationToken, setVerificationToken] = useState<string | null>(null);
+  const [verifying, setVerifying] = useState(false);
 
   const { data: creatorData, isLoading } = useQuery<CreatorData>({
     queryKey: ["/api/creators", handle],
@@ -27,6 +45,70 @@ export default function CreatorPage() {
       return response.json();
     },
   });
+
+  const startVerification = async () => {
+    try {
+      setVerifying(true);
+      const response = await fetch("/api/verify-x", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ xHandle: handle }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to start verification");
+      }
+
+      const data = await response.json();
+      setVerificationToken(data.verificationToken);
+      setVerifyDialogOpen(true);
+
+      toast({
+        title: "Verification Started",
+        description: "Please follow the instructions to verify your X account.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to start verification",
+      });
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const completeVerification = async () => {
+    try {
+      setVerifying(true);
+      const response = await fetch("/api/verify-x/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ xHandle: handle }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to complete verification");
+      }
+
+      const data = await response.json();
+      setVerifyDialogOpen(false);
+      setVerificationToken(null);
+
+      toast({
+        title: "Success",
+        description: "Your X account has been verified successfully!",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to complete verification",
+      });
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -68,13 +150,48 @@ export default function CreatorPage() {
                 <SiX className="h-6 w-6" />
                 <span>@{handle}</span>
               </div>
-              <div className="ml-auto flex gap-4 text-sm text-zinc-400">
-                <span>{creatorData?.stats.totalProjects} Projects</span>
-                <span>{creatorData?.stats.totalLikes} Likes</span>
+              <div className="ml-auto flex items-center gap-4">
+                <div className="text-sm text-zinc-400">
+                  <span className="mr-4">{creatorData?.stats.totalProjects} Projects</span>
+                  <span>{creatorData?.stats.totalLikes} Likes</span>
+                </div>
+                {isLoggedIn && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={startVerification}
+                    disabled={verifying}
+                  >
+                    Verify X Account
+                  </Button>
+                )}
               </div>
             </CardTitle>
           </CardHeader>
         </Card>
+
+        <Dialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Verify X Account</DialogTitle>
+              <DialogDescription>
+                To verify your X account ownership, please:
+                <ol className="list-decimal mt-2 ml-4 space-y-2">
+                  <li>Post a tweet with exactly this text: "{verificationToken}"</li>
+                  <li>Click the "Complete Verification" button below</li>
+                </ol>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setVerifyDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={completeVerification} disabled={verifying}>
+                Complete Verification
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <h2 className="text-2xl font-bold mb-6 text-white">Projects</h2>
         {projectsWithContext && projectsWithContext.length > 0 ? (
