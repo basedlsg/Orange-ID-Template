@@ -5,7 +5,6 @@ import { useState } from "react";
 import type { Project } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 import { SiX } from "react-icons/si";
-import { Leaderboard } from "@/components/leaderboard";
 
 export default function Home() {
   const [sortBy, setSortBy] = useState("likes");
@@ -72,28 +71,21 @@ export default function Home() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-3">
-            <FilterBar 
-              sortBy={sortBy} 
-              aiTool={aiTool}
-              sponsorshipFilter={sponsorshipFilter}
-              searchQuery={searchQuery}
-              onSortChange={setSortBy}
-              onAiToolChange={setAiTool}
-              onSponsorshipFilterChange={setSponsorshipFilter}
-              onSearchChange={setSearchQuery}
-            />
-            <ProjectGrid
-              projects={sortedAndFilteredProjects || []}
-              onProjectView={handleProjectView}
-              isLoading={isLoading}
-            />
-          </div>
-          <div className="lg:col-span-1">
-            <Leaderboard />
-          </div>
-        </div>
+        <FilterBar 
+          sortBy={sortBy} 
+          aiTool={aiTool}
+          sponsorshipFilter={sponsorshipFilter}
+          searchQuery={searchQuery}
+          onSortChange={setSortBy}
+          onAiToolChange={setAiTool}
+          onSponsorshipFilterChange={setSponsorshipFilter}
+          onSearchChange={setSearchQuery}
+        />
+        <ProjectGrid
+          projects={sortedAndFilteredProjects || []}
+          onProjectView={handleProjectView}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );
