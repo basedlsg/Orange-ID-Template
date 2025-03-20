@@ -21,6 +21,13 @@ type LeaderboardEntry = {
 export default function LeaderboardPage() {
   const { data: leaderboard, isLoading } = useQuery<LeaderboardEntry[]>({
     queryKey: ["/api/leaderboard"],
+    queryFn: async () => {
+      const response = await fetch("/api/leaderboard");
+      if (!response.ok) {
+        throw new Error("Failed to fetch leaderboard");
+      }
+      return response.json();
+    }
   });
 
   if (isLoading) {
