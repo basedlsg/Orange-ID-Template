@@ -12,14 +12,15 @@ export default function ProjectPage() {
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
 
-  // Check if we came from a creator profile
-  const fromCreator = location.includes('/creator/');
-  const creatorHandle = fromCreator ? location.split('/creator/')[1]?.split('/')[0] : null;
+  // Parse URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const fromCreator = urlParams.get('from') === 'creator';
+  const creatorHandle = urlParams.get('handle');
 
   const { data: project, isLoading } = useQuery<Project>({
-    queryKey: ["/api/projects/by-slug", slug],
+    queryKey: ["/api/projects/by-slug", slug.split('?')[0]], // Remove query params from slug
     queryFn: async () => {
-      const response = await fetch(`/api/projects/by-slug/${slug}`);
+      const response = await fetch(`/api/projects/by-slug/${slug.split('?')[0]}`);
       if (!response.ok) {
         throw new Error("Failed to fetch project");
       }

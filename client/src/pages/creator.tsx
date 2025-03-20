@@ -44,6 +44,12 @@ export default function CreatorPage() {
     (b.likeCount || 0) - (a.likeCount || 0)
   );
 
+  // Modify each project's slug to include the creator context
+  const projectsWithContext = sortedProjects?.map(project => ({
+    ...project,
+    slug: `${project.slug}?from=creator&handle=${handle}`
+  }));
+
   return (
     <div className="min-h-screen bg-black">
       <Helmet>
@@ -71,9 +77,9 @@ export default function CreatorPage() {
         </Card>
 
         <h2 className="text-2xl font-bold mb-6 text-white">Projects</h2>
-        {sortedProjects && sortedProjects.length > 0 ? (
+        {projectsWithContext && projectsWithContext.length > 0 ? (
           <ProjectGrid
-            projects={sortedProjects}
+            projects={projectsWithContext}
             showFilters={false}
             showSubmitCard={false}
           />
