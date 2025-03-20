@@ -588,13 +588,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const leaderboardQuery = sql`
         SELECT 
-          x_handle,
+          TRIM(LEADING '@' FROM x_handle) as x_handle,
           COUNT(*) as total_projects,
           SUM(like_count) as total_likes
         FROM projects 
         WHERE x_handle IS NOT NULL 
-        GROUP BY x_handle
-        ORDER BY total_likes DESC, total_projects DESC
+        GROUP BY TRIM(LEADING '@' FROM x_handle)
+        ORDER BY total_likes DESC NULLS LAST, total_projects DESC
+        LIMIT 50
       `;
 
       const leaderboard = await db.execute(leaderboardQuery);
