@@ -418,13 +418,19 @@ export function EditProjectDialog({
                       {...field}
                       value={formState.xHandle}
                       onChange={(e) => {
-                        field.onChange(e);
+                        let value = e.target.value;
+                        // Ensure the @ symbol is always present
+                        if (!value.startsWith('@')) {
+                          value = '@' + value;
+                        }
+                        field.onChange(value);
                         setFormState((prev) => ({
                           ...prev,
-                          xHandle: e.target.value,
+                          xHandle: value,
                         }));
                       }}
                       className="bg-zinc-900 border-zinc-700 text-white"
+                      placeholder="@username"
                     />
                   </FormControl>
                   <FormMessage />
