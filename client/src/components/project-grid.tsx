@@ -25,12 +25,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-interface ProjectGridProps {
+export interface ProjectGridProps {
   projects: Project[];
   onProjectView?: (id: number) => void;
   showEditButton?: boolean;
   showSubmitCard?: boolean;
-  showFilters?: boolean; // Added showFilters prop
+  showFilters?: boolean;
   isLoading?: boolean;
 }
 
@@ -38,8 +38,8 @@ export function ProjectGrid({
   projects,
   onProjectView,
   showEditButton = false,
-  showSubmitCard = false,
-  showFilters = true, // Added default value for showFilters
+  showSubmitCard = true, // Changed default back to true
+  showFilters = true,
   isLoading = false,
 }: ProjectGridProps) {
   const { toast } = useToast();
@@ -173,7 +173,7 @@ export function ProjectGrid({
 
   return (
     <div>
-      {showFilters && ( // Conditional rendering of genre filters
+      {showFilters && (
         <div className="mb-6">
           <div className="flex flex-wrap gap-2">
             <Badge
