@@ -40,7 +40,6 @@ export const users = pgTable("users", {
   orangeId: text("orange_id").notNull().unique(),
   username: text("username").notNull(),
   email: text("email"),
-  xHandle: text("x_handle").unique(),
   role: text("role").notNull().default("user"),
   authToken: text("auth_token"),
   isAdmin: boolean("is_admin").notNull().default(false),
@@ -85,12 +84,6 @@ export const insertUserSchema = createInsertSchema(users)
   })
   .extend({
     role: z.enum(["user", "admin"]).default("user"),
-    xHandle: z.string().optional().refine(
-      (val) => !val || !val.startsWith('@'),
-      {
-        message: "X handle should not include the @ symbol"
-      }
-    ),
   });
 
 export const insertProjectSchema = createInsertSchema(projects)
@@ -101,7 +94,7 @@ export const insertProjectSchema = createInsertSchema(projects)
     views: true,
     likeCount: true,
     createdAt: true,
-    slug: true,
+    slug: true, // Omit slug as it will be generated from name
   })
   .extend({
     description: z
@@ -170,12 +163,3 @@ export type Project = typeof projects.$inferSelect;
 export type Like = typeof likes.$inferSelect;
 export type InsertAdvertisingRequest = z.infer<typeof insertAdvertisingRequestSchema>;
 export type AdvertisingRequest = typeof advertisingRequests.$inferSelect;
-
-export type LeaderboardEntry = {
-  xHandle: string;
-  totalLikes: number;
-  projectCount: number;
-  lastProjectDate: Date;
-};
-
-export type TimeFilter = "all" | "monthly" | "weekly";

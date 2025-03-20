@@ -581,28 +581,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/leaderboard", async (req, res) => {
-    try {
-      const timeFilter = (req.query.timeFilter as "all" | "monthly" | "weekly") || "all";
-      const entries = await storage.getCreatorLeaderboard(timeFilter);
-      res.json(entries);
-    } catch (error) {
-      console.error("Error fetching leaderboard:", error);
-      res.status(500).json({ error: "Failed to fetch leaderboard data" });
-    }
-  });
-
-  app.get("/api/creator/:xHandle", async (req, res) => {
-    try {
-      const { xHandle } = req.params;
-      const projects = await storage.getCreatorProjects(xHandle);
-      res.json(projects);
-    } catch (error) {
-      console.error("Error fetching creator projects:", error);
-      res.status(500).json({ error: "Failed to fetch creator projects" });
-    }
-  });
-
   const httpServer = createServer(app);
   return httpServer;
 }
