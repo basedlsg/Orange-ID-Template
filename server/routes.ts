@@ -22,6 +22,8 @@ import { uploadToGCS } from "./utils/storage";
 import { insertAdvertisingRequestSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import OAuth from 'oauth';
+import session from "express-session";
+import { MemoryStore } from "express-session";
 
 // Add this before registerRoutes function
 const oauth = new OAuth.OAuth(
@@ -59,6 +61,16 @@ async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId:
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Add session middleware before routes
+  app.use(
+    session({
+      secret: "your-secret-key", // Replace with a strong, randomly generated secret
+      resave: false,
+      saveUninitialized: false,
+      store: new MemoryStore(),
+    })
+  );
+
   // Ensure uploads directory exists
   app.use('/uploads', express.static('uploads'));
 
@@ -608,10 +620,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(500).json({ error: "Failed to initiate Twitter authentication" });
         }
 
-        // Store oauth_token_secret in session for verification during callback
+        if (!oauth_token || !oauth_token_secret) {
+          console.error('Missing OAuth tokens');
+          return res.status(500).json({ error: "Invalid OAuth response" });
+        }
+
+        // Store tokens in session
+        req.session.oauth_token = oauth_token;
         req.session.oauth_token_secret = oauth_token_secret;
 
-        // Redirect user to Twitter auth page
+        // Redirect to Twitter auth page
         const authUrl = `https://api.twitter.com/oauth/authenticate?oauth_token=${oauth_token}`;
         res.redirect(authUrl);
       });
@@ -625,13 +643,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { oauth_token, oauth_verifier } = req.query;
       const oauth_token_secret = req.session.oauth_token_secret;
+      const oauth_token_from_session = req.session.oauth_token;
 
-      if (!oauth_token_secret) {
+      if (!oauth_token_secret || !oauth_token_from_session) {
         throw new Error("No OAuth token secret found in session");
       }
 
       oauth.getOAuthAccessToken(
-        oauth_token as string,
+        oauth_token_from_session,
         oauth_token_secret,
         oauth_verifier as string,
         async (error, oauth_access_token, oauth_access_token_secret, results) => {
@@ -725,7 +744,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add this new endpoint after the existing ones and before the http server creation
+    // Add this new endpoint after the existing ones and before the http server creation
   app.get("/api/creators/:handle", async (req, res) => {
     try {
       const { handle } = req.params;
