@@ -277,18 +277,18 @@ export class DatabaseStorage implements IStorage {
 
     const result = await db.execute<LeaderboardEntry>(sql`
       SELECT 
-        u.x_handle as "xHandle",
-        COALESCE(SUM(p.like_count), 0) as "totalLikes",
-        COUNT(p.id) as "projectCount",
+        p.x_handle as "xHandle",
+        COUNT(DISTINCT l.id) as "totalLikes",
+        COUNT(DISTINCT p.id) as "projectCount",
         MAX(p.created_at) as "lastProjectDate"
-      FROM users u
-      LEFT JOIN projects p ON p.user_id = u.id
+      FROM projects p
+      LEFT JOIN likes l ON l.project_id = p.id
       WHERE 
-        u.x_handle IS NOT NULL
+        p.x_handle IS NOT NULL
         AND ${dateFilter}
-      GROUP BY u.x_handle
-      HAVING COUNT(p.id) > 0
-      ORDER BY "totalLikes" DESC, "projectCount" DESC
+      GROUP BY p.x_handle
+      HAVING COUNT(DISTINCT p.id) > 0
+      ORDER BY COUNT(DISTINCT l.id) DESC, COUNT(DISTINCT p.id) DESC
       LIMIT 100
     `);
 
@@ -296,16 +296,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCreatorProjects(xHandle: string): Promise<Project[]> {
-    const projects = await db
-      .select()
-      .from(users)
-      .innerJoin(projects, eq(users.id, projects.userId))
-      .where(eq(users.xHandle, xHandle))
-      .orderBy(desc(projects.createdAt));
+    // Clean the handle by removing @ if present
+    const cleanHandle = xHandle.startsWith('@') ? xHandle.substring(1) : xHandle;
 
-    return projects.map(row => ({
-      ...row.projects,
-    }));
+    return db
+      .select()
+      .from(projects)
+      .where(sql`LOWER(projects.x_handle) = LOWER(${cleanHandle})`)
+      .orderBy(desc(projects.createdAt));
   }
 }
 
