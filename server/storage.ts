@@ -292,7 +292,7 @@ export class DatabaseStorage implements IStorage {
       LIMIT 100
     `);
 
-    return result;
+    return result.rows || [];
   }
 
   async getCreatorProjects(xHandle: string): Promise<Project[]> {
