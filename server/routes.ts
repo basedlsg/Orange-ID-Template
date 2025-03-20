@@ -611,8 +611,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Inside registerRoutes, update the Twitter auth routes
-  // Add debug logging to the Twitter auth route
+  // Inside registerRoutes, update the Twitter auth route
   app.get("/api/auth/twitter", async (req, res) => {
     try {
       console.log('Initiating Twitter authentication...');
