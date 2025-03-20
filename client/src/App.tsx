@@ -8,7 +8,7 @@ import { useBedrockPassport } from "@bedrock_org/passport";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { X, Plus, User } from "lucide-react";
+import { X, Plus, User, Trophy } from "lucide-react";
 import { Logo } from "@/components/logo";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Advertise from "@/pages/advertise";
+import Leaderboard from "@/pages/leaderboard"; // Import Leaderboard component
 
 async function storeUserInDB(user: any) {
   if (!user) {
@@ -209,6 +210,17 @@ function Navigation() {
           <Link href="/">
             <Logo className="cursor-pointer" />
           </Link>
+          <div className="ml-4 flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLocation("/leaderboard")}
+              className="text-sm font-medium hover:text-primary"
+            >
+              <Trophy className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Leaderboard</span>
+            </Button>
+          </div>
           <div className="ml-auto flex items-center space-x-4">
             {/* Hide on mobile, show on desktop */}
             <div className="hidden sm:block">
@@ -270,6 +282,7 @@ function Router() {
       </Route>
       <Route path="/projects/:slug" component={Project} />
       <Route path="/advertise" component={Advertise} />
+      <Route path="/leaderboard" component={Leaderboard} />
       <Route path="/auth/callback" component={AuthCallback} />
       <Route component={NotFound} />
     </Switch>
