@@ -2,11 +2,10 @@ import {
   users, type User, type InsertUser,
   projects, type Project, type InsertProject,
   likes, type Like, type InsertLike,
-  advertisingRequests, type AdvertisingRequest, type InsertAdvertisingRequest,
-  type LeaderboardEntry, type TimeFilter
+  advertisingRequests, type AdvertisingRequest, type InsertAdvertisingRequest
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, sql, desc, gte } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { generateUniqueSlug } from "./utils/slug";
 
 export interface IStorage {
@@ -37,8 +36,6 @@ export interface IStorage {
   createAdvertisingRequest(request: InsertAdvertisingRequest): Promise<AdvertisingRequest>;
   getAdvertisingRequests(): Promise<AdvertisingRequest[]>;
   markAdvertisingRequestProcessed(id: number): Promise<AdvertisingRequest>;
-  getCreatorLeaderboard(timeFilter: TimeFilter): Promise<LeaderboardEntry[]>;
-  getCreatorProjects(xHandle: string): Promise<Project[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -261,51 +258,6 @@ export class DatabaseStorage implements IStorage {
 
     if (!project) throw new Error("Project not found");
     return project;
-  }
-
-  async getCreatorLeaderboard(timeFilter: TimeFilter): Promise<LeaderboardEntry[]> {
-    let dateFilter = sql`TRUE`;
-    const now = new Date();
-
-    if (timeFilter === 'weekly') {
-      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      dateFilter = sql`${projects.createdAt} >= ${weekAgo}`;
-    } else if (timeFilter === 'monthly') {
-      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      dateFilter = sql`${projects.createdAt} >= ${monthAgo}`;
-    }
-
-    const result = await db.execute<LeaderboardEntry>(sql`
-      SELECT 
-        u.x_handle as "xHandle",
-        COALESCE(SUM(p.like_count), 0) as "totalLikes",
-        COUNT(p.id) as "projectCount",
-        MAX(p.created_at) as "lastProjectDate"
-      FROM users u
-      LEFT JOIN projects p ON p.user_id = u.id
-      WHERE 
-        u.x_handle IS NOT NULL
-        AND ${dateFilter}
-      GROUP BY u.x_handle
-      HAVING COUNT(p.id) > 0
-      ORDER BY "totalLikes" DESC, "projectCount" DESC
-      LIMIT 100
-    `);
-
-    return result.rows || [];
-  }
-
-  async getCreatorProjects(xHandle: string): Promise<Project[]> {
-    const projects = await db
-      .select()
-      .from(users)
-      .innerJoin(projects, eq(users.id, projects.userId))
-      .where(eq(users.xHandle, xHandle))
-      .orderBy(desc(projects.createdAt));
-
-    return projects.map(row => ({
-      ...row.projects,
-    }));
   }
 }
 
