@@ -606,6 +606,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add this new endpoint after the existing ones and before the http server creation
+  app.get("/api/creators/:handle", async (req, res) => {
+    try {
+      const { handle } = req.params;
+
+      // Fetch all approved projects for this creator
+      const projects = await storage.getProjects(true); // Get approved projects
+      const creatorProjects = projects.filter(p => p.xHandle === handle);
+
+      if (!creatorProjects.length) {
+        return res.status(404).json({ error: "No projects found for this creator" });
+      }
+
+      res.json(creatorProjects);
+    } catch (error) {
+      console.error("Error fetching creator's projects:", error);
+      res.status(500).json({ error: "Failed to fetch creator's projects" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

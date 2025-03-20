@@ -8,11 +8,11 @@ import type { Project } from "@shared/schema";
 
 export default function CreatorPage() {
   const { handle } = useParams<{ handle: string }>();
-  
+
   const { data: projects, isLoading } = useQuery<Project[]>({
-    queryKey: ["/api/projects", { approved: true, xHandle: handle }],
+    queryKey: ["/api/creators", handle],
     queryFn: async () => {
-      const response = await fetch(`/api/projects?approved=true&xHandle=${handle}`);
+      const response = await fetch(`/api/creators/${handle}`);
       if (!response.ok) {
         throw new Error("Failed to fetch creator's projects");
       }
