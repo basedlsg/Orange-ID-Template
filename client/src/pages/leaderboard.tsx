@@ -11,11 +11,13 @@ import {
 } from "@/components/ui/table";
 import { SiX } from "react-icons/si";
 import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 type LeaderboardEntry = {
   x_handle: string;
   total_projects: number;
   total_likes: number;
+  profile_image_url: string | null;
 };
 
 export default function LeaderboardPage() {
@@ -67,7 +69,14 @@ export default function LeaderboardPage() {
                 {leaderboard?.map((entry) => (
                   <TableRow key={entry.x_handle} className="border-zinc-800">
                     <TableCell className="font-medium text-white">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          {entry.profile_image_url ? (
+                            <AvatarImage src={entry.profile_image_url} alt={`@${entry.x_handle}`} />
+                          ) : (
+                            <AvatarFallback>{entry.x_handle[0].toUpperCase()}</AvatarFallback>
+                          )}
+                        </Avatar>
                         <Link href={`/creator/${entry.x_handle}`} className="flex items-center gap-1 hover:text-blue-400">
                           @{entry.x_handle}
                         </Link>

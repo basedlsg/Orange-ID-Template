@@ -588,13 +588,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const leaderboardQuery = sql`
         SELECT 
-          x_handle,
+          p.x_handle,
           COUNT(*) as total_projects,
-          SUM(like_count) as total_likes
-        FROM projects 
-        WHERE x_handle IS NOT NULL 
-          AND x_handle != ''
-        GROUP BY x_handle
+          SUM(p.like_count) as total_likes,
+          vc.profile_image_url
+        FROM projects p
+        LEFT JOIN verified_creators vc ON p.x_handle = vc.x_handle
+        WHERE p.x_handle IS NOT NULL 
+          AND p.x_handle != ''
+        GROUP BY p.x_handle, vc.profile_image_url
         ORDER BY total_likes DESC, total_projects DESC
       `;
 
@@ -632,6 +634,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching creator's projects:", error);
       res.status(500).json({ error: "Failed to fetch creator's projects" });
+    }
+  });
+
+  // Start X verification process
+  app.post("/api/verify-x", async (req, res) => {
+    try {
+      const user = await getUserFromRequest(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { xHandle } = req.body;
+      if (!xHandle) {
+        return res.status(400).json({ error: "X handle is required" });
+      }
+
+      // Generate a unique verification token
+      const verificationToken = Math.random().toString(36).substring(2, 15);
+
+      // Create or update verification record
+      await db.insert(verifiedCreators)
+        .values({
+          xHandle,
+          orangeId: user.orangeId,
+          verificationToken,
+        })
+        .onConflictDoUpdate({
+          target: verifiedCreators.xHandle,
+          set: { verificationToken }
+        });
+
+      res.json({
+        message: "Verification process started",
+        verificationToken,
+        instructions: `Please tweet "${verificationToken}" from your X account @${xHandle} to verify ownership`
+      });
+    } catch (error) {
+      console.error("Error starting X verification:", error);
+      res.status(500).json({ error: "Failed to start verification process" });
+    }
+  });
+
+  // Complete X verification process
+  app.post("/api/verify-x/complete", async (req, res) => {
+    try {
+      const user = await getUserFromRequest(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { xHandle } = req.body;
+      if (!xHandle) {
+        return res.status(400).json({ error: "X handle is required" });
+      }
+
+      // Fetch the verification record
+      const verificationRecord = await db.select()
+        .from(verifiedCreators)
+        .where(sql`x_handle = ${xHandle} AND orange_id = ${user.orangeId}`)
+        .limit(1);
+
+      if (!verificationRecord.length) {
+        return res.status(404).json({ error: "Verification record not found" });
+      }
+
+      const record = verificationRecord[0];
+
+      try {
+        // Fetch the user's recent tweets
+        const response = await fetch(`https://api.twitter.com/2/users/by/username/${xHandle}/tweets`, {
+          headers: {
+            'Authorization': `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch tweets");
+        }
+
+        const tweets = await response.json();
+        const verificationTweet = tweets.data.find(
+          tweet => tweet.text.includes(record.verificationToken)
+        );
+
+        if (!verificationTweet) {
+          return res.status(400).json({
+            error: "Verification tweet not found. Please make sure you've tweeted the verification token."
+          });
+        }
+
+        // If verified, update the record with profile image
+        const userResponse = await fetch(`https://api.twitter.com/2/users/by/username/${xHandle}?user.fields=profile_image_url`, {
+          headers: {
+            'Authorization': `Bearer ${process.env.TWITTER_BEARER_TOKEN}`,
+          }
+        });
+
+        if (!userResponse.ok) {
+          throw new Error("Failed to fetch user profile");
+        }
+
+        const userData = await userResponse.json();
+
+        // Update verification status and profile image
+        await db.update(verifiedCreators)
+          .set({
+            verifiedAt: new Date(),
+            profileImageUrl: userData.data.profile_image_url,
+          })
+          .where(sql`x_handle = ${xHandle}`);
+
+        res.json({
+          message: "X account verified successfully",
+          profileImageUrl: userData.data.profile_image_url
+        });
+      } catch (error) {
+        console.error("Error verifying with Twitter API:", error);
+        res.status(500).json({ error: "Failed to verify with Twitter API" });
+      }
+    } catch (error) {
+      console.error("Error completing X verification:", error);
+      res.status(500).json({ error: "Failed to complete verification" });
     }
   });
 
