@@ -40,7 +40,7 @@ export default function CreatorPage() {
   }
 
   // Sort projects by likes in descending order
-  const sortedProjects = creatorData?.projects.sort((a, b) => 
+  const sortedProjects = creatorData?.projects.sort((a, b) =>
     (b.likeCount || 0) - (a.likeCount || 0)
   );
 
@@ -72,7 +72,11 @@ export default function CreatorPage() {
 
         <h2 className="text-2xl font-bold mb-6 text-white">Projects</h2>
         {sortedProjects && sortedProjects.length > 0 ? (
-          <ProjectGrid projects={sortedProjects} showFilters={false} />
+          <ProjectGrid
+            projects={sortedProjects}
+            showFilters={false}
+            showSubmitCard={false}
+          />
         ) : (
           <p className="text-zinc-400">No projects found.</p>
         )}
