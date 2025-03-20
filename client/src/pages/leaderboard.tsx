@@ -1,6 +1,5 @@
 import { Helmet } from "react-helmet";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
 import {
   Table,
   TableBody,
@@ -70,19 +69,15 @@ export default function LeaderboardPage() {
                 {leaderboard?.map((entry) => (
                   <TableRow key={entry.x_handle} className="border-zinc-800">
                     <TableCell className="font-medium text-white">
-                      <div className="flex items-center gap-2">
-                        <Link href={`/creator/${entry.x_handle}`} className="hover:text-blue-400">
-                          @{entry.x_handle}
-                        </Link>
-                        <a
-                          href={`https://x.com/${entry.x_handle}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:text-blue-400"
-                        >
-                          <SiX className="h-4 w-4" />
-                        </a>
-                      </div>
+                      <a
+                        href={`https://x.com/${entry.x_handle}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 hover:text-blue-400"
+                      >
+                        <SiX className="h-4 w-4" />
+                        @{entry.x_handle}
+                      </a>
                     </TableCell>
                     <TableCell className="text-right text-zinc-300">
                       {entry.total_projects}
