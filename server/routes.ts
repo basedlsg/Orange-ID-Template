@@ -581,6 +581,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add this new endpoint after the existing endpoints
+  app.get("/api/leaderboard", async (req, res) => {
+    try {
+      const leaderboardQuery = sql`
+        SELECT 
+          x_handle,
+          COUNT(*) as total_projects,
+          SUM(like_count) as total_likes
+        FROM projects 
+        WHERE x_handle IS NOT NULL 
+        GROUP BY x_handle
+        ORDER BY total_likes DESC, total_projects DESC
+      `;
+
+      const leaderboard = await db.execute(leaderboardQuery);
+      res.json(leaderboard.rows);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch leaderboard data" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
