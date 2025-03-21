@@ -93,7 +93,7 @@ export default function Advertise() {
         {/* OpenGraph Meta Tags */}
         <meta property="og:title" content="Advertise with Us - VibeCodingList" />
         <meta property="og:description" content="Advertise your AI product or service to thousands of developers and AI enthusiasts on VibeCodingList." />
-        <meta property="og:image" content="/og-image.png" />
+        <meta property="og:image" content={`${window.location.origin}/og-image.png`} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:url" content={window.location.href} />
@@ -105,7 +105,7 @@ export default function Advertise() {
         <meta name="twitter:site" content="@vibecodinglist" />
         <meta name="twitter:title" content="Advertise with Us - VibeCodingList" />
         <meta name="twitter:description" content="Advertise your AI product or service to thousands of developers and AI enthusiasts on VibeCodingList." />
-        <meta name="twitter:image" content="/og-image.png" />
+        <meta name="twitter:image" content={`${window.location.origin}/og-image.png`} />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <h1 className="text-4xl font-bold mb-6">Advertise with Us</h1>
