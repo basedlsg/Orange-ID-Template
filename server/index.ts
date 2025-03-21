@@ -38,8 +38,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Add SEO middleware for server-side meta tag injection
-  app.use(seoMiddleware);
+  // SEO handling is now done by dedicated route in routes.ts
+  // app.use(seoMiddleware);
   
   const server = await registerRoutes(app);
 
