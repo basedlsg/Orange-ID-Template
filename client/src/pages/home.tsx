@@ -61,7 +61,7 @@ export default function Home() {
         {/* OpenGraph Meta Tags */}
         <meta property="og:title" content="VibeCodingList - AI-Powered Project Showcase" />
         <meta property="og:description" content="Explore the best AI-built vibe coding projects on VibeCodingList. Browse quick-turnaround creations, track trends, and submit your own—fast and easy." />
-        <meta property="og:image" content="/og-image.png" />
+        <meta property="og:image" content={`${window.location.origin}/og-image.png`} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:url" content={window.location.href} />
@@ -73,7 +73,7 @@ export default function Home() {
         <meta name="twitter:site" content="@vibecodinglist" />
         <meta name="twitter:title" content="VibeCodingList - AI-Powered Project Showcase" />
         <meta name="twitter:description" content="Explore the best AI-built vibe coding projects on VibeCodingList. Browse quick-turnaround creations, track trends, and submit your own—fast and easy." />
-        <meta name="twitter:image" content="/og-image.png" />
+        <meta name="twitter:image" content={`${window.location.origin}/og-image.png`} />
       </Helmet>
       
       {/* Social Banner */}
