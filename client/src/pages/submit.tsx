@@ -69,17 +69,10 @@ export default function Submit() {
   // Create form after we have project data
   const form = useForm<InsertProject>({
     resolver: zodResolver(insertProjectSchema),
-    defaultValues: projectData ? {
-      name: projectData.name,
-      description: projectData.description,
-      url: projectData.url,
-      aiTools: projectData.aiTools || [],
-      genres: projectData.genres || [],
-      thumbnail: projectData.thumbnail || '',
-      xHandle: projectData.xHandle || '',
-      sponsorshipEnabled: projectData.sponsorshipEnabled || false,
-      sponsorshipUrl: projectData.sponsorshipUrl || '',
-    } : defaultFormValues,
+    defaultValues: {
+      ...defaultFormValues,
+      xHandle: '@', // Initialize with @ symbol
+    },
   });
 
   // Fetch project data if editing
@@ -462,7 +455,17 @@ export default function Submit() {
                       <FormControl>
                         <Input
                           {...field}
+                          value={field.value}
+                          onChange={(e) => {
+                            let value = e.target.value;
+                            // Ensure the @ symbol is always present
+                            if (!value.startsWith('@')) {
+                              value = '@' + value;
+                            }
+                            field.onChange(value);
+                          }}
                           className="bg-zinc-900 border-zinc-700 text-white"
+                          placeholder="@username"
                         />
                       </FormControl>
                       <FormMessage />

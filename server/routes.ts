@@ -10,6 +10,8 @@ import {
   type InsertUser,
   projects
 } from "@shared/schema";
+import { sql } from "drizzle-orm";
+import { db } from "./db";
 import multer from "multer";
 import path from "path";
 import express from 'express';
@@ -17,7 +19,7 @@ import { fromZodError } from "zod-validation-error";
 import { parse } from 'csv-parse/sync';
 import fetch from 'node-fetch';
 import { uploadToGCS } from "./utils/storage";
-import { insertAdvertisingRequestSchema } from "@shared/schema"; // Assuming this schema exists
+import { insertAdvertisingRequestSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 
 // Configure multer for memory storage
@@ -578,6 +580,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error processing advertising request:", error);
       res.status(500).json({ error: "Failed to process advertising request" });
+    }
+  });
+
+  // Add this new endpoint after the existing endpoints
+  app.get("/api/leaderboard", async (req, res) => {
+    try {
+      const leaderboardQuery = sql`
+        SELECT 
+          x_handle,
+          COUNT(*) as total_projects,
+          SUM(like_count) as total_likes
+        FROM projects 
+        WHERE x_handle IS NOT NULL 
+          AND x_handle != ''
+        GROUP BY x_handle
+        ORDER BY total_likes DESC, total_projects DESC
+      `;
+
+      const leaderboard = await db.execute(leaderboardQuery);
+      res.json(leaderboard.rows);
+    } catch (error) {
+      console.error("Error fetching leaderboard:", error);
+      res.status(500).json({ error: "Failed to fetch leaderboard data" });
+    }
+  });
+
+  // Add this new endpoint after the existing ones and before the http server creation
+  app.get("/api/creators/:handle", async (req, res) => {
+    try {
+      const { handle } = req.params;
+
+      // Fetch all approved projects for this creator
+      const projects = await storage.getProjects(true); // Get approved projects
+      const creatorProjects = projects.filter(p => p.xHandle === handle);
+
+      if (!creatorProjects.length) {
+        return res.status(404).json({ error: "No projects found for this creator" });
+      }
+
+      // Calculate total likes
+      const totalLikes = creatorProjects.reduce((sum, project) => sum + (project.likeCount || 0), 0);
+
+      res.json({
+        projects: creatorProjects,
+        stats: {
+          totalProjects: creatorProjects.length,
+          totalLikes: totalLikes
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching creator's projects:", error);
+      res.status(500).json({ error: "Failed to fetch creator's projects" });
     }
   });
 
