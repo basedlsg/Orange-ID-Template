@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { Project } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 import { SiX } from "react-icons/si";
+import { Helmet } from "react-helmet";
 
 export default function Home() {
   const [sortBy, setSortBy] = useState("likes");
@@ -53,6 +54,30 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black">
+      <Helmet>
+        <title>VibeCodingList - AI-Powered Project Showcase</title>
+        <meta 
+          name="description" 
+          content="Explore the best AI-built vibe coding projects on VibeCodingList. Browse quick-turnaround creations, track trends, and submit your own—fast and easy." 
+        />
+        <link rel="canonical" href={window.location.href} />
+        
+        {/* OpenGraph Meta Tags */}
+        <meta property="og:title" content="VibeCodingList - AI-Powered Project Showcase" />
+        <meta property="og:description" content="Explore the best AI-built vibe coding projects on VibeCodingList. Browse quick-turnaround creations, track trends, and submit your own—fast and easy." />
+        <meta property="og:image" content={`${window.location.origin}/og-image.png`} />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="VibeCodingList" />
+
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@vibecodinglist" />
+        <meta name="twitter:title" content="VibeCodingList - AI-Powered Project Showcase" />
+        <meta name="twitter:description" content="Explore the best AI-built vibe coding projects on VibeCodingList. Browse quick-turnaround creations, track trends, and submit your own—fast and easy." />
+        <meta name="twitter:image" content={`${window.location.origin}/og-image.png`} />
+      </Helmet>
+      
       {/* Social Banner */}
       <div className="border-b border-zinc-800 bg-gradient-to-r from-zinc-900 to-black">
         <div className="container mx-auto px-4 py-3">
