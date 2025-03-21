@@ -43,7 +43,6 @@ export const users = pgTable("users", {
   role: text("role").notNull().default("user"),
   authToken: text("auth_token"),
   isAdmin: boolean("is_admin").notNull().default(false),
-  xHandle: text("x_handle").unique(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
