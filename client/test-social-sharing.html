@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social Sharing Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+    }
+    h1 {
+      margin-bottom: 30px;
+      color: #2563eb;
+    }
+    section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+    h2 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #1e40af;
+    }
+    code {
+      display: block;
+      padding: 12px;
+      background-color: #f3f4f6;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: monospace;
+      margin: 10px 0;
+    }
+    ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .success {
+      color: #047857;
+      font-weight: bold;
+    }
+    .warning {
+      color: #b45309;
+      font-weight: bold;
+    }
+    a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>VibeCodingList: Social Sharing Test</h1>
+  
+  <section>
+    <h2>What we've implemented</h2>
+    <ul>
+      <li>Created a dedicated meta-preview endpoint that renders proper HTML with all needed meta tags for social platforms</li>
+      <li>Implemented bot detection middleware that identifies social media crawlers and redirects them to meta-preview</li>
+      <li>Added proper Open Graph and Twitter Card meta tags on project pages</li>
+      <li>Added canonical links to ensure SEO benefits</li>
+    </ul>
+  </section>
+  
+  <section>
+    <h2>Test: Share the following URL on social media</h2>
+    <code id="shareUrl">Loading...</code>
+    <p>When shared on social platforms like X (Twitter), Facebook, LinkedIn, etc., the platform should show:</p>
+    <ul>
+      <li>The project's title</li>
+      <li>A description of the project</li>
+      <li>The project's thumbnail image</li>
+    </ul>
+  </section>
+  
+  <section>
+    <h2>Understanding the solution</h2>
+    <p>Our solution uses server-side detection of social media bots based on their User-Agent:</p>
+    <code>
+// We detect social media crawlers with this regex:
+/facebookexternalhit|twitterbot|pinterest|linkedinbot|whatsapp|telegram|slack|discord|social|bot|crawl|spider|preview/i
+    </code>
+    
+    <p>When a bot visits a project page, we redirect it to the meta-preview endpoint:</p>
+    <code id="metaPreviewUrl">Loading...</code>
+    
+    <p>This endpoint serves HTML with the correct meta tags for the specific project.</p>
+  </section>
+
+  <section>
+    <h2>Testing tools</h2>
+    <p>You can test your URLs with these tools:</p>
+    <ul>
+      <li><a href="https://cards-dev.twitter.com/validator" target="_blank">Twitter Card Validator</a></li>
+      <li><a href="https://developers.facebook.com/tools/debug/" target="_blank">Facebook Sharing Debugger</a></li>
+      <li><a href="https://www.linkedin.com/post-inspector/" target="_blank">LinkedIn Post Inspector</a></li>
+    </ul>
+  </section>
+
+  <script>
+    // Get current domain
+    const domain = window.location.origin;
+    
+    // Set the example URLs
+    document.getElementById('shareUrl').textContent = `${domain}/projects/xmentorship`;
+    document.getElementById('metaPreviewUrl').textContent = `${domain}/meta-preview/xmentorship`;
+  </script>
+</body>
+</html>

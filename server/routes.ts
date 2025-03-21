@@ -146,6 +146,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Ensure uploads directory exists
   app.use('/uploads', express.static('uploads'));
+  
+  // Serve test-social-sharing.html
+  app.get('/test-social-sharing', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'client/test-social-sharing.html'));
+  });
 
   // File upload endpoint with Google Cloud Storage
   app.post("/api/upload", upload.single('thumbnail'), async (req, res) => {
@@ -627,7 +632,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating advertising request:", error);
       if (error instanceof Error) {
-        const validationError = fromZodError(error);
+        // Use fromError instead of fromZodError for general errors
+        const validationError = fromError(error);
         res.status(400).json({ error: validationError.message });
       } else {
         res.status(500).json({ error: "Failed to create advertising request" });
