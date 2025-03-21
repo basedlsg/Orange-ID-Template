@@ -24,6 +24,7 @@ export interface IStorage {
   deleteProject(id: number): Promise<void>;
   createProjects(insertProjects: InsertProject[], userId: number): Promise<Project[]>;
   getProjectById(id: number): Promise<Project | undefined>;
+  getProjectBySlug(slug: string): Promise<Project | undefined>;
   updateProject(id: number, project: InsertProject): Promise<Project>;
 
   // Like operations
@@ -257,6 +258,11 @@ export class DatabaseStorage implements IStorage {
       .returning();
 
     if (!project) throw new Error("Project not found");
+    return project;
+  }
+  
+  async getProjectBySlug(slug: string): Promise<Project | undefined> {
+    const [project] = await db.select().from(projects).where(eq(projects.slug, slug));
     return project;
   }
 }
