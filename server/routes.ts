@@ -47,7 +47,7 @@ async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId:
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Special route for metadata - this will respond with HTML that has project meta tags
+  // Special routes for metadata - this will respond with HTML that has project meta tags
   // for social media bots and crawlers
   app.get('/meta-preview/:slug', async (req, res) => {
     try {
@@ -105,6 +105,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error generating meta preview:', error);
       res.status(500).send('Error generating preview');
+    }
+  });
+  
+  // Additional route to handle direct project URLs for social media crawlers
+  app.use('/projects/:slug', async (req, res, next) => {
+    try {
+      const { slug } = req.params;
+      const userAgent = req.get('User-Agent') || '';
+      
+      console.log(`Received request for /projects/${slug} with User-Agent: ${userAgent}`);
+      
+      // More comprehensive check for social media bots
+      const isSocialBot = /facebookexternalhit|twitterbot|pinterest|linkedinbot|whatsapp|telegram|slack|discord|social|bot|crawl|spider|preview/i.test(userAgent);
+      
+      if (isSocialBot && slug && !slug.includes('.')) {
+        console.log(`Social media bot detected: ${userAgent}, serving meta-preview for ${slug}`);
+        const project = await storage.getProjectBySlug(slug);
+        
+        if (project) {
+          // Serve special meta HTML for social bots with an absolute URL
+          const baseUrl = process.env.NODE_ENV === 'production'
+            ? 'https://vibecodinglist.com'
+            : `${req.protocol}://${req.get('host')}`;
+          
+          console.log(`Redirecting to ${baseUrl}/meta-preview/${slug}`);
+          return res.redirect(`${baseUrl}/meta-preview/${slug}`);
+        }
+      } else {
+        console.log(`Regular user request, continuing normal processing`);
+      }
+      
+      // Continue normal processing for non-bot requests
+      next();
+    } catch (error) {
+      console.error('Error in social bot detection middleware:', error);
+      next(error);
     }
   });
   
