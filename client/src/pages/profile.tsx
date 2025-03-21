@@ -82,9 +82,12 @@ export default function Profile() {
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:site" content="@vibecodinglist" />
+        <meta name="twitter:creator" content="@vibecodinglist" />
         <meta name="twitter:title" content="Your Profile - VibeCodingList" />
         <meta name="twitter:description" content="Manage your liked projects and submissions on VibeCodingList" />
-        <meta name="twitter:image" content={`${window.location.origin}/og-image.png`} />
+        <meta name="twitter:image" content={`${window.location.origin}/twitter-card.png`} />
+        <meta name="twitter:image:alt" content="Your Profile on VibeCodingList" />
+        <meta name="twitter:url" content={window.location.href} />
       </Helmet>
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
