@@ -39,6 +39,8 @@ export async function seoMiddleware(req: Request, res: Response, next: NextFunct
         
         // Override the send function
         res.send = function(body: any) {
+          console.log('Intercepted response, body type:', typeof body, 'length:', typeof body === 'string' ? body.length : 'N/A');
+          
           if (typeof body === 'string') {
             // Define the meta tags to inject
             const metaTags = `
@@ -63,13 +65,18 @@ export async function seoMiddleware(req: Request, res: Response, next: NextFunct
             
             // Find the position after title tag
             const headPosition = body.indexOf('</title>');
+            console.log('</title> position:', headPosition);
             
             if (headPosition !== -1) {
               // Insert meta tags after the title
               body = body.slice(0, headPosition + 8) + metaTags + body.slice(headPosition + 8);
               console.log('Meta tags injected successfully for project:', project.name);
+              
+              // Log first 100 characters of meta tags for debugging
+              console.log('Injected meta tags (first 100 chars):', metaTags.substring(0, 100).replace(/\n/g, '').trim());
             } else {
               console.error('Could not find </title> tag in the HTML');
+              console.log('HTML content (first 100 chars):', body.substring(0, 100));
             }
           }
           
