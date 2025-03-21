@@ -60,6 +60,8 @@ export default function ProjectPage() {
         <meta property="og:title" content={`${project.name} - VibeCodingList`} />
         <meta property="og:description" content={project.description} />
         <meta property="og:image" content={project.thumbnail || `${window.location.origin}/default-thumbnail.png`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta property="og:url" content={window.location.href} />
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="VibeCodingList" />
@@ -71,7 +73,7 @@ export default function ProjectPage() {
         <meta name="twitter:description" content={project.description} />
         <meta name="twitter:image" content={project.thumbnail || `${window.location.origin}/twitter-card.png`} />
         <meta name="twitter:image:alt" content={`${project.name} - VibeCodingList`} />
-        <meta name="twitter:creator" content={project.xHandle || '@vibecodinglist'} />
+        <meta name="twitter:creator" content={project.xHandle ? `@${project.xHandle.replace('@', '')}` : '@vibecodinglist'} />
         <meta name="twitter:url" content={window.location.href} />
 
         {/* Additional SEO Meta Tags */}
