@@ -62,7 +62,7 @@ export default function CreatorPage() {
         {/* OpenGraph Meta Tags */}
         <meta property="og:title" content={`Projects by @${handle} - VibeCodingList`} />
         <meta property="og:description" content={`Discover AI-powered projects created by @${handle}`} />
-        <meta property="og:image" content="/og-image.png" />
+        <meta property="og:image" content={`${window.location.origin}/og-image.png`} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:url" content={window.location.href} />
@@ -74,7 +74,7 @@ export default function CreatorPage() {
         <meta name="twitter:site" content="@vibecodinglist" />
         <meta name="twitter:title" content={`Projects by @${handle} - VibeCodingList`} />
         <meta name="twitter:description" content={`Discover AI-powered projects created by @${handle}`} />
-        <meta name="twitter:image" content="/og-image.png" />
+        <meta name="twitter:image" content={`${window.location.origin}/og-image.png`} />
         <meta name="twitter:creator" content={`@${handle}`} />
       </Helmet>
 
