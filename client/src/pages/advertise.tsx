@@ -101,11 +101,11 @@ export default function Advertise() {
         <meta property="og:site_name" content="VibeCodingList" />
         
         {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@vibecodinglist" />
-        <meta name="twitter:title" content="Advertise with Us - VibeCodingList" />
-        <meta name="twitter:description" content="Advertise your AI product or service to thousands of developers and AI enthusiasts on VibeCodingList." />
-        <meta name="twitter:image" content={`${window.location.origin}/og-image.png`} />
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:site" content="@vibecodinglist" />
+        <meta property="twitter:title" content="Advertise with Us - VibeCodingList" />
+        <meta property="twitter:description" content="Advertise your AI product or service to thousands of developers and AI enthusiasts on VibeCodingList." />
+        <meta property="twitter:image" content={`${window.location.origin}/og-image.png`} />
       </Helmet>
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <h1 className="text-4xl font-bold mb-6">Advertise with Us</h1>
