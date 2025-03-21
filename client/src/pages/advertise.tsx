@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Helmet } from "react-helmet";
 import {
   Form,
   FormControl,
@@ -82,130 +81,104 @@ export default function Advertise() {
   }
 
   return (
-    <>
-      <Helmet>
-        <title>Advertise with Us - VibeCodingList</title>
-        <meta 
-          name="description" 
-          content="Advertise your AI product or service to thousands of developers and AI enthusiasts on VibeCodingList."
-        />
-        
-        {/* OpenGraph Meta Tags */}
-        <meta property="og:title" content="Advertise with Us - VibeCodingList" />
-        <meta property="og:description" content="Advertise your AI product or service to thousands of developers and AI enthusiasts on VibeCodingList." />
-        <meta property="og:image" content={`${window.location.origin}/og-image.png`} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:url" content={window.location.href} />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="VibeCodingList" />
-        
-        {/* Twitter Card Meta Tags */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:site" content="@vibecodinglist" />
-        <meta property="twitter:title" content="Advertise with Us - VibeCodingList" />
-        <meta property="twitter:description" content="Advertise your AI product or service to thousands of developers and AI enthusiasts on VibeCodingList." />
-        <meta property="twitter:image" content={`${window.location.origin}/og-image.png`} />
-      </Helmet>
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <h1 className="text-4xl font-bold mb-6">Advertise with Us</h1>
-        <p className="text-muted-foreground mb-8">
-          Reach thousands of AI-powered projects and their creators. Fill out the form below
-          and we'll help you connect with the right projects for your advertising needs.
-        </p>
+    <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <h1 className="text-4xl font-bold mb-6">Advertise with Us</h1>
+      <p className="text-muted-foreground mb-8">
+        Reach thousands of AI-powered projects and their creators. Fill out the form below
+        and we'll help you connect with the right projects for your advertising needs.
+      </p>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Your name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="your@email.com" type="email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="company"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Company</FormLabel>
+                <FormControl>
+                  <Input placeholder="Your company name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="budget"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Monthly Budget Range</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <Input placeholder="Your name" {...field} />
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your budget range" />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                  <SelectContent>
+                    <SelectItem value="1000-5000">$1,000 - $5,000</SelectItem>
+                    <SelectItem value="5000-10000">$5,000 - $10,000</SelectItem>
+                    <SelectItem value="10000-25000">$10,000 - $25,000</SelectItem>
+                    <SelectItem value="25000+">$25,000+</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="your@email.com" type="email" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="message"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Message</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Tell us about your advertising goals and requirements..."
+                    className="min-h-[120px]"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="company"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Company</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Your company name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="budget"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Monthly Budget Range</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your budget range" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="1000-5000">$1,000 - $5,000</SelectItem>
-                      <SelectItem value="5000-10000">$5,000 - $10,000</SelectItem>
-                      <SelectItem value="10000-25000">$10,000 - $25,000</SelectItem>
-                      <SelectItem value="25000+">$25,000+</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="message"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Message</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Tell us about your advertising goals and requirements..."
-                      className="min-h-[120px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button type="submit" className="w-full">
-              Submit
-            </Button>
-          </form>
-        </Form>
-      </div>
-    </>
+          <Button type="submit" className="w-full">
+            Submit
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 }

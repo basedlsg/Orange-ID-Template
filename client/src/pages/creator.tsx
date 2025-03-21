@@ -58,24 +58,6 @@ export default function CreatorPage() {
           name="description"
           content={`Discover AI-powered projects created by @${handle}`}
         />
-        
-        {/* OpenGraph Meta Tags */}
-        <meta property="og:title" content={`Projects by @${handle} - VibeCodingList`} />
-        <meta property="og:description" content={`Discover AI-powered projects created by @${handle}`} />
-        <meta property="og:image" content={`${window.location.origin}/og-image.png`} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:url" content={window.location.href} />
-        <meta property="og:type" content="profile" />
-        <meta property="og:site_name" content="VibeCodingList" />
-
-        {/* Twitter Card Meta Tags */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:site" content="@vibecodinglist" />
-        <meta property="twitter:title" content={`Projects by @${handle} - VibeCodingList`} />
-        <meta property="twitter:description" content={`Discover AI-powered projects created by @${handle}`} />
-        <meta property="twitter:image" content={`${window.location.origin}/og-image.png`} />
-        <meta property="twitter:creator" content={`@${handle}`} />
       </Helmet>
 
       <div className="container mx-auto px-4 py-8">
