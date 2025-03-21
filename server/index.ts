@@ -175,6 +175,23 @@ app.use((req, res, next) => {
         '<!-- SEO-optimized by server-side rendering: high-priority handler -->\n  </head>'
       );
       
+      // Add preloaded state to help client-side React know what project to render
+      // Include the full project data to avoid an extra API call
+      const projectStateScript = `
+      <script>
+        window.__PRELOADED_PROJECT__ = ${JSON.stringify({
+          slug: project.slug,
+          id: project.id
+        })};
+        window.__PRELOADED_PROJECT_DATA__ = ${JSON.stringify(project)};
+      </script>`;
+      
+      // Insert the preloaded state right before the main.tsx script
+      htmlTemplate = htmlTemplate.replace(
+        '<script type="module" src="/src/main.tsx"></script>',
+        `${projectStateScript}\n    <script type="module" src="/src/main.tsx"></script>`
+      );
+      
       console.log(`[SEO-Handler] Meta tags updated for project: ${project.name}, serving specialized HTML`);
       
       // Set appropriate headers
