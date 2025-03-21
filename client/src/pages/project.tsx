@@ -49,6 +49,18 @@ export default function ProjectPage() {
     }
   };
 
+  // Ensure we have absolute URLs for meta tags
+  const absoluteUrl = (path: string) => {
+    // Check if the URL is already absolute
+    if (path.startsWith('http')) {
+      return path;
+    }
+    return `${window.location.origin}${path.startsWith('/') ? '' : '/'}${path}`;
+  };
+
+  // Make sure thumbnail is absolute and valid
+  const thumbnailUrl = project.thumbnail || `${window.location.origin}/default-thumbnail.png`;
+  
   return (
     <div className="min-h-screen bg-black">
       <Helmet>
@@ -59,7 +71,7 @@ export default function ProjectPage() {
         {/* OpenGraph Meta Tags */}
         <meta property="og:title" content={`${project.name} - VibeCodingList`} />
         <meta property="og:description" content={project.description} />
-        <meta property="og:image" content={project.thumbnail || `${window.location.origin}/default-thumbnail.png`} />
+        <meta property="og:image" content={thumbnailUrl} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:url" content={window.location.href} />
@@ -71,7 +83,7 @@ export default function ProjectPage() {
         <meta name="twitter:site" content="@vibecodinglist" />
         <meta name="twitter:title" content={`${project.name} - VibeCodingList`} />
         <meta name="twitter:description" content={project.description} />
-        <meta name="twitter:image" content={project.thumbnail || `${window.location.origin}/twitter-card.png`} />
+        <meta name="twitter:image" content={thumbnailUrl} />
         <meta name="twitter:image:alt" content={`${project.name} - VibeCodingList`} />
         <meta name="twitter:creator" content={project.xHandle ? `@${project.xHandle.replace('@', '')}` : '@vibecodinglist'} />
         <meta name="twitter:url" content={window.location.href} />
