@@ -25,12 +25,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-export interface ProjectGridProps {
+interface ProjectGridProps {
   projects: Project[];
   onProjectView?: (id: number) => void;
   showEditButton?: boolean;
   showSubmitCard?: boolean;
-  showFilters?: boolean;
   isLoading?: boolean;
 }
 
@@ -38,8 +37,7 @@ export function ProjectGrid({
   projects,
   onProjectView,
   showEditButton = false,
-  showSubmitCard = true, // Changed default back to true
-  showFilters = true,
+  showSubmitCard = true,
   isLoading = false,
 }: ProjectGridProps) {
   const { toast } = useToast();
@@ -173,30 +171,29 @@ export function ProjectGrid({
 
   return (
     <div>
-      {showFilters && (
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-2">
+      {/* Genre filters */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2">
+          <Badge
+            key="all"
+            variant="secondary"
+            className={`cursor-pointer ${!selectedGenre ? "bg-blue-500 text-white" : "bg-zinc-800 text-zinc-400"}`}
+            onClick={() => setSelectedGenre(null)}
+          >
+            All
+          </Badge>
+          {PREDEFINED_GENRES.map((genre) => (
             <Badge
-              key="all"
+              key={genre}
               variant="secondary"
-              className={`cursor-pointer ${!selectedGenre ? "bg-blue-500 text-white" : "bg-zinc-800 text-zinc-400"}`}
-              onClick={() => setSelectedGenre(null)}
+              className={`cursor-pointer ${selectedGenre === genre ? "bg-blue-500 text-white" : "bg-zinc-800 text-zinc-400"}`}
+              onClick={() => setSelectedGenre(genre)}
             >
-              All
+              {genre}
             </Badge>
-            {PREDEFINED_GENRES.map((genre) => (
-              <Badge
-                key={genre}
-                variant="secondary"
-                className={`cursor-pointer ${selectedGenre === genre ? "bg-blue-500 text-white" : "bg-zinc-800 text-zinc-400"}`}
-                onClick={() => setSelectedGenre(genre)}
-              >
-                {genre}
-              </Badge>
-            ))}
-          </div>
+          ))}
         </div>
-      )}
+      </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 h-full">
         {showSubmitCard && (

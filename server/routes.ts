@@ -10,8 +10,6 @@ import {
   type InsertUser,
   projects
 } from "@shared/schema";
-import { sql } from "drizzle-orm";
-import { db } from "./db";
 import multer from "multer";
 import path from "path";
 import express from 'express';
@@ -19,28 +17,34 @@ import { fromZodError } from "zod-validation-error";
 import { parse } from 'csv-parse/sync';
 import fetch from 'node-fetch';
 import { uploadToGCS } from "./utils/storage";
-import { insertAdvertisingRequestSchema } from "@shared/schema";
+import { insertAdvertisingRequestSchema } from "@shared/schema"; // Assuming this schema exists
 import { fromError } from "zod-validation-error";
-import OAuth from 'oauth';
-import session from "express-session";
-import { MemoryStore } from "express-session";
 
-// Configure session middleware first
-const sessionMiddleware = session({
-  secret: "your-secret-key",
-  resave: false,
-  saveUninitialized: true,
-  store: new MemoryStore(),
-  cookie: {
-    secure: false, // Set to true if using HTTPS
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+// Configure multer for memory storage
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
   }
 });
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  // Add session middleware before any routes
-  app.use(sessionMiddleware);
+async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId: string } | null> {
+  // Get orangeId from the authenticated user's token
+  const orangeId = req.body.orangeId || req.query.orangeId;
+  if (!orangeId) {
+    return null;
+  }
 
+  // Get the user from our database
+  const user = await storage.getUserByOrangeId(orangeId);
+  if (!user) {
+    return null;
+  }
+
+  return { userId: user.id, orangeId };
+}
+
+export async function registerRoutes(app: Express): Promise<Server> {
   // Ensure uploads directory exists
   app.use('/uploads', express.static('uploads'));
 
@@ -170,12 +174,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(user);
     } catch (error) {
       console.error("User creation error:", error);
-      if (error instanceof Error) {
-        const validationError = fromError(error);
-        res.status(400).json({ error: validationError.message });
-      } else {
-        res.status(500).json({ error: "Unexpected error occurred" });
-      }
+      const validationError = fromZodError(error as any);
+      res.status(400).json({ error: validationError.message });
     }
   });
 
@@ -581,278 +581,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Inside registerRoutes, update the Twitter auth route
-  app.get("/api/auth/twitter", async (req, res) => {
-    try {
-      console.log('Initiating Twitter authentication...');
-      console.log('API Key available:', !!process.env.TWITTER_API_KEY);
-      console.log('API Secret available:', !!process.env.TWITTER_API_SECRET);
-
-      // Get the current host from the request
-      const protocol = req.protocol;
-      const host = req.get('host');
-      const callbackUrl = `${protocol}://${host}/api/auth/twitter/callback`;
-
-      console.log('Using callback URL:', callbackUrl);
-
-      const oauthInstance = new OAuth.OAuth(
-        'https://api.twitter.com/oauth/request_token',
-        'https://api.twitter.com/oauth/access_token',
-        process.env.TWITTER_API_KEY!,
-        process.env.TWITTER_API_SECRET!,
-        '1.0A',
-        callbackUrl,
-        'HMAC-SHA1'
-      );
-
-      oauthInstance.getOAuthRequestToken((error, oauth_token, oauth_token_secret, results) => {
-        if (error) {
-          console.error('Error getting OAuth request token:', error);
-          return res.status(500).json({ error: "Failed to initiate Twitter authentication" });
-        }
-
-        if (!oauth_token || !oauth_token_secret) {
-          console.error('Missing OAuth tokens');
-          return res.status(500).json({ error: "Invalid OAuth response" });
-        }
-
-        // Store tokens in session
-        if (!req.session) {
-          console.error('No session available');
-          return res.status(500).json({ error: "Session not available" });
-        }
-
-        req.session.oauth_token = oauth_token;
-        req.session.oauth_token_secret = oauth_token_secret;
-
-        // Redirect to Twitter auth page
-        const authUrl = `https://api.twitter.com/oauth/authenticate?oauth_token=${oauth_token}`;
-        console.log('Redirecting to:', authUrl);
-        res.redirect(authUrl);
-      });
-    } catch (error) {
-      console.error("Error initiating Twitter auth:", error);
-      res.status(500).json({ error: "Failed to initiate Twitter authentication" });
-    }
-  });
-
-  app.get("/api/auth/twitter/callback", async (req, res) => {
-    try {
-      console.log("Received callback with query params:", req.query);
-
-      if (!req.session) {
-        console.error('No session available in callback');
-        return res.status(500).send(`
-          <script>
-            window.opener.postMessage({ type: 'TWITTER_AUTH_ERROR' }, '*');
-            window.close();
-          </script>
-        `);
-      }
-
-      const { oauth_token, oauth_verifier } = req.query;
-      const oauth_token_secret = req.session.oauth_token_secret;
-      const oauth_token_from_session = req.session.oauth_token;
-
-      console.log('Session tokens:', {
-        stored_token: oauth_token_from_session,
-        received_token: oauth_token,
-        has_secret: !!oauth_token_secret
-      });
-
-      if (!oauth_token_secret || !oauth_token_from_session) {
-        console.error('Missing session tokens');
-        return res.status(500).send(`
-          <script>
-            window.opener.postMessage({ type: 'TWITTER_AUTH_ERROR', message: 'Session expired' }, '*');
-            window.close();
-          </script>
-        `);
-      }
-
-      const oauthInstance = new OAuth.OAuth(
-        'https://api.twitter.com/oauth/request_token',
-        'https://api.twitter.com/oauth/access_token',
-        process.env.TWITTER_API_KEY!,
-        process.env.TWITTER_API_SECRET!,
-        '1.0A',
-        `${req.protocol}://${req.get('host')}/api/auth/twitter/callback`,
-        'HMAC-SHA1'
-      );
-
-      oauthInstance.getOAuthAccessToken(
-        oauth_token_from_session,
-        oauth_token_secret,
-        oauth_verifier as string,
-        async (error, oauth_access_token, oauth_access_token_secret, results) => {
-          if (error) {
-            console.error('Error getting OAuth access token:', error);
-            return res.status(500).send(`
-              <script>
-                window.opener.postMessage({ type: 'TWITTER_AUTH_ERROR' }, '*');
-                window.close();
-              </script>
-            `);
-          }
-
-          try {
-            // Get user's Twitter info
-            oauthInstance.get(
-              'https://api.twitter.com/1.1/account/verify_credentials.json',
-              oauth_access_token,
-              oauth_access_token_secret,
-              async (error, data) => {
-                if (error) {
-                  console.error('Error verifying credentials:', error);
-                  throw error;
-                }
-
-                const userInfo = JSON.parse(data as string);
-                const xHandle = userInfo.screen_name;
-
-                // Get orangeId from session or query params
-                const orangeId = req.query.orangeId || req.session.orangeId;
-                if (!orangeId) {
-                  throw new Error("User ID not found");
-                }
-
-                // Update user's X handle in the database
-                await storage.updateUserXHandle(orangeId as string, xHandle);
-
-                // Send success message back to opener
-                res.send(`
-                  <script>
-                    window.opener.postMessage({ 
-                      type: 'TWITTER_AUTH_SUCCESS', 
-                      screen_name: '${xHandle}'
-                    }, '*');
-                    window.close();
-                  </script>
-                `);
-              }
-            );
-          } catch (error) {
-            console.error('Error verifying credentials:', error);
-            res.status(500).send(`
-              <script>
-                window.opener.postMessage({ type: 'TWITTER_AUTH_ERROR' }, '*');
-                window.close();
-              </script>
-            `);
-          }
-        }
-      );
-    } catch (error) {
-      console.error("Error handling Twitter callback:", error);
-      res.status(500).send(`
-        <script>
-          window.opener.postMessage({ type: 'TWITTER_AUTH_ERROR' }, '*');
-          window.close();
-        </script>
-      `);
-    }
-  });
-
-  // Add this new endpoint after the existing endpoints
-  app.get("/api/leaderboard", async (req, res) => {
-    try {
-      const leaderboardQuery = sql`
-        SELECT 
-          x_handle,
-          COUNT(*) as total_projects,
-          SUM(like_count) as total_likes
-        FROM projects 
-        WHERE x_handle IS NOT NULL 
-          AND x_handle != ''
-        GROUP BY x_handle
-        ORDER BY total_likes DESC, total_projects DESC
-      `;
-
-      const leaderboard = await db.execute(leaderboardQuery);
-      res.json(leaderboard.rows);
-    } catch (error) {
-      console.error("Error fetching leaderboard:", error);
-      res.status(500).json({ error: "Failed to fetch leaderboard data" });
-    }
-  });
-
-  // Add this new endpoint after the existing ones and before the http server creation
-  app.get("/api/creators/:handle", async (req, res) => {
-    try {
-      const { handle } = req.params;
-
-      // Fetch all approved projects for this creator
-      const projects = await storage.getProjects(true); // Get approved projects
-      const creatorProjects = projects.filter(p => p.xHandle === handle);
-
-      if (!creatorProjects.length) {
-        return res.status(404).json({ error: "No projects found for this creator" });
-      }
-
-      // Calculate total likes
-      const totalLikes = creatorProjects.reduce((sum, project) => sum + (project.likeCount || 0), 0);
-
-      res.json({
-        projects: creatorProjects,
-        stats: {
-          totalProjects: creatorProjects.length,
-          totalLikes: totalLikes
-        }
-      });
-    } catch (error) {
-      console.error("Error fetching creator's projects:", error);
-      res.status(500).json({ error: "Failed to fetch creator's projects" });
-    }
-  });
-
-  app.post("/api/users/x-handle", async (req, res) => {
-    try {
-      const user = await getUserFromRequest(req);
-      if (!user) {
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
-      const { xHandle } = req.body;
-      if (!xHandle) {
-        return res.status(400).json({ error: "X handle is required" });
-      }
-
-      // Remove @ symbol if present
-      const cleanXHandle = xHandle.replace(/^@/, '');
-
-      // Update the user's X handle
-      const updatedUser = await storage.updateUserXHandle(user.orangeId, cleanXHandle);
-      res.json(updatedUser);
-    } catch (error) {
-      console.error("Error updating X handle:", error);
-      res.status(500).json({ error: "Failed to update X handle" });
-    }
-  });
-
   const httpServer = createServer(app);
   return httpServer;
 }
-
-async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId: string } | null> {
-  // Get orangeId from the authenticated user's token
-  const orangeId = req.body.orangeId || req.query.orangeId || req.session?.orangeId;
-  if (!orangeId) {
-    return null;
-  }
-
-  // Get the user from our database
-  const user = await storage.getUserByOrangeId(orangeId);
-  if (!user) {
-    return null;
-  }
-
-  return { userId: user.id, orangeId };
-}
-
-// Configure multer for memory storage
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
-  }
-});
