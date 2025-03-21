@@ -61,7 +61,9 @@ export default function ProjectPage() {
         <meta property="og:description" content={project.description} />
         <meta property="og:image" content={
           project.thumbnail 
-            ? `${window.location.origin}${project.thumbnail}`
+            ? project.thumbnail.startsWith('http') 
+              ? project.thumbnail 
+              : `${window.location.origin}${project.thumbnail}`
             : `${window.location.origin}/default-thumbnail.png`
         } />
         <meta property="og:image:width" content="1200" />
@@ -77,7 +79,9 @@ export default function ProjectPage() {
         <meta name="twitter:description" content={project.description} />
         <meta name="twitter:image" content={
           project.thumbnail 
-            ? `${window.location.origin}${project.thumbnail}`
+            ? project.thumbnail.startsWith('http') 
+              ? project.thumbnail 
+              : `${window.location.origin}${project.thumbnail}`
             : `${window.location.origin}/default-thumbnail.png`
         } />
         <meta name="twitter:creator" content={project.xHandle || '@vibecodinglist'} />
