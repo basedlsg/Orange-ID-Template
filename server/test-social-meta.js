@@ -31,7 +31,8 @@ async function testSocialMetaPreview() {
   const twitterResponse = await fetch(`http://localhost:5000/projects/${slug}`, {
     headers: {
       'User-Agent': 'Twitterbot/1.0'
-    }
+    },
+    redirect: 'manual' // Don't follow redirects automatically
   });
   
   console.log(`Status: ${twitterResponse.status}`);

@@ -77,7 +77,10 @@ export default function ProjectPage() {
         <meta property="og:url" content={window.location.href} />
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="VibeCodingList" />
+        
+        {/* Additional links to help social media bots */}
         <link rel="alternate" type="application/json+oembed" href={`${window.location.origin}/meta-preview/${slug}`} title={`${project.name} - VibeCodingList`} />
+        <link rel="canonical" href={window.location.href} />
 
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
