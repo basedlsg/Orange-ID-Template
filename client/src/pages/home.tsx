@@ -69,11 +69,11 @@ export default function Home() {
         <meta property="og:site_name" content="VibeCodingList" />
 
         {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@vibecodinglist" />
-        <meta name="twitter:title" content="VibeCodingList - AI-Powered Project Showcase" />
-        <meta name="twitter:description" content="Explore the best AI-built vibe coding projects on VibeCodingList. Browse quick-turnaround creations, track trends, and submit your own—fast and easy." />
-        <meta name="twitter:image" content={`${window.location.origin}/og-image.png`} />
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:site" content="@vibecodinglist" />
+        <meta property="twitter:title" content="VibeCodingList - AI-Powered Project Showcase" />
+        <meta property="twitter:description" content="Explore the best AI-built vibe coding projects on VibeCodingList. Browse quick-turnaround creations, track trends, and submit your own—fast and easy." />
+        <meta property="twitter:image" content={`${window.location.origin}/og-image.png`} />
       </Helmet>
       
       {/* Social Banner */}
