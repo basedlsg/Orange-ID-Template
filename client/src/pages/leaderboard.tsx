@@ -49,6 +49,22 @@ export default function LeaderboardPage() {
           name="description"
           content="Discover the most successful AI project creators on VibeCodingList"
         />
+        <link rel="canonical" href={window.location.href} />
+        
+        {/* OpenGraph Meta Tags */}
+        <meta property="og:title" content="Top Creators - VibeCodingList" />
+        <meta property="og:description" content="Discover the most successful AI project creators on VibeCodingList" />
+        <meta property="og:image" content={`${window.location.origin}/og-image.png`} />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="VibeCodingList" />
+
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@vibecodinglist" />
+        <meta name="twitter:title" content="Top Creators - VibeCodingList" />
+        <meta name="twitter:description" content="Discover the most successful AI project creators on VibeCodingList" />
+        <meta name="twitter:image" content={`${window.location.origin}/og-image.png`} />
       </Helmet>
 
       <div className="container mx-auto px-4 py-8">

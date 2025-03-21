@@ -6,6 +6,7 @@ import { useBedrockPassport } from "@bedrock_org/passport";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Redirect, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { Helmet } from "react-helmet";
 
 export default function Profile() {
   const { isLoggedIn, user } = useBedrockPassport();
@@ -62,6 +63,29 @@ export default function Profile() {
     <Redirect to="/" />
   ) : (
     <div className="min-h-screen bg-black">
+      <Helmet>
+        <title>Your Profile - VibeCodingList</title>
+        <meta
+          name="description"
+          content="Manage your liked projects and submissions on VibeCodingList"
+        />
+        <link rel="canonical" href={window.location.href} />
+        
+        {/* OpenGraph Meta Tags */}
+        <meta property="og:title" content="Your Profile - VibeCodingList" />
+        <meta property="og:description" content="Manage your liked projects and submissions on VibeCodingList" />
+        <meta property="og:image" content={`${window.location.origin}/og-image.png`} />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:type" content="profile" />
+        <meta property="og:site_name" content="VibeCodingList" />
+
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@vibecodinglist" />
+        <meta name="twitter:title" content="Your Profile - VibeCodingList" />
+        <meta name="twitter:description" content="Manage your liked projects and submissions on VibeCodingList" />
+        <meta name="twitter:image" content={`${window.location.origin}/og-image.png`} />
+      </Helmet>
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full max-w-[400px] grid-cols-2 mb-8">
