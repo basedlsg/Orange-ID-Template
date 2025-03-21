@@ -73,8 +73,10 @@ export default function CreatorPage() {
         <meta name="twitter:site" content="@vibecodinglist" />
         <meta name="twitter:title" content={`Projects by @${handle} - VibeCodingList`} />
         <meta name="twitter:description" content={`Discover AI-powered projects created by @${handle}`} />
-        <meta name="twitter:image" content={`${window.location.origin}/og-image.png`} />
+        <meta name="twitter:image" content={`${window.location.origin}/twitter-card.png`} />
+        <meta name="twitter:image:alt" content={`@${handle}'s projects on VibeCodingList`} />
         <meta name="twitter:creator" content={`@${handle}`} />
+        <meta name="twitter:url" content={window.location.href} />
       </Helmet>
 
       <div className="container mx-auto px-4 py-8">
