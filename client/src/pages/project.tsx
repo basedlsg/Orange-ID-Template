@@ -1,22 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import type { Project } from "@shared/schema";
 import { ProjectCard } from "@/components/project-card";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useLocation } from "wouter";
 
 export default function ProjectPage() {
   const { slug } = useParams<{ slug: string }>();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
 
+  // Parse URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const fromCreator = urlParams.get('from') === 'creator';
+  const creatorHandle = urlParams.get('handle');
+
   const { data: project, isLoading } = useQuery<Project>({
-    queryKey: ["/api/projects/by-slug", slug],
+    queryKey: ["/api/projects/by-slug", slug.split('?')[0]], // Remove query params from slug
     queryFn: async () => {
-      const response = await fetch(`/api/projects/by-slug/${slug}`);
+      const response = await fetch(`/api/projects/by-slug/${slug.split('?')[0]}`);
       if (!response.ok) {
         throw new Error("Failed to fetch project");
       }
@@ -36,6 +40,14 @@ export default function ProjectPage() {
       </div>
     );
   }
+
+  const handleBack = () => {
+    if (fromCreator && creatorHandle) {
+      setLocation(`/creator/${creatorHandle}`);
+    } else {
+      setLocation('/');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black">
@@ -63,7 +75,7 @@ export default function ProjectPage() {
         {/* Additional SEO Meta Tags */}
         <meta name="robots" content="index, follow" />
         <meta name="author" content={project.xHandle || 'VibeCodingList'} />
-        <meta name="keywords" content={`${project.genres.join(', ')}, ${project.aiTools.join(', ')}, AI Projects, Coding Projects`} />
+        <meta name="keywords" content={`${project.genres.join(', ')}, ${project.aiTools?.join(', ')}, AI Projects, Coding Projects`} />
       </Helmet>
 
       <div className="container mx-auto px-4 py-8">
@@ -71,10 +83,10 @@ export default function ProjectPage() {
           <Button
             variant="ghost"
             className="text-zinc-400 hover:text-white"
-            onClick={() => setLocation('/')}
+            onClick={handleBack}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Projects
+            {fromCreator ? 'Back to Creator Profile' : 'Back to Projects'}
           </Button>
         </div>
 
