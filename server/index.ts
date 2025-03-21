@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { seoMiddleware } from "./seo-middleware";
 
 const app = express();
 app.use(express.json());
@@ -37,6 +38,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Add SEO middleware for server-side meta tag injection
+  app.use(seoMiddleware);
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
