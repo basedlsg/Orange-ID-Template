@@ -31,8 +31,7 @@ async function testSocialMetaPreview() {
   const twitterResponse = await fetch(`http://localhost:5000/projects/${slug}`, {
     headers: {
       'User-Agent': 'Twitterbot/1.0'
-    },
-    redirect: 'manual' // Don't follow redirects automatically
+    }
   });
   
   console.log(`Status: ${twitterResponse.status}`);
@@ -40,6 +39,13 @@ async function testSocialMetaPreview() {
   if (twitterResponse.redirected) {
     console.log(`Redirect URL: ${twitterResponse.url}`);
   }
+  
+  // Also check the HTML response for meta tags when accessed as Twitter bot
+  const twitterHtml = await twitterResponse.text();
+  const twitterMetaTags = extractMetaTags(twitterHtml);
+  
+  console.log('\nMeta Tags from direct Twitter bot response:');
+  console.log(JSON.stringify(twitterMetaTags, null, 2));
   
   // Test direct meta-preview endpoint
   console.log('\n3. Testing direct meta-preview endpoint:');

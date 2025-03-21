@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Additional route to handle direct project URLs for social media crawlers
+  // Direct serving of project pages with embedded meta tags for social media crawlers
   app.use('/projects/:slug', async (req, res, next) => {
     try {
       const { slug } = req.params;
@@ -120,17 +120,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isSocialBot = /facebookexternalhit|twitterbot|pinterest|linkedinbot|whatsapp|telegram|slack|discord|social|bot|crawl|spider|preview/i.test(userAgent);
       
       if (isSocialBot && slug && !slug.includes('.')) {
-        console.log(`Social media bot detected: ${userAgent}, serving meta-preview for ${slug}`);
+        console.log(`Social media bot detected: ${userAgent}, serving direct meta tags for ${slug}`);
         const project = await storage.getProjectBySlug(slug);
         
         if (project) {
-          // Serve special meta HTML for social bots with an absolute URL
+          // Get absolute base URL for all references
           const baseUrl = process.env.NODE_ENV === 'production'
             ? 'https://vibecodinglist.com'
             : `${req.protocol}://${req.get('host')}`;
           
-          console.log(`Redirecting to ${baseUrl}/meta-preview/${slug}`);
-          return res.redirect(`${baseUrl}/meta-preview/${slug}`);
+          // Generate HTML with proper meta tags directly
+          const html = `
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <title>${project.name} - VibeCodingList</title>
+              <meta name="description" content="${project.description}" />
+              
+              <!-- Open Graph / Facebook -->
+              <meta property="og:type" content="article" />
+              <meta property="og:url" content="${baseUrl}/projects/${project.slug}" />
+              <meta property="og:title" content="${project.name} - VibeCodingList" />
+              <meta property="og:description" content="${project.description}" />
+              <meta property="og:image" content="${project.thumbnail || `${baseUrl}/default-thumbnail.png`}" />
+              <meta property="og:image:width" content="1200" />
+              <meta property="og:image:height" content="630" />
+              <meta property="og:site_name" content="VibeCodingList" />
+              
+              <!-- Twitter -->
+              <meta name="twitter:card" content="summary_large_image" />
+              <meta name="twitter:site" content="@vibecodinglist" />
+              <meta name="twitter:creator" content="${project.xHandle ? `@${project.xHandle.replace('@', '')}` : '@vibecodinglist'}" />
+              <meta name="twitter:title" content="${project.name} - VibeCodingList" />
+              <meta name="twitter:description" content="${project.description}" />
+              <meta name="twitter:image" content="${project.thumbnail || `${baseUrl}/twitter-card.png`}" />
+              <meta name="twitter:image:alt" content="${project.name} - VibeCodingList" />
+              
+              <link rel="canonical" href="${baseUrl}/projects/${project.slug}" />
+            </head>
+            <body>
+              <h1>${project.name}</h1>
+              <p>${project.description}</p>
+              ${project.thumbnail ? `<img src="${project.thumbnail}" alt="${project.name}" />` : ''}
+              <p>View this project at: <a href="${baseUrl}/projects/${project.slug}">${baseUrl}/projects/${project.slug}</a></p>
+            </body>
+          </html>
+          `;
+          
+          res.setHeader('Content-Type', 'text/html');
+          return res.send(html);
         }
       } else {
         console.log(`Regular user request, continuing normal processing`);

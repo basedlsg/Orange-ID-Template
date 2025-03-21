@@ -65,10 +65,11 @@
   <section>
     <h2>What we've implemented</h2>
     <ul>
-      <li>Created a dedicated meta-preview endpoint that renders proper HTML with all needed meta tags for social platforms</li>
-      <li>Implemented bot detection middleware that identifies social media crawlers and redirects them to meta-preview</li>
-      <li>Added proper Open Graph and Twitter Card meta tags on project pages</li>
+      <li>Created a bot detection system that identifies social media crawlers by their User-Agent</li>
+      <li>Implemented <strong>direct HTML rendering</strong> that serves complete HTML with proper meta tags to social platforms</li>
+      <li>Added comprehensive Open Graph and Twitter Card meta tags with absolute URLs to project thumbnails</li>
       <li>Added canonical links to ensure SEO benefits</li>
+      <li>Created testing tools to verify proper social media integration</li>
     </ul>
   </section>
   
@@ -91,10 +92,10 @@
 /facebookexternalhit|twitterbot|pinterest|linkedinbot|whatsapp|telegram|slack|discord|social|bot|crawl|spider|preview/i
     </code>
     
-    <p>When a bot visits a project page, we redirect it to the meta-preview endpoint:</p>
-    <code id="metaPreviewUrl">Loading...</code>
+    <p>When a bot visits a project page, we now directly serve HTML with project-specific meta tags:</p>
+    <code id="directBotUrl">Loading...</code>
     
-    <p>This endpoint serves HTML with the correct meta tags for the specific project.</p>
+    <p>This approach avoids redirects and ensures social platforms see the proper metadata immediately.</p>
   </section>
 
   <section>
@@ -113,7 +114,7 @@
     
     // Set the example URLs
     document.getElementById('shareUrl').textContent = `${domain}/projects/xmentorship`;
-    document.getElementById('metaPreviewUrl').textContent = `${domain}/meta-preview/xmentorship`;
+    document.getElementById('directBotUrl').textContent = `${domain}/projects/xmentorship  (viewed by social media bots)`;
   </script>
 </body>
 </html>
