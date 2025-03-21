@@ -589,6 +589,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Meta tags updated for project: ${project.name}, serving specialized HTML`);
       
+      // Add a debugging marker to verify this is being used
+      htmlTemplate = htmlTemplate.replace(
+        '</head>',
+        '<!-- SEO-optimized by server-side rendering -->\n  </head>'
+      );
+      
       // Set appropriate headers
       res.setHeader('Content-Type', 'text/html');
       res.send(htmlTemplate);
