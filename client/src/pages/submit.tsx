@@ -11,7 +11,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useLocation, useSearch } from "wouter";
+import { useLocation } from "wouter";
 import { Helmet } from "react-helmet";
 import {
   Form,
@@ -52,7 +52,6 @@ const defaultFormValues: InsertProject = {
 export default function Submit() {
   const { user } = useBedrockPassport();
   const [, setLocation] = useLocation();
-  const [searchParams] = useSearch();
   const { toast } = useToast();
   const [newTool, setNewTool] = useState("");
   const [newGenre, setNewGenre] = useState("");
@@ -60,7 +59,7 @@ export default function Submit() {
   const [projectData, setProjectData] = useState<Project | null>(null);
 
   // Parse project ID from URL
-  const params = new URLSearchParams(searchParams || "");
+  const params = new URLSearchParams(window.location.search);
   const editingProjectId = params.get('edit');
   const projectId = editingProjectId ? parseInt(editingProjectId, 10) : null;
   const isEditing = !!projectId;
