@@ -7,14 +7,15 @@ export async function seoMiddleware(req: Request, res: Response, next: NextFunct
     const url = req.originalUrl || req.url;
     console.log('SEO middleware processing URL:', url);
     
-    // Check if it's a project page
-    const projectSlugMatch = url.match(/\/project\/([^\/\?]+)/);
+    // Check if it's a project page (match both singular and plural forms)
+    const projectSlugMatch = url.match(/\/projects?\/([^\/\?]+)/);
     
     if (projectSlugMatch) {
       const slug = projectSlugMatch[1];
       console.log('Found project slug:', slug);
       
       const project = await storage.getProjectBySlug(slug);
+      console.log('DB Query result for project slug:', slug, project ? 'Found' : 'Not found');
       
       if (project) {
         console.log('Found project with name:', project.name, 'and thumbnail:', project.thumbnail);
