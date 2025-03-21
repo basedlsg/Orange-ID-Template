@@ -60,6 +60,8 @@ export default function ProjectPage() {
         <meta property="og:title" content={`${project.name} - VibeCodingList`} />
         <meta property="og:description" content={project.description} />
         <meta property="og:image" content={project.thumbnail || '/default-thumbnail.png'} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta property="og:url" content={window.location.href} />
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="VibeCodingList" />
