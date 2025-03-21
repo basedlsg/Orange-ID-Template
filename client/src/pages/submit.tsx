@@ -260,11 +260,11 @@ export default function Submit() {
         <meta property="og:site_name" content="VibeCodingList" />
 
         {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@vibecodinglist" />
-        <meta name="twitter:title" content={isEditing ? 'Edit Project - VibeCodingList' : 'Submit a Project - VibeCodingList'} />
-        <meta name="twitter:description" content={isEditing ? 'Edit your AI-powered coding project' : 'Share your AI-powered coding project with the community'} />
-        <meta name="twitter:image" content={`${window.location.origin}/og-image.png`} />
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:site" content="@vibecodinglist" />
+        <meta property="twitter:title" content={isEditing ? 'Edit Project - VibeCodingList' : 'Submit a Project - VibeCodingList'} />
+        <meta property="twitter:description" content={isEditing ? 'Edit your AI-powered coding project' : 'Share your AI-powered coding project with the community'} />
+        <meta property="twitter:image" content={`${window.location.origin}/og-image.png`} />
       </Helmet>
       <div className="container mx-auto max-w-2xl px-4 py-8">
         <Card className="bg-black border-zinc-800">
