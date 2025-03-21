@@ -481,8 +481,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { slug } = req.params;
       console.log(`Serving project page with SEO for slug: ${slug}`);
       
-      // Get the project from the database
-      const project = await storage.getProjectBySlug(slug);
+      // Get all projects first to ensure we have data
+      console.log(`Getting all projects to verify database connection`);
+      const allProjects = await storage.getProjects();
+      console.log(`Found ${allProjects.length} total projects in database`);
+      
+      // Now try to find the specific project by slug
+      console.log(`Searching for project with slug: ${slug}`);
+      
+      // Try to use the direct lookup first
+      let project = await storage.getProjectBySlug(slug);
+      
+      // Look manually through all projects for debugging
+      const manualSearch = allProjects.find(p => p.slug === slug);
+      console.log(`Manual project search result: ${manualSearch ? 'Found ' + manualSearch.name : 'Not found'}`);
+      
+      // If the direct lookup failed but manual search succeeded, use the manual result
+      if (!project && manualSearch) {
+        console.log(`Direct lookup failed but found project manually: ${manualSearch.name}`);
+        project = manualSearch;
+      }
       
       if (!project) {
         console.log(`Project not found for slug: ${slug}, proceeding to client-side routing`);
