@@ -21,7 +21,6 @@ import fetch from 'node-fetch';
 import { uploadToGCS } from "./utils/storage";
 import { insertAdvertisingRequestSchema } from "@shared/schema";
 import { fromError } from "zod-validation-error";
-import fs from 'fs';
 
 // Configure multer for memory storage
 const upload = multer({
@@ -475,153 +474,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Special route to serve project pages with proper meta tags for social media crawlers
-  app.get("/projects/:slug", async (req, res, next) => {
-    try {
-      const { slug } = req.params;
-      console.log(`Serving project page with SEO for slug: ${slug}`);
-      
-      // Get all projects first to ensure we have data
-      console.log(`Getting all projects to verify database connection`);
-      const allProjects = await storage.getProjects();
-      console.log(`Found ${allProjects.length} total projects in database`);
-      
-      // Now try to find the specific project by slug
-      console.log(`Searching for project with slug: ${slug}`);
-      
-      // Try to use the direct lookup first
-      let project = await storage.getProjectBySlug(slug);
-      
-      // Look manually through all projects for debugging
-      const manualSearch = allProjects.find(p => p.slug === slug);
-      console.log(`Manual project search result: ${manualSearch ? 'Found ' + manualSearch.name : 'Not found'}`);
-      
-      // If the direct lookup failed but manual search succeeded, use the manual result
-      if (!project && manualSearch) {
-        console.log(`Direct lookup failed but found project manually: ${manualSearch.name}`);
-        project = manualSearch;
-      }
-      
-      if (!project) {
-        console.log(`Project not found for slug: ${slug}, proceeding to client-side routing`);
-        return next();
-      }
-      
-      console.log(`Found project: ${project.name}, preparing SEO-optimized HTML`);
-      
-      // Get the host and protocol for absolute URLs
-      const host = req.get('host');
-      const protocol = req.protocol;
-      const baseUrl = `${protocol}://${host}`;
-      
-      // Ensure thumbnail URL is absolute
-      const thumbnailUrl = project.thumbnail && project.thumbnail.startsWith('http') 
-        ? project.thumbnail 
-        : project.thumbnail 
-          ? `${baseUrl}${project.thumbnail.startsWith('/') ? '' : '/'}${project.thumbnail}` 
-          : `${baseUrl}/og-image.png`;
-      
-      // Read the base HTML template
-      let htmlTemplate = fs.readFileSync(path.resolve('./client/index.html'), 'utf8');
-      
-      // Create custom meta tags
-      const pageTitle = `${project.name} - VibeCodingList`;
-      const pageDescription = project.description || 'A coding project on VibeCodingList';
-      
-      // Replace the title tag
-      htmlTemplate = htmlTemplate.replace(
-        /<title>.*?<\/title>/,
-        `<title>${pageTitle}</title>`
-      );
-      
-      // Replace the meta description
-      htmlTemplate = htmlTemplate.replace(
-        /<meta name="description" content=".*?" \/>/,
-        `<meta name="description" content="${pageDescription}" />`
-      );
-      
-      // Replace Open Graph meta tags directly, instead of using regex
-      htmlTemplate = htmlTemplate.replace(
-        /<meta property="og:title" content=".*?" \/>/,
-        `<meta property="og:title" content="${pageTitle}" />`
-      );
-      
-      htmlTemplate = htmlTemplate.replace(
-        /<meta property="og:description" content=".*?" \/>/,
-        `<meta property="og:description" content="${pageDescription}" />`
-      );
-      
-      htmlTemplate = htmlTemplate.replace(
-        /<meta property="og:image" content=".*?" \/>/,
-        `<meta property="og:image" content="${thumbnailUrl}" />`
-      );
-      
-      htmlTemplate = htmlTemplate.replace(
-        /<meta property="og:url" content=".*?" \/>/,
-        `<meta property="og:url" content="${baseUrl}/projects/${slug}" />`
-      );
-      
-      htmlTemplate = htmlTemplate.replace(
-        /<meta property="og:type" content=".*?" \/>/,
-        `<meta property="og:type" content="article" />`
-      );
-      
-      // Replace Twitter Card meta tags directly
-      htmlTemplate = htmlTemplate.replace(
-        /<meta property="twitter:title" content=".*?" \/>/,
-        `<meta property="twitter:title" content="${pageTitle}" />`
-      );
-      
-      htmlTemplate = htmlTemplate.replace(
-        /<meta property="twitter:description" content=".*?" \/>/,
-        `<meta property="twitter:description" content="${pageDescription}" />`
-      );
-      
-      htmlTemplate = htmlTemplate.replace(
-        /<meta property="twitter:image" content=".*?" \/>/,
-        `<meta property="twitter:image" content="${thumbnailUrl}" />`
-      );
-      
-      // Add Twitter creator if available
-      if (project.xHandle) {
-        const creatorMeta = `<meta property="twitter:creator" content="${project.xHandle}" />`;
-        // Check if creator meta already exists, if not add it before the Robots section
-        if (!htmlTemplate.includes('twitter:creator')) {
-          htmlTemplate = htmlTemplate.replace(
-            '<!-- Robots and Canonical -->',
-            `${creatorMeta}\n    <!-- Robots and Canonical -->`
-          );
-        } else {
-          htmlTemplate = htmlTemplate.replace(
-            /<meta property="twitter:creator" content=".*?" \/>/,
-            creatorMeta
-          );
-        }
-      }
-      
-      // Update canonical URL to point to this project
-      htmlTemplate = htmlTemplate.replace(
-        /<link rel="canonical" href=".*?" \/>/,
-        `<link rel="canonical" href="${baseUrl}/projects/${slug}" />`
-      );
-      
-      console.log(`Meta tags updated for project: ${project.name}, serving specialized HTML`);
-      
-      // Add a debugging marker to verify this is being used
-      htmlTemplate = htmlTemplate.replace(
-        '</head>',
-        '<!-- SEO-optimized by server-side rendering -->\n  </head>'
-      );
-      
-      // Set appropriate headers
-      res.setHeader('Content-Type', 'text/html');
-      res.send(htmlTemplate);
-    } catch (error) {
-      console.error('Error serving project page with SEO:', error);
-      next(); // Proceed to client-side rendering on error
-    }
-  });
-  
   // Sitemap endpoint
   app.get("/sitemap.xml", async (req, res) => {
     try {
@@ -678,8 +530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating advertising request:", error);
       if (error instanceof Error) {
-        // Use fromError for general errors
-        const validationError = fromError(error);
+        const validationError = fromZodError(error);
         res.status(400).json({ error: validationError.message });
       } else {
         res.status(500).json({ error: "Failed to create advertising request" });

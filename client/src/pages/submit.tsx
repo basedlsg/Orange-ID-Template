@@ -11,8 +11,7 @@ import {
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { useLocation } from "wouter";
-import { Helmet } from "react-helmet";
+import { useLocation, useSearch } from "wouter";
 import {
   Form,
   FormControl,
@@ -52,6 +51,7 @@ const defaultFormValues: InsertProject = {
 export default function Submit() {
   const { user } = useBedrockPassport();
   const [, setLocation] = useLocation();
+  const [search] = useSearch();
   const { toast } = useToast();
   const [newTool, setNewTool] = useState("");
   const [newGenre, setNewGenre] = useState("");
@@ -59,7 +59,7 @@ export default function Submit() {
   const [projectData, setProjectData] = useState<Project | null>(null);
 
   // Parse project ID from URL
-  const params = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(search);
   const editingProjectId = params.get('edit');
   const projectId = editingProjectId ? parseInt(editingProjectId, 10) : null;
   const isEditing = !!projectId;
@@ -242,30 +242,6 @@ export default function Submit() {
 
   return (
     <>
-      <Helmet>
-        <title>{isEditing ? 'Edit Project' : 'Submit a Project'} - VibeCodingList</title>
-        <meta
-          name="description"
-          content={isEditing ? 'Edit your AI-powered coding project' : 'Share your AI-powered coding project with the community'}
-        />
-        
-        {/* OpenGraph Meta Tags */}
-        <meta property="og:title" content={isEditing ? 'Edit Project - VibeCodingList' : 'Submit a Project - VibeCodingList'} />
-        <meta property="og:description" content={isEditing ? 'Edit your AI-powered coding project' : 'Share your AI-powered coding project with the community'} />
-        <meta property="og:image" content={`${window.location.origin}/og-image.png`} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:url" content={window.location.href} />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="VibeCodingList" />
-
-        {/* Twitter Card Meta Tags */}
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:site" content="@vibecodinglist" />
-        <meta property="twitter:title" content={isEditing ? 'Edit Project - VibeCodingList' : 'Submit a Project - VibeCodingList'} />
-        <meta property="twitter:description" content={isEditing ? 'Edit your AI-powered coding project' : 'Share your AI-powered coding project with the community'} />
-        <meta property="twitter:image" content={`${window.location.origin}/og-image.png`} />
-      </Helmet>
       <div className="container mx-auto max-w-2xl px-4 py-8">
         <Card className="bg-black border-zinc-800">
           <CardHeader>
