@@ -37,51 +37,104 @@ export async function seoMiddleware(req: Request, res: Response, next: NextFunct
             
         console.log('Using thumbnail URL:', thumbnailUrl);
         
-        // Override the send function
-        res.send = function(body: any) {
-          console.log('Intercepted response, body type:', typeof body, 'length:', typeof body === 'string' ? body.length : 'N/A');
+        // Override the send function with a type-safe version
+        res.send = function(this: Response, bodyArg: any) {
+          const currentBody = bodyArg;
+          console.log('Intercepted response, body type:', typeof currentBody, 'length:', typeof currentBody === 'string' ? currentBody.length : 'N/A');
           
-          if (typeof body === 'string') {
-            // Define the meta tags to inject
-            const metaTags = `
-    <!-- OpenGraph Meta Tags -->
-    <meta property="og:title" content="${project.name} - VibeCodingList">
-    <meta property="og:description" content="${project.description}">
-    <meta property="og:image" content="${thumbnailUrl}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:url" content="${baseUrl}${req.originalUrl}">
-    <meta property="og:type" content="article">
-    <meta property="og:site_name" content="VibeCodingList">
-
-    <!-- Twitter Card Meta Tags -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:site" content="@vibecodinglist">
-    <meta property="twitter:title" content="${project.name} - VibeCodingList">
-    <meta property="twitter:description" content="${project.description}">
-    <meta property="twitter:image" content="${thumbnailUrl}">
-    <meta property="twitter:creator" content="${project.xHandle || '@vibecodinglist'}">
-`;
+          if (typeof currentBody === 'string') {
+            // Replace the default meta tags with our custom ones
+            let updatedBody = currentBody;
             
-            // Find the position after title tag
-            const headPosition = body.indexOf('</title>');
-            console.log('</title> position:', headPosition);
+            // Replace OG tags
+            const ogStart = updatedBody.indexOf('<!-- Default Open Graph Meta Tags');
+            const ogEnd = updatedBody.indexOf('<meta property="og:image:height" content="630" />');
+            const ogEndPos = ogEnd !== -1 ? 
+                          ogEnd + '<meta property="og:image:height" content="630" />'.length : -1;
             
-            if (headPosition !== -1) {
-              // Insert meta tags after the title
-              body = body.slice(0, headPosition + 8) + metaTags + body.slice(headPosition + 8);
-              console.log('Meta tags injected successfully for project:', project.name);
+            if (ogStart !== -1 && ogEnd !== -1) {
+              console.log(`Found OG tags section from ${ogStart} to ${ogEnd}`);
+              const ogReplacement = `<!-- OpenGraph Meta Tags (Project: ${project.name}) -->
+    <meta property="og:title" content="${project.name} - VibeCodingList" />
+    <meta property="og:description" content="${project.description}" />
+    <meta property="og:image" content="${thumbnailUrl}" />
+    <meta property="og:url" content="${baseUrl}${req.originalUrl}" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="VibeCodingList" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />`;
               
-              // Log first 100 characters of meta tags for debugging
-              console.log('Injected meta tags (first 100 chars):', metaTags.substring(0, 100).replace(/\n/g, '').trim());
+              updatedBody = updatedBody.substring(0, ogStart) + ogReplacement + updatedBody.substring(ogEnd);
+              console.log('OG tags replaced successfully');
             } else {
-              console.error('Could not find </title> tag in the HTML');
-              console.log('HTML content (first 100 chars):', body.substring(0, 100));
+              console.error('Could not find OG tags section in the HTML');
+              
+              // Fallback approach: Add after title tag
+              const titleTagEnd = updatedBody.indexOf('</title>') + 8; // 8 is length of '</title>'
+              if (titleTagEnd !== -1 + 8) {
+                const ogMeta = `
+    <!-- OpenGraph Meta Tags (Project: ${project.name}) -->
+    <meta property="og:title" content="${project.name} - VibeCodingList" />
+    <meta property="og:description" content="${project.description}" />
+    <meta property="og:image" content="${thumbnailUrl}" />
+    <meta property="og:url" content="${baseUrl}${req.originalUrl}" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="VibeCodingList" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />`;
+                
+                updatedBody = updatedBody.substring(0, titleTagEnd) + ogMeta + updatedBody.substring(titleTagEnd);
+                console.log('OG tags added after title tag (fallback method)');
+              }
             }
+            
+            // Replace Twitter tags if they exist
+            const twitterStart = updatedBody.indexOf('<!-- Default Twitter Card Meta Tags');
+            if (twitterStart !== -1) {
+              const twitterEnd = updatedBody.indexOf('<meta property="twitter:image" content="https://vibecodinglist.com/og-image.png" />');
+              if (twitterEnd !== -1) {
+                const endPos = twitterEnd + '<meta property="twitter:image" content="https://vibecodinglist.com/og-image.png" />'.length;
+                console.log(`Found Twitter tags section from ${twitterStart} to ${endPos}`);
+                const twitterReplacement = `<!-- Twitter Card Meta Tags (Project: ${project.name}) -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:site" content="@vibecodinglist" />
+    <meta property="twitter:title" content="${project.name} - VibeCodingList" />
+    <meta property="twitter:description" content="${project.description}" />
+    <meta property="twitter:image" content="${thumbnailUrl}" />
+    <meta property="twitter:creator" content="${project.xHandle || '@vibecodinglist'}" />`;
+                
+                updatedBody = updatedBody.substring(0, twitterStart) + twitterReplacement + updatedBody.substring(endPos);
+                console.log('Twitter tags replaced successfully');
+              }
+            } else {
+              console.error('Could not find Twitter tags section in the HTML');
+              
+              // Fallback approach: Add after OG tags
+              const ogTagsEnd = updatedBody.indexOf('<!-- OpenGraph Meta Tags (Project:');
+              if (ogTagsEnd !== -1) {
+                const endOfOgSection = updatedBody.indexOf('</meta>', ogTagsEnd);
+                if (endOfOgSection !== -1) {
+                  const twitterMeta = `
+    <!-- Twitter Card Meta Tags (Project: ${project.name}) -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:site" content="@vibecodinglist" />
+    <meta property="twitter:title" content="${project.name} - VibeCodingList" />
+    <meta property="twitter:description" content="${project.description}" />
+    <meta property="twitter:image" content="${thumbnailUrl}" />
+    <meta property="twitter:creator" content="${project.xHandle || '@vibecodinglist'}" />`;
+                  
+                  updatedBody = updatedBody.substring(0, endOfOgSection + 7) + twitterMeta + updatedBody.substring(endOfOgSection + 7);
+                  console.log('Twitter tags added after OG section (fallback method)');
+                }
+              }
+            }
+            
+            console.log('Meta tags replacement completed for project:', project.name);
+            return originalSend.call(this, updatedBody);
           }
           
-          // Call the original send function
-          return originalSend.call(this, body);
+          // If the body isn't a string, just pass it through unmodified
+          return originalSend.call(this, currentBody);
         };
       }
     }
