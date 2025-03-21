@@ -47,6 +47,67 @@ async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId:
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Special route for metadata - this will respond with HTML that has project meta tags
+  // for social media bots and crawlers
+  app.get('/meta-preview/:slug', async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const project = await storage.getProjectBySlug(slug);
+      
+      if (!project) {
+        return res.status(404).send('Project not found');
+      }
+      
+      // Generate HTML with proper meta tags specifically for preview bots
+      const baseUrl = process.env.NODE_ENV === 'production'
+          ? 'https://vibecodinglist.com'
+          : `${req.protocol}://${req.get('host')}`;
+      
+      const html = `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>${project.name} - VibeCodingList</title>
+          <meta name="description" content="${project.description}" />
+          
+          <!-- Open Graph / Facebook -->
+          <meta property="og:type" content="article" />
+          <meta property="og:url" content="${baseUrl}/projects/${project.slug}" />
+          <meta property="og:title" content="${project.name} - VibeCodingList" />
+          <meta property="og:description" content="${project.description}" />
+          <meta property="og:image" content="${project.thumbnail || `${baseUrl}/default-thumbnail.png`}" />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta property="og:site_name" content="VibeCodingList" />
+          
+          <!-- Twitter -->
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:site" content="@vibecodinglist" />
+          <meta name="twitter:creator" content="${project.xHandle ? `@${project.xHandle.replace('@', '')}` : '@vibecodinglist'}" />
+          <meta name="twitter:title" content="${project.name} - VibeCodingList" />
+          <meta name="twitter:description" content="${project.description}" />
+          <meta name="twitter:image" content="${project.thumbnail || `${baseUrl}/twitter-card.png`}" />
+          <meta name="twitter:image:alt" content="${project.name} - VibeCodingList" />
+          
+          <link rel="canonical" href="${baseUrl}/projects/${project.slug}" />
+          <meta http-equiv="refresh" content="0;url=${baseUrl}/projects/${project.slug}" />
+        </head>
+        <body>
+          <p>Redirecting to <a href="${baseUrl}/projects/${project.slug}">${project.name}</a></p>
+        </body>
+      </html>
+      `;
+      
+      res.setHeader('Content-Type', 'text/html');
+      res.send(html);
+    } catch (error) {
+      console.error('Error generating meta preview:', error);
+      res.status(500).send('Error generating preview');
+    }
+  });
+  
   // Ensure uploads directory exists
   app.use('/uploads', express.static('uploads'));
 
