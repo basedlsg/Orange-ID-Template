@@ -69,8 +69,10 @@ export default function ProjectPage() {
         <meta name="twitter:site" content="@vibecodinglist" />
         <meta name="twitter:title" content={`${project.name} - VibeCodingList`} />
         <meta name="twitter:description" content={project.description} />
-        <meta name="twitter:image" content={project.thumbnail || `${window.location.origin}/default-thumbnail.png`} />
+        <meta name="twitter:image" content={project.thumbnail || `${window.location.origin}/twitter-card.png`} />
+        <meta name="twitter:image:alt" content={`${project.name} - VibeCodingList`} />
         <meta name="twitter:creator" content={project.xHandle || '@vibecodinglist'} />
+        <meta name="twitter:url" content={window.location.href} />
 
         {/* Additional SEO Meta Tags */}
         <meta name="robots" content="index, follow" />
