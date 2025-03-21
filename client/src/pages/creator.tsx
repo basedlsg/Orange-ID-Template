@@ -70,12 +70,12 @@ export default function CreatorPage() {
         <meta property="og:site_name" content="VibeCodingList" />
 
         {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@vibecodinglist" />
-        <meta name="twitter:title" content={`Projects by @${handle} - VibeCodingList`} />
-        <meta name="twitter:description" content={`Discover AI-powered projects created by @${handle}`} />
-        <meta name="twitter:image" content={`${window.location.origin}/og-image.png`} />
-        <meta name="twitter:creator" content={`@${handle}`} />
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:site" content="@vibecodinglist" />
+        <meta property="twitter:title" content={`Projects by @${handle} - VibeCodingList`} />
+        <meta property="twitter:description" content={`Discover AI-powered projects created by @${handle}`} />
+        <meta property="twitter:image" content={`${window.location.origin}/og-image.png`} />
+        <meta property="twitter:creator" content={`@${handle}`} />
       </Helmet>
 
       <div className="container mx-auto px-4 py-8">

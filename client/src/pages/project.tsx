@@ -73,18 +73,18 @@ export default function ProjectPage() {
         <meta property="og:site_name" content="VibeCodingList" />
 
         {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@vibecodinglist" />
-        <meta name="twitter:title" content={`${project.name} - VibeCodingList`} />
-        <meta name="twitter:description" content={project.description} />
-        <meta name="twitter:image" content={
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:site" content="@vibecodinglist" />
+        <meta property="twitter:title" content={`${project.name} - VibeCodingList`} />
+        <meta property="twitter:description" content={project.description} />
+        <meta property="twitter:image" content={
           project.thumbnail 
             ? project.thumbnail.startsWith('http') 
               ? project.thumbnail 
               : `${window.location.origin}${project.thumbnail}`
             : `${window.location.origin}/default-thumbnail.png`
         } />
-        <meta name="twitter:creator" content={project.xHandle || '@vibecodinglist'} />
+        <meta property="twitter:creator" content={project.xHandle || '@vibecodinglist'} />
 
         {/* Additional SEO Meta Tags */}
         <meta name="robots" content="index, follow" />
