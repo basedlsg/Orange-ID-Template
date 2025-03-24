@@ -4,10 +4,13 @@ import { storage } from "./storage";
 import {
   insertProjectSchema,
   insertUserSchema,
+  insertNotificationSchema,
   type Project,
   type InsertProject,
   type User,
   type InsertUser,
+  type Notification,
+  type InsertNotification,
   projects
 } from "@shared/schema";
 import { sql } from "drizzle-orm";
@@ -384,6 +387,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // If no like exists, create it
         await storage.createLike(orangeId, projectId);
+        
+        // Get project details to create a notification
+        const project = await storage.getProject(projectId);
+        if (project && project.userId) {
+          // Get the user who liked the project
+          const fromUser = await storage.getUserByOrangeId(orangeId);
+          
+          // Create a notification for the project owner
+          await storage.createNotification({
+            userId: project.userId,
+            projectId: projectId,
+            type: 'like',
+            message: `${fromUser?.username || 'Someone'} liked your project "${project.name}"`,
+            fromOrangeId: orangeId,
+            read: false
+          });
+        }
       }
 
       res.json({ success: true });
@@ -775,6 +795,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching creator's projects:", error);
       res.status(500).json({ error: "Failed to fetch creator's projects" });
+    }
+  });
+
+  // Notification endpoints
+  app.get("/api/notifications", async (req, res) => {
+    try {
+      const user = await getUserFromRequest(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const notifications = await storage.getUserNotifications(user.userId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get("/api/notifications/unread/count", async (req, res) => {
+    try {
+      const user = await getUserFromRequest(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const count = await storage.getUnreadNotificationCount(user.userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching unread notification count:", error);
+      res.status(500).json({ error: "Failed to fetch unread notification count" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", async (req, res) => {
+    try {
+      const user = await getUserFromRequest(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const notificationId = parseInt(req.params.id);
+      const notification = await storage.markNotificationAsRead(notificationId);
+      res.json(notification);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ error: "Failed to mark notification as read" });
+    }
+  });
+
+  app.patch("/api/notifications/read-all", async (req, res) => {
+    try {
+      const user = await getUserFromRequest(req);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      await storage.markAllNotificationsAsRead(user.userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ error: "Failed to mark all notifications as read" });
     }
   });
 
