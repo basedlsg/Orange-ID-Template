@@ -2,6 +2,7 @@ import {
   users, type User, type InsertUser,
   projects, type Project, type InsertProject,
   likes, type Like, type InsertLike,
+  notifications, type Notification, type InsertNotification,
   advertisingRequests, type AdvertisingRequest, type InsertAdvertisingRequest
 } from "@shared/schema";
 import { db } from "./db";
@@ -32,6 +33,13 @@ export interface IStorage {
   deleteLike(orangeId: string, projectId: number): Promise<void>;
   getUserLikes(orangeId: string): Promise<number[]>;
   getLike(orangeId: string, projectId: number): Promise<Like | undefined>;
+
+  // Notification operations
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: number): Promise<Notification[]>;
+  getUnreadNotificationCount(userId: number): Promise<number>;
+  markNotificationAsRead(id: number): Promise<Notification>;
+  markAllNotificationsAsRead(userId: number): Promise<void>;
 
   // Advertising request operations
   createAdvertisingRequest(request: InsertAdvertisingRequest): Promise<AdvertisingRequest>;
@@ -264,6 +272,50 @@ export class DatabaseStorage implements IStorage {
   async getProjectBySlug(slug: string): Promise<Project | undefined> {
     const [project] = await db.select().from(projects).where(eq(projects.slug, slug));
     return project;
+  }
+
+  // Notification operations
+  async createNotification(insertNotification: InsertNotification): Promise<Notification> {
+    const [notification] = await db.insert(notifications).values(insertNotification).returning();
+    return notification;
+  }
+
+  async getUserNotifications(userId: number): Promise<Notification[]> {
+    return db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(sql`${notifications.createdAt} DESC`);
+  }
+
+  async getUnreadNotificationCount(userId: number): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(notifications)
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.read, false)
+      ));
+    
+    return result[0]?.count || 0;
+  }
+
+  async markNotificationAsRead(id: number): Promise<Notification> {
+    const [notification] = await db
+      .update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.id, id))
+      .returning();
+    
+    if (!notification) throw new Error("Notification not found");
+    return notification;
+  }
+
+  async markAllNotificationsAsRead(userId: number): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ read: true })
+      .where(eq(notifications.userId, userId));
   }
 }
 

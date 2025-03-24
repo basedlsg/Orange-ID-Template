@@ -76,6 +76,17 @@ export const likes = pgTable("likes", {
   userProjectUnique: unique().on(table.orangeId, table.projectId),
 }));
 
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  projectId: integer("project_id").references(() => projects.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // 'like', 'comment', etc.
+  message: text("message").notNull(),
+  fromOrangeId: text("from_orange_id"),
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users)
   .omit({
     id: true,
@@ -155,11 +166,19 @@ export const insertAdvertisingRequestSchema = createInsertSchema(advertisingRequ
     createdAt: true,
   });
 
+export const insertNotificationSchema = createInsertSchema(notifications)
+  .omit({
+    id: true,
+    createdAt: true,
+  });
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type InsertLike = z.infer<typeof insertLikeSchema>;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type User = typeof users.$inferSelect;
 export type Project = typeof projects.$inferSelect;
 export type Like = typeof likes.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
 export type InsertAdvertisingRequest = z.infer<typeof insertAdvertisingRequestSchema>;
 export type AdvertisingRequest = typeof advertisingRequests.$inferSelect;
