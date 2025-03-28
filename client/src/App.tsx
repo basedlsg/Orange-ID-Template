@@ -199,9 +199,9 @@ function Navigation() {
     <Button
       variant="outline"
       onClick={() => setLocation("/advertise")}
-      className="text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
+      className="text-sm font-medium bg-orange-500 text-white hover:bg-orange-600"
     >
-      Advertise Across Projects
+      Advertise in Orange Vibejam
     </Button>
   );
 
@@ -260,9 +260,9 @@ function Navigation() {
         <Button
           variant="outline"
           onClick={() => setLocation("/advertise")}
-          className="w-full text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
+          className="w-full text-sm font-medium bg-orange-500 text-white hover:bg-orange-600"
         >
-          Advertise Across Projects
+          Advertise in Orange Vibejam
         </Button>
       </div>
     </>

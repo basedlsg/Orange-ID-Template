@@ -82,10 +82,10 @@ export default function Advertise() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-4xl font-bold mb-6">Advertise with Us</h1>
+      <h1 className="text-4xl font-bold mb-6">Advertise in Orange Vibejam</h1>
       <p className="text-muted-foreground mb-8">
-        Reach thousands of AI-powered projects and their creators. Fill out the form below
-        and we'll help you connect with the right projects for your advertising needs.
+        Reach participants and showcase your brand during the Orange Vibejam hackathon. Fill out the form below
+        and we'll help you connect with the Orange Vibejam community for your advertising needs.
       </p>
 
       <Form {...form}>
@@ -137,7 +137,7 @@ export default function Advertise() {
             name="budget"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Monthly Budget Range</FormLabel>
+                <FormLabel>Budget Range</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
@@ -164,7 +164,7 @@ export default function Advertise() {
                 <FormLabel>Message</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Tell us about your advertising goals and requirements..."
+                    placeholder="Tell us about your advertising goals and how you'd like to engage with Orange Vibejam participants..."
                     className="min-h-[120px]"
                     {...field}
                   />
@@ -174,7 +174,7 @@ export default function Advertise() {
             )}
           />
 
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full bg-orange-500 text-white hover:bg-orange-600">
             Submit
           </Button>
         </form>
