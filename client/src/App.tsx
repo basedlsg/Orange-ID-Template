@@ -1,14 +1,14 @@
 import { Switch, Route, Link, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { OrangeAuthProvider } from "@/components/OrangeAuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { useBedrockPassport } from "@bedrock_org/passport";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { X, Plus, User, Trophy, Bell } from "lucide-react";
+import { X, Plus, User, Trophy } from "lucide-react";
 import { Logo } from "@/components/logo";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -29,48 +29,6 @@ import Advertise from "@/pages/advertise";
 import Leaderboard from "@/pages/leaderboard"; // Import Leaderboard component
 import Creator from "@/pages/creator"; // Add this import
 import { Helmet } from "react-helmet";
-
-// Define notification type
-type Notification = {
-  id: number;
-  userId: number;
-  projectId: number;
-  message: string;
-  read: boolean;
-  createdAt: string;
-  type: string;
-  fromOrangeId?: string;
-};
-
-// Notification item component for the dropdown
-function NotificationItem({ 
-  notification, 
-  onMarkAsRead,
-  onNavigate,
-}: { 
-  notification: Notification;
-  onMarkAsRead: (id: number) => void;
-  onNavigate: (projectId: number) => void;
-}) {
-  const handleClick = () => {
-    onMarkAsRead(notification.id);
-    if (notification.projectId) {
-      onNavigate(notification.projectId);
-    }
-  };
-  
-  return (
-    <div 
-      className={`p-3 border-b last:border-0 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-blue-50' : ''}`}
-      onClick={handleClick}
-    >
-      <div className="font-medium text-sm">{notification.message}</div>
-      <div className="text-xs text-gray-400 mt-1">
-        {new Date(notification.createdAt).toLocaleDateString()}
-      </div>
-    </div>
-  );
-}
 
 async function storeUserInDB(user: any) {
   if (!user) {
@@ -218,156 +176,6 @@ function Navigation() {
   const { isLoggedIn, user, signOut } = useBedrockPassport();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Query for unread notification count
-  const { data: unreadCount = 0, refetch: refetchUnreadCount } = useQuery({
-    queryKey: ['/api/notifications/unread/count'],
-    queryFn: async () => {
-      if (!isLoggedIn || !user) return 0;
-      
-      const params = new URLSearchParams();
-      if (user) params.append('orangeId', user.id);
-      
-      const response = await fetch(`/api/notifications/unread/count?${params.toString()}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch unread count');
-      }
-      
-      const data = await response.json();
-      return data.count;
-    },
-    enabled: !!isLoggedIn && !!user,
-    refetchInterval: 30000, // Refresh every 30 seconds
-  });
-
-  // Query for notification list
-  const { data: notifications = [], refetch: refetchNotifications } = useQuery({
-    queryKey: ['/api/notifications'],
-    queryFn: async () => {
-      if (!isLoggedIn || !user) return [];
-      
-      const params = new URLSearchParams();
-      if (user) params.append('orangeId', user.id);
-      
-      const response = await fetch(`/api/notifications?${params.toString()}`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch notifications');
-      }
-      
-      return response.json();
-    },
-    enabled: !!isLoggedIn && !!user,
-  });
-
-  // Setup polling for notifications when logged in
-  useEffect(() => {
-    if (isLoggedIn && user) {
-      // Initial fetch
-      refetchUnreadCount();
-      refetchNotifications();
-      
-      // Set up interval for polling
-      intervalRef.current = setInterval(() => {
-        refetchUnreadCount();
-        refetchNotifications();
-      }, 30000); // Every 30 seconds
-    }
-    
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [isLoggedIn, user, refetchUnreadCount, refetchNotifications]);
-
-  // Mark notification as read
-  const markAsRead = async (id: number) => {
-    try {
-      const params = new URLSearchParams();
-      if (user) params.append('orangeId', user.id);
-      
-      const response = await fetch(`/api/notifications/${id}/read?${params.toString()}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to mark notification as read');
-      }
-      
-      await Promise.all([refetchUnreadCount(), refetchNotifications()]);
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to mark notification as read',
-      });
-    }
-  };
-
-  // Mark all notifications as read
-  const markAllAsRead = async () => {
-    try {
-      const params = new URLSearchParams();
-      if (user) params.append('orangeId', user.id);
-      
-      const response = await fetch(`/api/notifications/read-all?${params.toString()}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to mark all notifications as read');
-      }
-      
-      await Promise.all([refetchUnreadCount(), refetchNotifications()]);
-      
-      toast({
-        title: 'Success',
-        description: 'All notifications marked as read',
-      });
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to mark all notifications as read',
-      });
-    }
-  };
-
-  // Navigate to project when notification is clicked
-  const navigateToProject = async (projectId: number) => {
-    try {
-      // Fetch the project to get its slug
-      const response = await fetch(`/api/projects/${projectId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch project details');
-      }
-      
-      const project = await response.json();
-      if (project && project.slug) {
-        setLocation(`/projects/${project.slug}`);
-      }
-    } catch (error) {
-      console.error('Error navigating to project:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to navigate to project',
-      });
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -420,58 +228,6 @@ function Navigation() {
             <div className="hidden sm:block">
               <AdvertiseButton />
             </div>
-            
-            {/* Notification bell - only show when logged in */}
-            {isLoggedIn && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-sm font-medium hover:text-primary relative"
-                  >
-                    <Bell className="h-4 w-4" />
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                        {unreadCount > 9 ? '9+' : unreadCount}
-                      </span>
-                    )}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-80">
-                  <div className="p-2 border-b flex justify-between items-center">
-                    <h3 className="font-semibold">Notifications</h3>
-                    {notifications.length > 0 && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={markAllAsRead}
-                        className="text-xs"
-                      >
-                        Mark all as read
-                      </Button>
-                    )}
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    {notifications.length === 0 ? (
-                      <div className="p-4 text-center text-gray-500">
-                        No notifications yet
-                      </div>
-                    ) : (
-                      notifications.map((notification: Notification) => (
-                        <NotificationItem
-                          key={notification.id}
-                          notification={notification}
-                          onMarkAsRead={markAsRead}
-                          onNavigate={navigateToProject}
-                        />
-                      ))
-                    )}
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-            
             {isLoggedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
