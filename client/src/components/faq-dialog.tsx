@@ -34,7 +34,7 @@ const faqs = [
   {
     question: "What are the conditions of entry?",
     answer:
-      "To participate:\n\n• Your app or game must be vibe-coded.\n\n• At least 80% of the code must be AI-generated.\n\n• The project must be web-based.\n\n• Orange ID integration is required.\n\n• You must complete the attached registration form to enter.",
+      "To participate:\n\n• Your app or game must be vibe-coded.\n\n• At least 80% of the code must be AI-generated.\n\n• The project must be web-based.\n\n• Orange ID integration is required.\n\n• You must complete the registration form at: https://y1ot1gslj3w.typeform.com/OrangeHackathon",
   },
   {
     question: "How will entries be judged?",
@@ -64,7 +64,7 @@ const faqs = [
   {
     question: "How do I register for the Orange Vibe Jam?",
     answer:
-      "To register, complete the registration form attached to the announcement or available via the official website, vibecodinglist.com.",
+      "To register, complete the Orange Vibe Jam: Registration of Interest Form at: https://y1ot1gslj3w.typeform.com/OrangeHackathon or visit the official website at vibecodinglist.com.",
   },
   {
     question: "What is Orange ID, and how do I integrate it?",

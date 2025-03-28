@@ -214,6 +214,8 @@ function Navigation() {
             <Logo className="cursor-pointer" />
           </Link>
           <div className="ml-4 flex items-center space-x-4">
+            {/* Commented out Leaderboard as requested */}
+            {/* 
             <Button
               variant="ghost"
               size="sm"
@@ -223,6 +225,25 @@ function Navigation() {
               <Trophy className="h-4 w-4 mr-2" />
               <span className="hidden sm:inline">Leaderboard</span>
             </Button>
+            */}
+            
+            {/* Orange Vibe Jam Registration Button */}
+            <a 
+              href="https://y1ot1gslj3w.typeform.com/OrangeHackathon"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-sm font-medium bg-gradient-to-r from-orange-500 to-yellow-500 text-white hover:from-orange-600 hover:to-yellow-600 border-orange-300 shadow-md"
+              >
+                <span className="flex items-center gap-1">
+                  <span className="animate-pulse">💻</span> Register for Orange Vibe Jam
+                </span>
+              </Button>
+            </a>
           </div>
           <div className="ml-auto flex items-center space-x-4">
             {/* Hide on mobile, show on desktop */}
@@ -260,6 +281,23 @@ function Navigation() {
       {/* Show on mobile only */}
       <div className="sm:hidden container mx-auto px-4 py-2 space-y-3">
         <div className="grid grid-cols-1 gap-3">
+          {/* Orange Vibe Jam Registration button for mobile */}
+          <a 
+            href="https://y1ot1gslj3w.typeform.com/OrangeHackathon"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full"
+          >
+            <Button
+              variant="outline"
+              className="w-full text-sm font-medium bg-gradient-to-r from-orange-500 to-yellow-500 text-white hover:from-orange-600 hover:to-yellow-600 border-orange-300 shadow-md"
+            >
+              <span className="flex items-center gap-1 justify-center">
+                <span className="animate-pulse">💻</span> Register for Orange Vibe Jam
+              </span>
+            </Button>
+          </a>
+          
           <Button
             variant="outline"
             onClick={() => setLocation("/advertise")}
@@ -267,6 +305,7 @@ function Navigation() {
           >
             Advertise in Orange Vibe Jam
           </Button>
+          
           <FAQButton className="w-full border-2 border-orange-300 rounded-md" />
         </div>
       </div>
