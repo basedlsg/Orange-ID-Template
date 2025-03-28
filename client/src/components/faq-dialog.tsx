@@ -64,7 +64,7 @@ const faqs = [
   {
     question: "How do I register for the Orange Vibe Jam?",
     answer:
-      "To register, complete the Orange Vibe Jam: Registration Form here: https://y1ot1gslj3w.typeform.com/OrangeHackathon or visit the official website at vibecodinglist.com.",
+      "To register, complete the Orange Vibe Jam Registration Form here: https://y1ot1gslj3w.typeform.com/OrangeHackathon",
   },
   {
     question: "What is Orange ID, and how do I integrate it?",
@@ -137,14 +137,18 @@ export function FAQButton({ className = "" }: { className?: string }) {
                       {faq.question}
                     </AccordionTrigger>
                     <AccordionContent className="whitespace-pre-line text-sm text-muted-foreground pb-4">
-                      {faq.answer.includes('https://') ? (
-                        <span dangerouslySetInnerHTML={{ 
-                          __html: faq.answer.replace(
-                            /(https:\/\/y1ot1gslj3w\.typeform\.com\/OrangeHackathon)/g, 
-                            '<a href="$1" target="_blank" rel="noopener noreferrer" class="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-md font-medium hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors">Register Now</a>'
-                          ) 
-                        }} />
-                      ) : faq.answer}
+                      {faq.answer.includes("https://") ? (
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html: faq.answer.replace(
+                              /(https:\/\/y1ot1gslj3w\.typeform\.com\/OrangeHackathon)/g,
+                              '<a href="$1" target="_blank" rel="noopener noreferrer" class="px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-md font-medium hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors">Register Now</a>',
+                            ),
+                          }}
+                        />
+                      ) : (
+                        faq.answer
+                      )}
                     </AccordionContent>
                   </AccordionItem>
                 ))}
