@@ -84,21 +84,25 @@ export function FAQButton({ className = "" }: { className?: string }) {
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className={`text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 border-2 border-orange-300 ${className}`}
+        className={`text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 border-2 border-orange-300 font-bold shadow-md hover:shadow-lg transition-all ${className}`}
       >
-        Orange Vibe Jam FAQ
+        <span className="flex items-center gap-1">
+          <span className="animate-pulse">🔥</span> Orange Vibe Jam FAQ
+        </span>
       </Button>
       
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col overflow-hidden p-0">
-          <DialogHeader className="p-6 pb-2">
-            <DialogTitle className="text-2xl font-bold text-center">2025 Orange Vibe Jam - FAQs</DialogTitle>
-            <DialogDescription className="text-center text-orange-500 pt-2">
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+          <DialogHeader className="p-6 pb-2 bg-orange-50 dark:bg-orange-950/30">
+            <DialogTitle className="text-3xl font-bold text-center text-orange-600 drop-shadow-sm">
+              2025 Orange Vibe Jam - FAQs
+            </DialogTitle>
+            <DialogDescription className="text-center text-orange-500 pt-2 text-lg">
               Everything you need to know about the Orange Vibe Jam hackathon
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="flex-1 px-6 py-4 max-h-[70vh]">
-            <div className="space-y-4">
+          <ScrollArea className="flex-1 px-6 py-4 overflow-y-auto" style={{ maxHeight: 'calc(80vh - 180px)' }}>
+            <div className="space-y-4 pb-4">
               <Accordion type="single" collapsible className="w-full">
                 {faqs.map((faq, index) => (
                   <AccordionItem key={index} value={`item-${index}`} className="border-b border-zinc-200 dark:border-zinc-800">
@@ -113,7 +117,7 @@ export function FAQButton({ className = "" }: { className?: string }) {
               </Accordion>
             </div>
           </ScrollArea>
-          <div className="p-6 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="p-6 border-t border-zinc-200 dark:border-zinc-800 sticky bottom-0 bg-background">
             <Button
               onClick={() => setIsOpen(false)}
               className="w-full bg-orange-500 text-white hover:bg-orange-600"
