@@ -82,11 +82,19 @@ export default function Advertise() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-4xl font-bold mb-6">Advertise in Orange Vibejam</h1>
-      <p className="text-muted-foreground mb-8">
-        Reach participants and showcase your brand during the Orange Vibejam hackathon. Fill out the form below
-        and we'll help you connect with the Orange Vibejam community for your advertising needs.
-      </p>
+      <h1 className="text-4xl font-bold mb-6 text-orange-600">Advertise in Orange Vibe Jam</h1>
+      <div className="mb-8 space-y-4">
+        <p className="text-lg">
+          Reach developers and showcase your brand during the <span className="font-semibold text-orange-500">2025 Orange Vibe Jam</span>, a competition with up to $100K USD in prizes.
+        </p>
+        <p className="text-muted-foreground">
+          The Orange Vibe Jam is co-hosted by <span className="font-bold">@Orange_web3</span> and <span className="font-bold">@vibecodinglist</span>, running until April 30, 2025.
+          With participating developers creating AI-powered, vibe-coded apps and games, your brand can connect with innovative creators. 
+        </p>
+        <p className="text-muted-foreground">
+          Fill out the form below and we'll help you connect with the Orange Vibe Jam community for sponsorship and advertising opportunities.
+        </p>
+      </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -164,7 +172,7 @@ export default function Advertise() {
                 <FormLabel>Message</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Tell us about your advertising goals and how you'd like to engage with Orange Vibejam participants..."
+                    placeholder="Tell us about your advertising goals, how you'd like to engage with Orange Vibe Jam participants, and any specific interests in Orange ID integration or other aspects of the competition..."
                     className="min-h-[120px]"
                     {...field}
                   />

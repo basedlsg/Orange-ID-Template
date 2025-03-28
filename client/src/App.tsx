@@ -202,7 +202,7 @@ function Navigation() {
       onClick={() => setLocation("/advertise")}
       className="text-sm font-medium bg-orange-500 text-white hover:bg-orange-600"
     >
-      Advertise in Orange Vibejam
+      Advertise in Orange Vibe Jam
     </Button>
   );
 
@@ -265,7 +265,7 @@ function Navigation() {
             onClick={() => setLocation("/advertise")}
             className="w-full text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 border-orange-400"
           >
-            Advertise in Orange Vibejam
+            Advertise in Orange Vibe Jam
           </Button>
           <FAQButton className="w-full border-2 border-orange-300 rounded-md" />
         </div>

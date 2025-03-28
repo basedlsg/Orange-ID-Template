@@ -92,12 +92,12 @@ export function FAQButton({ className = "" }: { className?: string }) {
       </Button>
       
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0">
-          <DialogHeader className="p-6 pb-2 bg-orange-50 dark:bg-orange-950/30">
-            <DialogTitle className="text-3xl font-bold text-center text-orange-600 drop-shadow-sm">
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-hidden flex flex-col p-0 bg-zinc-900 text-white">
+          <DialogHeader className="p-6 pb-2 bg-orange-950/70">
+            <DialogTitle className="text-3xl font-bold text-center text-orange-400 drop-shadow-sm">
               2025 Orange Vibe Jam - FAQs
             </DialogTitle>
-            <DialogDescription className="text-center text-orange-500 pt-2 text-lg">
+            <DialogDescription className="text-center text-orange-300 pt-2 text-lg">
               Everything you need to know about the Orange Vibe Jam hackathon
             </DialogDescription>
           </DialogHeader>
@@ -105,11 +105,11 @@ export function FAQButton({ className = "" }: { className?: string }) {
             <div className="space-y-4 pb-4">
               <Accordion type="single" collapsible className="w-full">
                 {faqs.map((faq, index) => (
-                  <AccordionItem key={index} value={`item-${index}`} className="border-b border-zinc-200 dark:border-zinc-800">
-                    <AccordionTrigger className="text-left font-medium py-4">
+                  <AccordionItem key={index} value={`item-${index}`} className="border-b border-zinc-700">
+                    <AccordionTrigger className="text-left font-medium py-4 text-orange-200">
                       {faq.question}
                     </AccordionTrigger>
-                    <AccordionContent className="whitespace-pre-line text-sm text-muted-foreground pb-4">
+                    <AccordionContent className="whitespace-pre-line text-sm text-zinc-300 pb-4">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>
@@ -117,7 +117,7 @@ export function FAQButton({ className = "" }: { className?: string }) {
               </Accordion>
             </div>
           </ScrollArea>
-          <div className="p-6 border-t border-zinc-200 dark:border-zinc-800 sticky bottom-0 bg-background">
+          <div className="p-6 border-t border-zinc-700 sticky bottom-0 bg-zinc-900">
             <Button
               onClick={() => setIsOpen(false)}
               className="w-full bg-orange-500 text-white hover:bg-orange-600"
