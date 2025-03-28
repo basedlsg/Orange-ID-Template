@@ -29,6 +29,7 @@ import Advertise from "@/pages/advertise";
 import Leaderboard from "@/pages/leaderboard"; // Import Leaderboard component
 import Creator from "@/pages/creator"; // Add this import
 import { Helmet } from "react-helmet";
+import { FAQButton } from "@/components/faq-dialog";
 
 async function storeUserInDB(user: any) {
   if (!user) {
@@ -225,7 +226,8 @@ function Navigation() {
           </div>
           <div className="ml-auto flex items-center space-x-4">
             {/* Hide on mobile, show on desktop */}
-            <div className="hidden sm:block">
+            <div className="hidden sm:flex items-center space-x-4">
+              <FAQButton />
               <AdvertiseButton />
             </div>
             {isLoggedIn ? (
@@ -256,7 +258,7 @@ function Navigation() {
         </div>
       </nav>
       {/* Show on mobile only */}
-      <div className="sm:hidden container mx-auto px-4 py-2">
+      <div className="sm:hidden container mx-auto px-4 py-2 space-y-2">
         <Button
           variant="outline"
           onClick={() => setLocation("/advertise")}
@@ -264,6 +266,7 @@ function Navigation() {
         >
           Advertise in Orange Vibejam
         </Button>
+        <FAQButton className="w-full" />
       </div>
     </>
   );
