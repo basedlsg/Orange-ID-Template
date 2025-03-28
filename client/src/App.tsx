@@ -267,7 +267,7 @@ function Navigation() {
           >
             Advertise in Orange Vibejam
           </Button>
-          <FAQButton className="w-full" />
+          <FAQButton className="w-full border-2 border-orange-300 rounded-md" />
         </div>
       </div>
     </>
