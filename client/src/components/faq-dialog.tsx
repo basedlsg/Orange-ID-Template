@@ -84,7 +84,7 @@ export function FAQButton({ className = "" }: { className?: string }) {
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className={`text-sm font-medium bg-yellow-500 text-white hover:bg-yellow-600 ${className}`}
+        className={`text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 border-2 border-orange-300 ${className}`}
       >
         Orange Vibe Jam FAQ
       </Button>
