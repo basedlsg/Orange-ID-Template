@@ -97,6 +97,23 @@ export default function Home() {
           </a>
         </div>
       </div>
+      
+      {/* Orange Vibe Jam Banner */}
+      <div className="border-b border-orange-900/50 bg-gradient-to-r from-orange-950 to-orange-900">
+        <div className="container mx-auto px-4 py-3">
+          <a 
+            href="https://y1ot1gslj3w.typeform.com/OrangeHackathon" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center justify-center sm:justify-start gap-2 text-orange-200 hover:text-white transition-colors"
+          >
+            <span className="animate-pulse">🔥</span>
+            <span className="text-sm font-medium">
+              Enter the <span className="font-bold text-orange-400">Orange Vibe Jam</span> with over $100K in prizes! ($25K for 1st place) - Deadline: April 7, 2025
+            </span>
+          </a>
+        </div>
+      </div>
 
       <div className="container mx-auto px-4 py-8">
         <FilterBar 
