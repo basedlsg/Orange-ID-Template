@@ -226,7 +226,7 @@ function Navigation() {
           </div>
           <div className="ml-auto flex items-center space-x-4">
             {/* Hide on mobile, show on desktop */}
-            <div className="hidden sm:flex items-center space-x-4">
+            <div className="hidden sm:flex items-center space-x-3">
               <FAQButton />
               <AdvertiseButton />
             </div>
@@ -258,15 +258,17 @@ function Navigation() {
         </div>
       </nav>
       {/* Show on mobile only */}
-      <div className="sm:hidden container mx-auto px-4 py-2 space-y-2">
-        <Button
-          variant="outline"
-          onClick={() => setLocation("/advertise")}
-          className="w-full text-sm font-medium bg-orange-500 text-white hover:bg-orange-600"
-        >
-          Advertise in Orange Vibejam
-        </Button>
-        <FAQButton className="w-full" />
+      <div className="sm:hidden container mx-auto px-4 py-2 space-y-3">
+        <div className="grid grid-cols-1 gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setLocation("/advertise")}
+            className="w-full text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 border-orange-400"
+          >
+            Advertise in Orange Vibejam
+          </Button>
+          <FAQButton className="w-full" />
+        </div>
       </div>
     </>
   );
