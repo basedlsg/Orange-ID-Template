@@ -106,7 +106,7 @@ export function FeedbackForm({ projectId, onSuccess }: FeedbackFormProps) {
             control={form.control}
             name="type"
             render={({ field }) => (
-              <FormItem className="space-y-3">
+              <FormItem className="space-y-3 pt-4">
                 <FormLabel className="text-zinc-300">Feedback Type</FormLabel>
                 <FormControl>
                   <RadioGroup
