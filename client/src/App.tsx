@@ -305,6 +305,58 @@ function Router() {
   );
 }
 
+// Component that prefetches data for common paths
+function DataPrefetcher() {
+  const [hasPrefetched, setHasPrefetched] = useState(false);
+  
+  useEffect(() => {
+    // Only prefetch once
+    if (!hasPrefetched) {
+      // Prefetch feedback data for featured projects
+      const prefetchFeedbackData = async () => {
+        try {
+          // Get projects first to know which projects' feedback to prefetch
+          const projectsResponse = await fetch('/api/projects');
+          if (projectsResponse.ok) {
+            const projects = await projectsResponse.json();
+            
+            // Prefetch feedback data for first 10 projects (most visible ones)
+            const topProjects = projects.slice(0, 10);
+            
+            // Prefetch in parallel
+            await Promise.all(
+              topProjects.map(async (project: any) => {
+                const feedbackUrl = `/api/projects/${project.id}/feedback`;
+                await queryClient.prefetchQuery({
+                  queryKey: [feedbackUrl],
+                  queryFn: async () => {
+                    const response = await fetch(feedbackUrl);
+                    if (response.ok) {
+                      return response.json();
+                    }
+                    return [];
+                  },
+                  staleTime: 60000 // 1 minute
+                });
+              })
+            );
+            
+            console.log('Prefetched feedback data for featured projects');
+          }
+        } catch (error) {
+          console.error('Error prefetching data:', error);
+        }
+        
+        setHasPrefetched(true);
+      };
+      
+      prefetchFeedbackData();
+    }
+  }, [hasPrefetched]);
+  
+  return null;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -367,6 +419,7 @@ function App() {
         <Router />
         <Toaster />
         <StoreUserData />
+        <DataPrefetcher />
       </OrangeAuthProvider>
     </QueryClientProvider>
   );

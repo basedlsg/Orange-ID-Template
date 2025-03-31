@@ -21,16 +21,23 @@ export function FeedbackList({ projectId }: FeedbackListProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get project feedback
-  const { data: feedbacks, isLoading } = useQuery<Feedback[]>({
-    queryKey: ["/api/projects", projectId, "feedback"],
-    queryFn: async () => {
-      const response = await fetch(`/api/projects/${projectId}/feedback`);
+  // Get project feedback with better caching
+  const { data: feedbacks = [], isLoading } = useQuery<Feedback[]>({
+    // Use a consistent query key format that matches what's used in project-card.tsx
+    queryKey: [`/api/projects/${projectId}/feedback`],
+    queryFn: async ({ queryKey }) => {
+      const response = await fetch(queryKey[0] as string);
       if (!response.ok) {
         throw new Error("Failed to fetch feedback");
       }
       return response.json();
     },
+    // Improved caching configuration
+    staleTime: 120000, // 2 minutes
+    gcTime: 300000,    // 5 minutes
+    retry: 2,
+    refetchOnWindowFocus: false,
+    placeholderData: []
   });
 
   // Get user's voted feedback IDs
@@ -58,12 +65,14 @@ export function FeedbackList({ projectId }: FeedbackListProps) {
       });
     },
     onSuccess: () => {
-      // Invalidate all related queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "feedback"] });
+      // Invalidate the feedback query using the consistent key format
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/feedback`] });
+      
+      // Invalidate the user's votes
       queryClient.invalidateQueries({ queryKey: ["/api/users", user?.id, "feedback-votes"] });
       
-      // Also invalidate the cached feedback count for project cards
-      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/feedback`] });
+      // Ensure the home page project list is updated with new counts
+      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
     },
     onError: (error) => {
       toast({
