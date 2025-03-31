@@ -163,22 +163,21 @@ export function FeedbackForm({ projectId, onSuccess }: FeedbackFormProps) {
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                     className="flex space-x-4"
-                    disabled={!isLoggedIn}
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="feature" id="feature" disabled={!isLoggedIn} />
+                      <RadioGroupItem value="feature" id="feature" />
                       <label 
                         htmlFor="feature" 
-                        className={`${isLoggedIn ? 'text-zinc-300 cursor-pointer' : 'text-zinc-500 cursor-not-allowed'}`}
+                        className="text-zinc-300 cursor-pointer"
                       >
                         Feature Request
                       </label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="bug" id="bug" disabled={!isLoggedIn} />
+                      <RadioGroupItem value="bug" id="bug" />
                       <label 
                         htmlFor="bug" 
-                        className={`${isLoggedIn ? 'text-zinc-300 cursor-pointer' : 'text-zinc-500 cursor-not-allowed'}`}
+                        className="text-zinc-300 cursor-pointer"
                       >
                         Bug Report
                       </label>
@@ -198,12 +197,8 @@ export function FeedbackForm({ projectId, onSuccess }: FeedbackFormProps) {
                 <FormLabel className="text-zinc-300">Your Feedback</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder={isLoggedIn ? 
-                      "Share your thoughts, suggestions or report issues..." : 
-                      "Please log in to share your feedback..."
-                    }
+                    placeholder="Share your thoughts, suggestions or report issues..."
                     className="bg-zinc-900 border-zinc-700 resize-none h-24 text-white"
-                    disabled={!isLoggedIn}
                     {...field}
                   />
                 </FormControl>
@@ -224,10 +219,10 @@ export function FeedbackForm({ projectId, onSuccess }: FeedbackFormProps) {
             <Button 
               type="button"
               onClick={handleLoginClick}
-              className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             >
               <LogIn className="h-4 w-4 mr-2" />
-              Log in to share feedback
+              Log in and Submit Feedback
             </Button>
           )}
         </form>
