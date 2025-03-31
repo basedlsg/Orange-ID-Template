@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Eye, Sparkles, Heart, Share2 } from "lucide-react";
+import { ExternalLink, Eye, Sparkles, Heart, Share2, MessageSquare } from "lucide-react";
 import { SiX } from "react-icons/si";
 import type { Project } from "@shared/schema";
 import defaultThumbnail from "../logocode.png";
@@ -141,6 +141,13 @@ export function ProjectCard({
       onView();
     }
   };
+  
+  const handleFeedbackClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!expanded) {
+      setLocation(`/projects/${project.slug}?tab=feedback`);
+    }
+  };
 
   return (
     <>
@@ -226,6 +233,15 @@ export function ProjectCard({
                 <Eye className="h-4 w-4" />
                 <span>{project.views}</span>
               </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleFeedbackClick}
+                className="text-zinc-400 hover:text-indigo-400 p-0 h-auto z-30"
+                title="View Feedback"
+              >
+                <MessageSquare className="h-4 w-4" />
+              </Button>
               {project.xHandle && (
                 <Button
                   variant="ghost"
