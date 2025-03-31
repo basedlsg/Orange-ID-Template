@@ -32,10 +32,10 @@ export function FeedbackList({ projectId }: FeedbackListProps) {
       }
       return response.json();
     },
-    // Improved caching configuration
-    staleTime: 120000, // 2 minutes
-    gcTime: 300000,    // 5 minutes
-    retry: 2,
+    // Conservative caching configuration
+    staleTime: 300000, // 5 minutes
+    gcTime: 600000,    // 10 minutes
+    retry: 1,
     refetchOnWindowFocus: false,
     placeholderData: []
   });

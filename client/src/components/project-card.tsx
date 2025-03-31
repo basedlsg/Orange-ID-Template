@@ -59,7 +59,10 @@ export function ProjectCard({
   // Use a local state to track if we've rendered the component at least once
   const [isInitialRender, setIsInitialRender] = useState(true);
   
-  // Use React Query to fetch and cache feedback count with better caching
+  // Determine if this is an important project to actively fetch feedback for
+  const isVibeSail = project.slug === 'vibe-sail';
+  
+  // Use React Query to fetch and cache feedback count - but be conservative
   const { data: feedbackData = [], isLoading } = useQuery<FeedbackItem[]>({
     queryKey: [`/api/projects/${project.id}/feedback`],
     queryFn: async ({ queryKey }) => {
@@ -75,12 +78,14 @@ export function ProjectCard({
         return [];
       }
     },
-    // Improved caching configuration
-    staleTime: 120000, // 2 minutes
-    gcTime: 300000,    // 5 minutes 
-    retry: 2,
-    refetchOnWindowFocus: false, 
-    // Ensure we don't lose the count during refetches
+    // More conservative caching configuration
+    staleTime: 300000, // 5 minutes
+    gcTime: 600000,    // 10 minutes 
+    retry: 1,
+    refetchOnWindowFocus: false,
+    // Don't fetch for all projects, only for specific important ones
+    enabled: isVibeSail || expanded, 
+    // Fallback data when not fetched
     placeholderData: [],
   });
   
