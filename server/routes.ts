@@ -4,10 +4,14 @@ import { storage } from "./storage";
 import {
   insertProjectSchema,
   insertUserSchema,
+  insertFeedbackSchema,
+  insertFeedbackVoteSchema,
   type Project,
   type InsertProject,
   type User,
   type InsertUser,
+  type Feedback,
+  type FeedbackVote,
   projects
 } from "@shared/schema";
 import { sql } from "drizzle-orm";
@@ -775,6 +779,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching creator's projects:", error);
       res.status(500).json({ error: "Failed to fetch creator's projects" });
+    }
+  });
+
+  // Feedback routes
+  app.post("/api/projects/:id/feedback", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const user = await getUserFromRequest(req);
+      
+      if (!user) {
+        return res.status(401).json({ error: "You must be logged in to submit feedback" });
+      }
+
+      // Validate the feedback data
+      const validatedData = insertFeedbackSchema.parse({
+        projectId,
+        orangeId: user.orangeId,
+        content: req.body.content,
+        type: req.body.type || "feature"
+      });
+
+      // Create the feedback
+      const feedback = await storage.createFeedback(validatedData);
+      res.json(feedback);
+    } catch (error) {
+      console.error("Error creating feedback:", error);
+      res.status(400).json({ 
+        error: error instanceof Error ? error.message : "Failed to create feedback" 
+      });
+    }
+  });
+
+  app.get("/api/projects/:id/feedback", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      
+      // Get all feedback for this project
+      const feedbacks = await storage.getProjectFeedbacks(projectId);
+      res.json(feedbacks);
+    } catch (error) {
+      console.error("Error fetching project feedback:", error);
+      res.status(500).json({ error: "Failed to fetch project feedback" });
+    }
+  });
+
+  app.post("/api/feedback/:id/vote", async (req, res) => {
+    try {
+      const feedbackId = parseInt(req.params.id);
+      const { orangeId } = req.body;
+      
+      if (!orangeId) {
+        return res.status(400).json({ error: "Orange ID is required" });
+      }
+
+      // Get user feedback votes to check if already voted
+      const userVotes = await storage.getUserFeedbackVotes(orangeId);
+      
+      if (userVotes.includes(feedbackId)) {
+        // If vote exists, remove it
+        await storage.deleteFeedbackVote(orangeId, feedbackId);
+        res.json({ success: true, voted: false });
+      } else {
+        // If no vote exists, create it
+        await storage.createFeedbackVote({ orangeId, feedbackId });
+        res.json({ success: true, voted: true });
+      }
+    } catch (error) {
+      console.error("Error toggling feedback vote:", error);
+      res.status(500).json({ error: "Failed to toggle feedback vote" });
+    }
+  });
+
+  app.get("/api/users/:orangeId/feedback-votes", async (req, res) => {
+    try {
+      const { orangeId } = req.params;
+      const votedFeedbackIds = await storage.getUserFeedbackVotes(orangeId);
+      res.json(votedFeedbackIds);
+    } catch (error) {
+      console.error("Error fetching user feedback votes:", error);
+      res.status(500).json({ error: "Failed to fetch voted feedback" });
     }
   });
 

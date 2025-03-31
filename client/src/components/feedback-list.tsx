@@ -1,0 +1,168 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { useBedrockPassport } from "@bedrock_org/passport";
+import { LoginDialog } from "./login-dialog";
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ThumbsUp, Bug, Lightbulb } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import type { Feedback } from "@shared/schema";
+
+interface FeedbackListProps {
+  projectId: number;
+}
+
+export function FeedbackList({ projectId }: FeedbackListProps) {
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const { isLoggedIn, user } = useBedrockPassport();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Get project feedback
+  const { data: feedbacks, isLoading } = useQuery<Feedback[]>({
+    queryKey: ["/api/projects", projectId, "feedback"],
+    queryFn: async () => {
+      const response = await fetch(`/api/projects/${projectId}/feedback`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch feedback");
+      }
+      return response.json();
+    },
+  });
+
+  // Get user's voted feedback IDs
+  const { data: userVotes = [] } = useQuery<number[]>({
+    queryKey: ["/api/users", user?.id, "feedback-votes"],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const response = await fetch(`/api/users/${user.id}/feedback-votes`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch votes");
+      }
+      return response.json();
+    },
+    enabled: !!user?.id,
+  });
+
+  // Mutation for voting
+  const voteMutation = useMutation({
+    mutationFn: async (feedbackId: number) => {
+      if (!isLoggedIn || !user?.id) {
+        throw new Error("User is not logged in");
+      }
+      return apiRequest("POST", `/api/feedback/${feedbackId}/vote`, {
+        orangeId: user.id,
+      });
+    },
+    onSuccess: () => {
+      // Invalidate both queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "feedback"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users", user?.id, "feedback-votes"] });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "Failed to vote",
+        description: error instanceof Error ? error.message : "Please try again",
+      });
+    },
+  });
+
+  const handleVote = (feedbackId: number) => {
+    if (!isLoggedIn) {
+      setShowLoginDialog(true);
+      return;
+    }
+    voteMutation.mutate(feedbackId);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <Card key={i} className="bg-zinc-900 border-zinc-800">
+            <CardContent className="p-4">
+              <div className="animate-pulse">
+                <div className="h-4 bg-zinc-800 rounded w-1/4 mb-2"></div>
+                <div className="h-8 bg-zinc-800 rounded w-full mb-2"></div>
+                <div className="flex justify-between items-center mt-4">
+                  <div className="h-4 bg-zinc-800 rounded w-1/6"></div>
+                  <div className="h-8 bg-zinc-800 rounded w-24"></div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (!feedbacks || feedbacks.length === 0) {
+    return (
+      <Card className="bg-zinc-900 border-zinc-800">
+        <CardContent className="p-6 text-center">
+          <p className="text-zinc-400">No feedback yet. Be the first to share your thoughts!</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      <div className="space-y-4">
+        {feedbacks.map((feedback) => {
+          const isVoted = userVotes.includes(feedback.id);
+          
+          return (
+            <Card key={feedback.id} className="bg-zinc-900 border-zinc-800">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant={feedback.type === "feature" ? "outline" : "destructive"}>
+                    {feedback.type === "feature" ? (
+                      <><Lightbulb className="h-3 w-3 mr-1" /> Feature</>
+                    ) : (
+                      <><Bug className="h-3 w-3 mr-1" /> Bug</>
+                    )}
+                  </Badge>
+                  <span className="text-xs text-zinc-500">
+                    {new Date(feedback.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                
+                <p className="text-white mb-4">{feedback.content}</p>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-zinc-500">
+                    {format(new Date(feedback.createdAt), "MMM d, yyyy 'at' h:mm a")}
+                  </span>
+                  
+                  <Button
+                    variant={isVoted ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleVote(feedback.id)}
+                    className={isVoted 
+                      ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                      : "border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-800"}
+                    disabled={voteMutation.isPending}
+                  >
+                    <ThumbsUp className="h-4 w-4 mr-2" />
+                    {feedback.upvoteCount}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+      
+      <LoginDialog
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+        message="Please log in to vote on feedback"
+      />
+    </>
+  );
+}

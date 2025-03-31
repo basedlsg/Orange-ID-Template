@@ -4,13 +4,19 @@ import type { Project } from "@shared/schema";
 import { ProjectCard } from "@/components/project-card";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FeedbackForm } from "@/components/feedback-form";
+import { FeedbackList } from "@/components/feedback-list";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ProjectPage() {
   const { slug } = useParams<{ slug: string }>();
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("project");
 
   // Parse URL parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -111,10 +117,41 @@ export default function ProjectPage() {
         </div>
 
         <div className="max-w-3xl mx-auto">
-          <ProjectCard
-            project={project}
-            expanded={true}
-          />
+          <Tabs defaultValue="project" value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-2 bg-zinc-900 border-zinc-800">
+              <TabsTrigger value="project" className="data-[state=active]:bg-zinc-800">
+                Project Details
+              </TabsTrigger>
+              <TabsTrigger value="feedback" className="data-[state=active]:bg-zinc-800">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Feedback
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="project">
+              <ProjectCard
+                project={project}
+                expanded={true}
+              />
+            </TabsContent>
+            <TabsContent value="feedback">
+              <Card className="bg-zinc-900 border-zinc-800">
+                <CardHeader>
+                  <CardTitle className="text-xl text-white">Project Feedback</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h3 className="text-sm font-medium mb-3 text-zinc-300">Submit Feedback</h3>
+                    <FeedbackForm projectId={project.id} />
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-sm font-medium mb-4 text-zinc-300">Community Feedback</h3>
+                    <FeedbackList projectId={project.id} />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

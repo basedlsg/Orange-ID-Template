@@ -161,5 +161,49 @@ export type InsertLike = z.infer<typeof insertLikeSchema>;
 export type User = typeof users.$inferSelect;
 export type Project = typeof projects.$inferSelect;
 export type Like = typeof likes.$inferSelect;
+export const feedbacks = pgTable("feedbacks", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  orangeId: text("orange_id").notNull(),
+  content: text("content").notNull(),
+  type: text("type").notNull().default("feature"),
+  upvoteCount: integer("upvote_count").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const feedbackVotes = pgTable("feedback_votes", {
+  id: serial("id").primaryKey(),
+  feedbackId: integer("feedback_id")
+    .notNull()
+    .references(() => feedbacks.id, { onDelete: "cascade" }),
+  orangeId: text("orange_id").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => ({
+  userFeedbackUnique: unique().on(table.orangeId, table.feedbackId),
+}));
+
+export const insertFeedbackSchema = createInsertSchema(feedbacks)
+  .omit({
+    id: true,
+    upvoteCount: true,
+    createdAt: true,
+  })
+  .extend({
+    type: z.enum(["feature", "bug"]).default("feature"),
+    content: z.string().min(5, "Feedback must be at least 5 characters").max(500, "Feedback must be 500 characters or less"),
+  });
+
+export const insertFeedbackVoteSchema = createInsertSchema(feedbackVotes)
+  .omit({
+    id: true,
+    createdAt: true,
+  });
+
 export type InsertAdvertisingRequest = z.infer<typeof insertAdvertisingRequestSchema>;
 export type AdvertisingRequest = typeof advertisingRequests.$inferSelect;
+export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
+export type Feedback = typeof feedbacks.$inferSelect;
+export type InsertFeedbackVote = z.infer<typeof insertFeedbackVoteSchema>;
+export type FeedbackVote = typeof feedbackVotes.$inferSelect;
