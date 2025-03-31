@@ -5,7 +5,7 @@ import { ExternalLink, Eye, Sparkles, Heart, Share2, MessageSquare } from "lucid
 import { SiX } from "react-icons/si";
 import type { Project } from "@shared/schema";
 import defaultThumbnail from "../logocode.png";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useEffect, useState } from "react";
 import { useBedrockPassport } from "@bedrock_org/passport";
@@ -45,24 +45,25 @@ export function ProjectCard({
   const queryClient = useQueryClient();
   const [isLiked, setIsLiked] = useState(false);
   const [, setLocation] = useLocation();
-  const [feedbackCount, setFeedbackCount] = useState(0);
-  
-  // Fetch feedback count
-  useEffect(() => {
-    async function fetchFeedbackCount() {
+  // Use React Query to fetch and cache feedback count
+  const { data: feedbackData } = useQuery({
+    queryKey: [`/api/projects/${project.id}/feedback`],
+    queryFn: async () => {
       try {
         const response = await fetch(`/api/projects/${project.id}/feedback`);
         if (response.ok) {
-          const data = await response.json();
-          setFeedbackCount(data.length);
+          return await response.json();
         }
+        return [];
       } catch (error) {
         console.error("Error fetching feedback count:", error);
+        return [];
       }
-    }
-    
-    fetchFeedbackCount();
-  }, [project.id]);
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes before refetching
+    placeholderData: [],
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     setIsLiked(userLikes.includes(project.id));
@@ -98,6 +99,10 @@ export function ProjectCard({
         });
       }
       setIsLiked(!isLiked);
+      // Also invalidate feedback data when likes change
+      queryClient.invalidateQueries({ 
+        queryKey: [`/api/projects/${project.id}/feedback`],
+      });
     },
     onError: (error) => {
       toast({
@@ -177,6 +182,11 @@ export function ProjectCard({
   
   const handleFeedbackClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    // Invalidate feedback data to ensure it's up to date
+    queryClient.invalidateQueries({ 
+      queryKey: [`/api/projects/${project.id}/feedback`],
+    });
+    
     if (!expanded) {
       setLocation(`/projects/${project.slug}?tab=feedback`);
     }
@@ -296,7 +306,7 @@ export function ProjectCard({
                 title="View Feedback"
               >
                 <MessageSquare className="mr-2 h-4 w-4" />
-                <span className="text-xs">{feedbackCount}</span>
+                <span className="text-xs">{feedbackData?.length || 0}</span>
               </Button>
               <Button
                 variant="ghost"

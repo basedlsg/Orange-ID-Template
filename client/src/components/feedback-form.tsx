@@ -69,6 +69,9 @@ export function FeedbackForm({ projectId, onSuccess }: FeedbackFormProps) {
       // Invalidate the project feedbacks query to refresh the list
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "feedback"] });
       
+      // Also invalidate the cached feedback count for project cards
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/feedback`] });
+      
       if (onSuccess) {
         onSuccess();
       }

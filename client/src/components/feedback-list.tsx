@@ -58,9 +58,12 @@ export function FeedbackList({ projectId }: FeedbackListProps) {
       });
     },
     onSuccess: () => {
-      // Invalidate both queries to refresh the data
+      // Invalidate all related queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "feedback"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users", user?.id, "feedback-votes"] });
+      
+      // Also invalidate the cached feedback count for project cards
+      queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/feedback`] });
     },
     onError: (error) => {
       toast({
