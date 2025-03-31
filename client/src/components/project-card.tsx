@@ -322,21 +322,12 @@ export function ProjectCard({
                 title="View Feedback"
               >
                 <MessageSquare className="mr-2 h-4 w-4" />
-                {/* Show total feedback count rather than just number of items */}
+                {/* Show the number of feedback items */}
                 <span className="text-xs">
                   {(() => {
-                    // Create a safe function to handle the logic
+                    // Just show the number of feedback items (not total upvotes)
                     const data = feedbackData || [];
-                    if (data.length === 0) return 0;
-                    
-                    // Calculate total upvotes
-                    const totalUpvotes = data.reduce(
-                      (sum, item) => sum + (item.upvoteCount || 0), 
-                      0
-                    );
-                    
-                    // Return the greater of total upvotes or feedback count
-                    return Math.max(totalUpvotes, data.length);
+                    return data.length;
                   })()}
                 </span>
               </Button>
