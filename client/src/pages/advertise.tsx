@@ -27,7 +27,9 @@ const advertiseFormSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   company: z.string().min(2, "Company name must be at least 2 characters"),
   budget: z.string().min(1, "Please select a budget range"),
-  message: z.string().min(10, "Please provide more details about your requirements"),
+  message: z
+    .string()
+    .min(10, "Please provide more details about your requirements"),
 });
 
 type AdvertiseForm = z.infer<typeof advertiseFormSchema>;
@@ -75,17 +77,19 @@ export default function Advertise() {
       toast({
         variant: "destructive",
         title: "Error submitting form",
-        description: error instanceof Error ? error.message : "Please try again later",
+        description:
+          error instanceof Error ? error.message : "Please try again later",
       });
     }
   }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <h1 className="text-4xl font-bold mb-6">Advertise in Orange Vibejam</h1>
+      <h1 className="text-4xl font-bold mb-6">Advertise in Orange Vibe Jam</h1>
       <p className="text-muted-foreground mb-8">
-        Reach participants and showcase your brand during the Orange Vibejam hackathon. Fill out the form below
-        and we'll help you connect with the Orange Vibejam community for your advertising needs.
+        Reach participants and showcase your brand during the Orange Vibe Jam
+        hackathon. Fill out the form below and we'll help you connect with the
+        Orange Vibe Jam community for your advertising needs.
       </p>
 
       <Form {...form}>
@@ -138,7 +142,10 @@ export default function Advertise() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Budget Range</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select your budget range" />
@@ -147,7 +154,9 @@ export default function Advertise() {
                   <SelectContent>
                     <SelectItem value="1000-5000">$1,000 - $5,000</SelectItem>
                     <SelectItem value="5000-10000">$5,000 - $10,000</SelectItem>
-                    <SelectItem value="10000-25000">$10,000 - $25,000</SelectItem>
+                    <SelectItem value="10000-25000">
+                      $10,000 - $25,000
+                    </SelectItem>
                     <SelectItem value="25000+">$25,000+</SelectItem>
                   </SelectContent>
                 </Select>
@@ -164,7 +173,7 @@ export default function Advertise() {
                 <FormLabel>Message</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Tell us about your advertising goals and how you'd like to engage with Orange Vibejam participants..."
+                    placeholder="Tell us about your advertising goals and how you'd like to engage with Orange Vibe Jam participants..."
                     className="min-h-[120px]"
                     {...field}
                   />
@@ -174,7 +183,10 @@ export default function Advertise() {
             )}
           />
 
-          <Button type="submit" className="w-full bg-orange-500 text-white hover:bg-orange-600">
+          <Button
+            type="submit"
+            className="w-full bg-orange-500 text-white hover:bg-orange-600"
+          >
             Submit
           </Button>
         </form>
