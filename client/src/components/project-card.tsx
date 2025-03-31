@@ -59,8 +59,8 @@ export function ProjectCard({
   // Use a local state to track if we've rendered the component at least once
   const [isInitialRender, setIsInitialRender] = useState(true);
   
-  // Use React Query to fetch and cache feedback count
-  const { data: feedbackData, isLoading } = useQuery<FeedbackItem[]>({
+  // Use React Query to fetch and cache feedback count with better caching
+  const { data: feedbackData = [], isLoading } = useQuery<FeedbackItem[]>({
     queryKey: [`/api/projects/${project.id}/feedback`],
     queryFn: async ({ queryKey }) => {
       try {
@@ -75,9 +75,13 @@ export function ProjectCard({
         return [];
       }
     },
-    staleTime: 30000, // 30 seconds - reduced to help with testing
-    initialData: [], 
-    refetchOnWindowFocus: false
+    // Improved caching configuration
+    staleTime: 120000, // 2 minutes
+    gcTime: 300000,    // 5 minutes 
+    retry: 2,
+    refetchOnWindowFocus: false, 
+    // Ensure we don't lose the count during refetches
+    placeholderData: [],
   });
   
   // Mark that we're no longer in the initial render once we've mounted
