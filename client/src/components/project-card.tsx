@@ -105,6 +105,7 @@ export function ProjectCard({
     setIsInitialRender(false);
   }, []);
 
+  // Set initial like state based on user's likes
   useEffect(() => {
     setIsLiked(userLikes.includes(project.id));
   }, [userLikes, project.id]);
@@ -162,11 +163,40 @@ export function ProjectCard({
   const handleLikeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isLoggedIn) {
+      // Save the project ID to like after login
+      sessionStorage.setItem('like_project_id', project.id.toString());
+      // Save the current path to return to after login
+      sessionStorage.setItem('feedback_return_to', window.location.pathname + window.location.search);
+      
       setShowLoginDialog(true);
       return;
     }
     toggleLike();
   };
+  
+  // Auto-like effect - executes a like action after login if there's a pending like
+  useEffect(() => {
+    // Only check for pending like if user is logged in and there are userLikes loaded
+    if (isLoggedIn && user?.id && userLikes && !isInitialRender) {
+      const pendingLikeProjectId = sessionStorage.getItem('like_project_id');
+      
+      // Only auto-like if this is the project that was pending and it's not already liked
+      if (
+        pendingLikeProjectId === project.id.toString() && 
+        !userLikes.includes(project.id)
+      ) {
+        console.log(`Auto-liking project ${project.id} after login`);
+        
+        // Clear the pending like first to prevent multiple attempts
+        sessionStorage.removeItem('like_project_id');
+        
+        // Execute the like action
+        setTimeout(() => {
+          toggleLike();
+        }, 500);
+      }
+    }
+  }, [isLoggedIn, user?.id, userLikes, project.id, isInitialRender, toggleLike]);
 
   const handleClick = async (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) {

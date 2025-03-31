@@ -24,15 +24,17 @@ export default function AuthCallback() {
             // Don't remove the storage items immediately - let the components use them first
             // The individual components will clean up their own sessionStorage items after using them
             
-            // Just capture the values for logging
+            // Capture the values for logging
             const projectId = sessionStorage.getItem("feedback_project_id");
             const voteFeedbackId = sessionStorage.getItem("vote_feedback_id");
             const formValues = sessionStorage.getItem("feedback_form_values");
+            const likeProjectId = sessionStorage.getItem("like_project_id");
             
-            console.log("Auth callback redirecting with pending feedback actions:", {
+            console.log("Auth callback redirecting with pending actions:", {
               projectId,
               voteFeedbackId,
               hasFormValues: !!formValues,
+              likeProjectId,
               returnPath: feedbackReturnPath
             });
             
