@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -47,6 +47,44 @@ export function FeedbackForm({ projectId, onSuccess }: FeedbackFormProps) {
       type: "feature",
     },
   });
+  
+  // Check for pending form submission after login
+  useEffect(() => {
+    if (isLoggedIn && user?.id) {
+      // Check if there's a saved form submission for this project
+      const savedProjectId = sessionStorage.getItem('feedback_project_id');
+      const savedFormValues = sessionStorage.getItem('feedback_form_values');
+      
+      if (savedProjectId === projectId.toString() && savedFormValues) {
+        try {
+          // Parse the saved form values
+          const formData = JSON.parse(savedFormValues) as FeedbackFormValues;
+          
+          // Validate the form data against the schema
+          const result = feedbackSchema.safeParse(formData);
+          if (result.success) {
+            // Set the form values
+            form.reset(formData);
+            
+            // Clear the session storage
+            sessionStorage.removeItem('feedback_form_values');
+            sessionStorage.removeItem('feedback_project_id');
+            
+            // We need to reference feedbackMutation before it's defined
+            // so we'll just queue the form submission for the next cycle
+            setTimeout(() => {
+              // Get the current values from the form
+              const currentValues = form.getValues();
+              // Use the mutation defined below
+              feedbackMutation.mutate(currentValues);
+            }, 500); // Small delay to ensure everything is loaded
+          }
+        } catch (e) {
+          console.error('Error parsing saved form values:', e);
+        }
+      }
+    }
+  }, [isLoggedIn, user?.id, projectId, form]);
 
   const feedbackMutation = useMutation({
     mutationFn: async (values: FeedbackFormValues) => {
@@ -95,6 +133,12 @@ export function FeedbackForm({ projectId, onSuccess }: FeedbackFormProps) {
   };
   
   const handleLoginClick = () => {
+    // Save the current project ID and form values in sessionStorage
+    const formValues = form.getValues();
+    sessionStorage.setItem('feedback_project_id', projectId.toString());
+    sessionStorage.setItem('feedback_form_values', JSON.stringify(formValues));
+    sessionStorage.setItem('feedback_return_to', window.location.pathname + window.location.search);
+    
     setShowLoginDialog(true);
   };
 
@@ -106,7 +150,7 @@ export function FeedbackForm({ projectId, onSuccess }: FeedbackFormProps) {
             control={form.control}
             name="type"
             render={({ field }) => (
-              <FormItem className="space-y-3">
+              <FormItem className="space-y-3 pt-4">
                 <FormLabel className="text-zinc-300">Feedback Type</FormLabel>
                 <FormControl>
                   <RadioGroup

@@ -17,7 +17,26 @@ export default function AuthCallback() {
             title: "Successfully logged in",
             description: "Welcome back!",
           });
-          // Get the return path from session storage, default to home if none exists
+          
+          // Check for specific feedback related return path first
+          const feedbackReturnPath = sessionStorage.getItem("feedback_return_to");
+          if (feedbackReturnPath) {
+            // Clean up feedback related storage
+            const projectId = sessionStorage.getItem("feedback_project_id");
+            const voteFeedbackId = sessionStorage.getItem("vote_feedback_id");
+            const formValues = sessionStorage.getItem("feedback_form_values");
+            
+            sessionStorage.removeItem("feedback_return_to");
+            sessionStorage.removeItem("feedback_project_id");
+            sessionStorage.removeItem("vote_feedback_id");
+            sessionStorage.removeItem("feedback_form_values");
+            
+            // Return to the feedback page
+            setLocation(feedbackReturnPath);
+            return;
+          }
+          
+          // Fall back to general return path
           const returnPath = sessionStorage.getItem("returnPath") || "/";
           sessionStorage.removeItem("returnPath"); // Clean up
           setLocation(returnPath);
