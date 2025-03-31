@@ -9,6 +9,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useEffect, useState } from "react";
 import { useBedrockPassport } from "@bedrock_org/passport";
+
+// Extended user type to include Bedrock Passport properties
+interface ExtendedUser {
+  id?: string;
+  sub?: string;
+  email?: string;
+  name?: string;
+  [key: string]: any;
+}
+
 import { LoginDialog } from "./login-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -28,12 +38,31 @@ export function ProjectCard({
   onEdit,
   expanded = false,
 }: ProjectCardProps) {
+  // @ts-ignore - Bedrock Passport types are not correctly exposed
   const { isLoggedIn, user } = useBedrockPassport();
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLiked, setIsLiked] = useState(false);
   const [, setLocation] = useLocation();
+  const [feedbackCount, setFeedbackCount] = useState(0);
+  
+  // Fetch feedback count
+  useEffect(() => {
+    async function fetchFeedbackCount() {
+      try {
+        const response = await fetch(`/api/projects/${project.id}/feedback`);
+        if (response.ok) {
+          const data = await response.json();
+          setFeedbackCount(data.length);
+        }
+      } catch (error) {
+        console.error("Error fetching feedback count:", error);
+      }
+    }
+    
+    fetchFeedbackCount();
+  }, [project.id]);
 
   useEffect(() => {
     setIsLiked(userLikes.includes(project.id));
@@ -41,10 +70,12 @@ export function ProjectCard({
 
   const { mutate: toggleLike, isPending: isLiking } = useMutation({
     mutationFn: async () => {
+      // @ts-ignore - Bedrock Passport user has 'sub' property
       if (!user?.sub && !user?.id) {
         throw new Error("User ID not found");
       }
 
+      // @ts-ignore - Bedrock Passport user has 'sub' property
       const orangeId = user.sub || user.id;
       const response = await apiRequest(
         "POST",
@@ -58,8 +89,10 @@ export function ProjectCard({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
+      // @ts-ignore - Bedrock Passport user has 'sub' property
       if (user?.sub || user?.id) {
         queryClient.invalidateQueries({
+          // @ts-ignore - Bedrock Passport user has 'sub' property
           queryKey: ["/api/users", user.sub || user.id, "likes"],
           exact: true,
         });
@@ -233,15 +266,6 @@ export function ProjectCard({
                 <Eye className="h-4 w-4" />
                 <span>{project.views}</span>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleFeedbackClick}
-                className="text-zinc-400 hover:text-indigo-400 p-0 h-auto z-30"
-                title="View Feedback"
-              >
-                <MessageSquare className="h-4 w-4" />
-              </Button>
               {project.xHandle && (
                 <Button
                   variant="ghost"
@@ -264,6 +288,16 @@ export function ProjectCard({
                   Edit
                 </Button>
               )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleFeedbackClick}
+                className="text-zinc-400 hover:text-indigo-400 hover:bg-zinc-800 z-10"
+                title="View Feedback"
+              >
+                <MessageSquare className="mr-2 h-4 w-4" />
+                <span className="text-xs">{feedbackCount}</span>
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
