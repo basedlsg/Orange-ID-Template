@@ -3,7 +3,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { LoginDialog } from "./login-dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, Bug, Lightbulb } from "lucide-react";
@@ -17,9 +17,19 @@ interface FeedbackListProps {
 
 export function FeedbackList({ projectId }: FeedbackListProps) {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [pendingVoteId, setPendingVoteId] = useState<number | null>(null);
   const { isLoggedIn, user } = useBedrockPassport();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Check if user just logged in and has a pending vote
+  useEffect(() => {
+    if (isLoggedIn && pendingVoteId !== null) {
+      // Submit the pending vote
+      voteMutation.mutate(pendingVoteId);
+      setPendingVoteId(null);
+    }
+  }, [isLoggedIn, pendingVoteId]);
 
   // Get project feedback
   const { data: feedbacks, isLoading } = useQuery<Feedback[]>({
@@ -73,6 +83,8 @@ export function FeedbackList({ projectId }: FeedbackListProps) {
 
   const handleVote = (feedbackId: number) => {
     if (!isLoggedIn) {
+      // Store the feedback ID for voting after login
+      setPendingVoteId(feedbackId);
       setShowLoginDialog(true);
       return;
     }
