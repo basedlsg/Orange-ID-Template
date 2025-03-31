@@ -305,50 +305,28 @@ function Router() {
   );
 }
 
-// Component that prefetches data for common paths
+// Component that handles app-level data synchronization
 function DataPrefetcher() {
   const [hasPrefetched, setHasPrefetched] = useState(false);
   
   useEffect(() => {
-    // Only prefetch once
+    // Only run once when app loads
     if (!hasPrefetched) {
-      // Prefetch feedback data for featured projects
-      const prefetchFeedbackData = async () => {
-        try {
-          // Get projects first to know which projects' feedback to prefetch
-          const projectsResponse = await fetch('/api/projects');
-          if (projectsResponse.ok) {
-            const projects = await projectsResponse.json();
-            
-            // Find important projects to prefetch - for now just grab Vibe Sail
-            // since we know it has feedback and is important to the user
-            const vibeSailProject = projects.find((p: any) => p.slug === 'vibe-sail');
-            
-            if (vibeSailProject) {
-              const feedbackUrl = `/api/projects/${vibeSailProject.id}/feedback`;
-              await queryClient.prefetchQuery({
-                queryKey: [feedbackUrl],
-                queryFn: async () => {
-                  const response = await fetch(feedbackUrl);
-                  if (response.ok) {
-                    return response.json();
-                  }
-                  return [];
-                },
-                staleTime: 300000 // 5 minutes
-              });
-              
-              console.log('Prefetched feedback data for Vibe Sail');
-            }
-          }
-        } catch (error) {
-          console.error('Error prefetching data:', error);
-        }
-        
-        setHasPrefetched(true);
-      };
+      // Flag that we've run initialization
+      setHasPrefetched(true);
       
-      prefetchFeedbackData();
+      // Configure the query client defaults
+      queryClient.setDefaultOptions({
+        queries: {
+          staleTime: 300000, // 5 minutes - reduce unnecessary refetches
+          gcTime: 600000,    // 10 minutes - keep data in cache longer
+          retry: 1,          // Only retry failed requests once
+          refetchOnWindowFocus: false // Don't refetch when window regains focus
+        }
+      });
+      
+      // We're not prefetching anything by default - data will load when needed
+      console.log('Initialized data management with optimal caching');
     }
   }, [hasPrefetched]);
   

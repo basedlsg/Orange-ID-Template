@@ -59,10 +59,7 @@ export function ProjectCard({
   // Use a local state to track if we've rendered the component at least once
   const [isInitialRender, setIsInitialRender] = useState(true);
   
-  // Determine if this is an important project to actively fetch feedback for
-  const isVibeSail = project.slug === 'vibe-sail';
-  
-  // Use React Query to fetch and cache feedback count - but be conservative
+  // Use React Query to fetch and cache feedback count
   const { data: feedbackData = [], isLoading } = useQuery<FeedbackItem[]>({
     queryKey: [`/api/projects/${project.id}/feedback`],
     queryFn: async ({ queryKey }) => {
@@ -78,13 +75,9 @@ export function ProjectCard({
         return [];
       }
     },
-    // More conservative caching configuration
-    staleTime: 300000, // 5 minutes
-    gcTime: 600000,    // 10 minutes 
-    retry: 1,
-    refetchOnWindowFocus: false,
-    // Don't fetch for all projects, only for specific important ones
-    enabled: isVibeSail || expanded, 
+    // Only fetch when the project is expanded/viewed
+    // This prevents excessive API calls on the homepage
+    enabled: expanded, 
     // Fallback data when not fetched
     placeholderData: [],
   });
@@ -343,11 +336,12 @@ export function ProjectCard({
                 <MessageSquare className="mr-2 h-4 w-4" />
                 {/* Show the number of feedback items */}
                 <span className="text-xs">
-                  {isLoading ? (
-                    "..." // Show a loading indicator during data fetch
+                  {expanded ? (
+                    // Only show actual feedback count when expanded
+                    isLoading ? "..." : feedbackData.length
                   ) : (
-                    // Once data is loaded, show the actual count
-                    feedbackData.length
+                    // Otherwise show a placeholder symbol
+                    "•"
                   )}
                 </span>
               </Button>
