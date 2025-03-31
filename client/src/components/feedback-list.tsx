@@ -120,7 +120,7 @@ export function FeedbackList({ projectId }: FeedbackListProps) {
           const isVoted = userVotes.includes(feedback.id);
           
           return (
-            <Card key={feedback.id} className="bg-zinc-900 border-zinc-800">
+            <Card key={feedback.id} className="bg-black border border-zinc-800">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant={feedback.type === "feature" ? "outline" : "destructive"}>

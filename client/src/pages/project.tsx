@@ -159,8 +159,8 @@ export default function ProjectPage() {
           
           {/* Feedback Section with ref for scrolling */}
           <div ref={feedbackRef} id="feedback" className="pt-4">
-            <Card className="bg-zinc-900 border-zinc-800">
-              <CardHeader className="flex flex-row items-center justify-between">
+            <Card className="bg-black border border-zinc-800">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-zinc-800">
                 <CardTitle className="text-xl text-white flex items-center">
                   <MessageSquare className="h-5 w-5 mr-2" />
                   Project Feedback
