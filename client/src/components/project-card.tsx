@@ -56,14 +56,19 @@ export function ProjectCard({
   const queryClient = useQueryClient();
   const [isLiked, setIsLiked] = useState(false);
   const [, setLocation] = useLocation();
+  // Use a local state to track if we've rendered the component at least once
+  const [isInitialRender, setIsInitialRender] = useState(true);
+  
   // Use React Query to fetch and cache feedback count
-  const { data: feedbackData } = useQuery<FeedbackItem[]>({
+  const { data: feedbackData, isLoading } = useQuery<FeedbackItem[]>({
     queryKey: [`/api/projects/${project.id}/feedback`],
     queryFn: async () => {
       try {
         const response = await fetch(`/api/projects/${project.id}/feedback`);
         if (response.ok) {
-          return await response.json();
+          const data = await response.json();
+          console.log(`Fetched feedback for project ${project.id}:`, data);
+          return data;
         }
         return [];
       } catch (error) {
@@ -75,7 +80,14 @@ export function ProjectCard({
     placeholderData: [], // Ensure we always have an array, even when loading
     initialData: [], // Start with empty array
     refetchOnWindowFocus: false,
+    // Enable fetching for all project cards on the home page
+    enabled: true,
   });
+  
+  // Mark that we're no longer in the initial render once we've mounted
+  useEffect(() => {
+    setIsInitialRender(false);
+  }, []);
 
   useEffect(() => {
     setIsLiked(userLikes.includes(project.id));
@@ -324,11 +336,12 @@ export function ProjectCard({
                 <MessageSquare className="mr-2 h-4 w-4" />
                 {/* Show the number of feedback items */}
                 <span className="text-xs">
-                  {(() => {
-                    // Just show the number of feedback items (not total upvotes)
-                    const data = feedbackData || [];
-                    return data.length;
-                  })()}
+                  {isLoading && isInitialRender ? (
+                    "..." // Show a loading indicator during initial data fetch
+                  ) : (
+                    // Once data is loaded, show the actual count
+                    (feedbackData || []).length
+                  )}
                 </span>
               </Button>
               <Button
