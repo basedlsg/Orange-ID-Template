@@ -2,7 +2,9 @@ import {
   users, type User, type InsertUser,
   projects, type Project, type InsertProject,
   likes, type Like, type InsertLike,
-  advertisingRequests, type AdvertisingRequest, type InsertAdvertisingRequest
+  advertisingRequests, type AdvertisingRequest, type InsertAdvertisingRequest,
+  feedbacks, type Feedback, type InsertFeedback,
+  feedbackVotes, type FeedbackVote, type InsertFeedbackVote
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, sql } from "drizzle-orm";
@@ -37,6 +39,17 @@ export interface IStorage {
   createAdvertisingRequest(request: InsertAdvertisingRequest): Promise<AdvertisingRequest>;
   getAdvertisingRequests(): Promise<AdvertisingRequest[]>;
   markAdvertisingRequestProcessed(id: number): Promise<AdvertisingRequest>;
+  
+  // Feedback operations
+  createFeedback(feedback: InsertFeedback): Promise<Feedback>;
+  getProjectFeedbacks(projectId: number): Promise<Feedback[]>;
+  getFeedbackById(id: number): Promise<Feedback | undefined>;
+  deleteFeedback(id: number): Promise<void>;
+  
+  // Feedback vote operations
+  createFeedbackVote(vote: InsertFeedbackVote): Promise<FeedbackVote>;
+  deleteFeedbackVote(orangeId: string, feedbackId: number): Promise<void>;
+  getUserFeedbackVotes(orangeId: string): Promise<number[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -264,6 +277,76 @@ export class DatabaseStorage implements IStorage {
   async getProjectBySlug(slug: string): Promise<Project | undefined> {
     const [project] = await db.select().from(projects).where(eq(projects.slug, slug));
     return project;
+  }
+
+  // Feedback methods
+  async createFeedback(insertFeedback: InsertFeedback): Promise<Feedback> {
+    const [feedback] = await db.insert(feedbacks).values(insertFeedback).returning();
+    return feedback;
+  }
+
+  async getProjectFeedbacks(projectId: number): Promise<Feedback[]> {
+    return db
+      .select()
+      .from(feedbacks)
+      .where(eq(feedbacks.projectId, projectId))
+      .orderBy(sql`${feedbacks.upvoteCount} DESC, ${feedbacks.createdAt} DESC`);
+  }
+
+  async getFeedbackById(id: number): Promise<Feedback | undefined> {
+    const [feedback] = await db.select().from(feedbacks).where(eq(feedbacks.id, id));
+    return feedback;
+  }
+
+  async deleteFeedback(id: number): Promise<void> {
+    await db.delete(feedbacks).where(eq(feedbacks.id, id));
+  }
+
+  // Feedback vote methods
+  async createFeedbackVote(vote: InsertFeedbackVote): Promise<FeedbackVote> {
+    return await db.transaction(async (tx) => {
+      // Create the vote
+      const [feedbackVote] = await tx
+        .insert(feedbackVotes)
+        .values(vote)
+        .returning();
+
+      // Increment the feedback's upvote count
+      await tx
+        .update(feedbacks)
+        .set({ upvoteCount: sql`${feedbacks.upvoteCount} + 1` })
+        .where(eq(feedbacks.id, vote.feedbackId));
+
+      return feedbackVote;
+    });
+  }
+
+  async deleteFeedbackVote(orangeId: string, feedbackId: number): Promise<void> {
+    await db.transaction(async (tx) => {
+      // Delete the vote
+      await tx
+        .delete(feedbackVotes)
+        .where(
+          and(
+            eq(feedbackVotes.orangeId, orangeId),
+            eq(feedbackVotes.feedbackId, feedbackId)
+          )
+        );
+
+      // Decrement the feedback's upvote count
+      await tx
+        .update(feedbacks)
+        .set({ upvoteCount: sql`${feedbacks.upvoteCount} - 1` })
+        .where(eq(feedbacks.id, feedbackId));
+    });
+  }
+
+  async getUserFeedbackVotes(orangeId: string): Promise<number[]> {
+    const userVotes = await db
+      .select({ feedbackId: feedbackVotes.feedbackId })
+      .from(feedbackVotes)
+      .where(eq(feedbackVotes.orangeId, orangeId));
+    return userVotes.map(vote => vote.feedbackId);
   }
 }
 
