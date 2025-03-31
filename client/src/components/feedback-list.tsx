@@ -76,22 +76,56 @@ export function FeedbackList({ projectId }: FeedbackListProps) {
 
   // Auto-vote after login if there's a pending vote
   useEffect(() => {
+    console.log("Auto-vote effect running", { 
+      isLoggedIn, 
+      userId: user?.id, 
+      hasFeedbacks: feedbacks && feedbacks.length > 0,
+      savedProjectId: sessionStorage.getItem('feedback_project_id'),
+      currentProjectId: projectId,
+      pendingVoteId: sessionStorage.getItem('vote_feedback_id')
+    });
+    
+    // Only proceed if all required conditions are met
     if (isLoggedIn && user?.id && feedbacks && feedbacks.length > 0) {
       const pendingVoteId = sessionStorage.getItem('vote_feedback_id');
-      if (pendingVoteId) {
+      const savedProjectId = sessionStorage.getItem('feedback_project_id');
+      
+      // Make sure the pending vote is for this project
+      if (pendingVoteId && savedProjectId === projectId.toString()) {
+        console.log("Found pending vote:", pendingVoteId, "for project:", savedProjectId);
+        
         const feedbackId = parseInt(pendingVoteId, 10);
+        const feedbackExists = feedbacks.some(f => f.id === feedbackId);
+        const alreadyVoted = userVotes.includes(feedbackId);
+        
+        console.log("Vote details:", { 
+          feedbackExists, 
+          alreadyVoted,
+          feedbackList: feedbacks.map(f => f.id),
+          userVotesList: userVotes
+        });
+        
         // Only vote if the feedback belongs to this project and isn't already voted
-        if (
-          feedbacks?.some(f => f.id === feedbackId) && 
-          !userVotes.includes(feedbackId)
-        ) {
+        if (feedbackExists && !alreadyVoted) {
+          console.log("Executing auto-vote for feedback:", feedbackId);
+          
           // Clear the pending vote first to prevent multiple attempts
           sessionStorage.removeItem('vote_feedback_id');
-          voteMutation.mutate(feedbackId);
+          sessionStorage.removeItem('feedback_project_id');
+          
+          // Execute the vote
+          setTimeout(() => {
+            voteMutation.mutate(feedbackId);
+          }, 500);
+        } else {
+          // Clear the pending vote since we can't execute it
+          console.log("Cannot execute vote, clearing storage");
+          sessionStorage.removeItem('vote_feedback_id');
+          sessionStorage.removeItem('feedback_project_id');
         }
       }
     }
-  }, [isLoggedIn, user?.id, feedbacks, userVotes, voteMutation]);
+  }, [isLoggedIn, user?.id, feedbacks, userVotes, projectId, voteMutation]);
 
   const handleVote = (feedbackId: number) => {
     if (!isLoggedIn) {
