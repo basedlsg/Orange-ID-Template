@@ -21,15 +21,23 @@ export default function AuthCallback() {
           // Check for specific feedback related return path first
           const feedbackReturnPath = sessionStorage.getItem("feedback_return_to");
           if (feedbackReturnPath) {
-            // Clean up feedback related storage
+            // Don't remove the storage items immediately - let the components use them first
+            // The individual components will clean up their own sessionStorage items after using them
+            
+            // Just capture the values for logging
             const projectId = sessionStorage.getItem("feedback_project_id");
             const voteFeedbackId = sessionStorage.getItem("vote_feedback_id");
             const formValues = sessionStorage.getItem("feedback_form_values");
             
+            console.log("Auth callback redirecting with pending feedback actions:", {
+              projectId,
+              voteFeedbackId,
+              hasFormValues: !!formValues,
+              returnPath: feedbackReturnPath
+            });
+            
+            // Only remove the return path since we're using it now
             sessionStorage.removeItem("feedback_return_to");
-            sessionStorage.removeItem("feedback_project_id");
-            sessionStorage.removeItem("vote_feedback_id");
-            sessionStorage.removeItem("feedback_form_values");
             
             // Return to the feedback page
             setLocation(feedbackReturnPath);

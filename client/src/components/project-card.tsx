@@ -19,6 +19,17 @@ interface ExtendedUser {
   [key: string]: any;
 }
 
+// Feedback item type from API
+interface FeedbackItem {
+  id: number;
+  projectId: number;
+  orangeId: string;
+  content: string;
+  type: 'bug' | 'feature';
+  upvoteCount: number;
+  createdAt: string;
+}
+
 import { LoginDialog } from "./login-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -46,7 +57,7 @@ export function ProjectCard({
   const [isLiked, setIsLiked] = useState(false);
   const [, setLocation] = useLocation();
   // Use React Query to fetch and cache feedback count
-  const { data: feedbackData } = useQuery({
+  const { data: feedbackData } = useQuery<FeedbackItem[]>({
     queryKey: [`/api/projects/${project.id}/feedback`],
     queryFn: async () => {
       try {
@@ -61,7 +72,8 @@ export function ProjectCard({
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes before refetching
-    placeholderData: [],
+    placeholderData: [], // Ensure we always have an array, even when loading
+    initialData: [], // Start with empty array
     refetchOnWindowFocus: false,
   });
 
@@ -310,7 +322,23 @@ export function ProjectCard({
                 title="View Feedback"
               >
                 <MessageSquare className="mr-2 h-4 w-4" />
-                <span className="text-xs">{feedbackData?.length || 0}</span>
+                {/* Show total feedback count rather than just number of items */}
+                <span className="text-xs">
+                  {(() => {
+                    // Create a safe function to handle the logic
+                    const data = feedbackData || [];
+                    if (data.length === 0) return 0;
+                    
+                    // Calculate total upvotes
+                    const totalUpvotes = data.reduce(
+                      (sum, item) => sum + (item.upvoteCount || 0), 
+                      0
+                    );
+                    
+                    // Return the greater of total upvotes or feedback count
+                    return Math.max(totalUpvotes, data.length);
+                  })()}
+                </span>
               </Button>
               <Button
                 variant="ghost"
