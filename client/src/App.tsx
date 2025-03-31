@@ -320,28 +320,26 @@ function DataPrefetcher() {
           if (projectsResponse.ok) {
             const projects = await projectsResponse.json();
             
-            // Prefetch feedback data for first 10 projects (most visible ones)
-            const topProjects = projects.slice(0, 10);
+            // Find important projects to prefetch - for now just grab Vibe Sail
+            // since we know it has feedback and is important to the user
+            const vibeSailProject = projects.find((p: any) => p.slug === 'vibe-sail');
             
-            // Prefetch in parallel
-            await Promise.all(
-              topProjects.map(async (project: any) => {
-                const feedbackUrl = `/api/projects/${project.id}/feedback`;
-                await queryClient.prefetchQuery({
-                  queryKey: [feedbackUrl],
-                  queryFn: async () => {
-                    const response = await fetch(feedbackUrl);
-                    if (response.ok) {
-                      return response.json();
-                    }
-                    return [];
-                  },
-                  staleTime: 60000 // 1 minute
-                });
-              })
-            );
-            
-            console.log('Prefetched feedback data for featured projects');
+            if (vibeSailProject) {
+              const feedbackUrl = `/api/projects/${vibeSailProject.id}/feedback`;
+              await queryClient.prefetchQuery({
+                queryKey: [feedbackUrl],
+                queryFn: async () => {
+                  const response = await fetch(feedbackUrl);
+                  if (response.ok) {
+                    return response.json();
+                  }
+                  return [];
+                },
+                staleTime: 300000 // 5 minutes
+              });
+              
+              console.log('Prefetched feedback data for Vibe Sail');
+            }
           }
         } catch (error) {
           console.error('Error prefetching data:', error);
