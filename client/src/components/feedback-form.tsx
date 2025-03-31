@@ -110,6 +110,12 @@ export function FeedbackForm({ projectId, onSuccess }: FeedbackFormProps) {
       // Also invalidate the cached feedback count for project cards
       queryClient.invalidateQueries({ queryKey: [`/api/projects/${projectId}/feedback`] });
       
+      // Invalidate the global feedback counts
+      queryClient.invalidateQueries({ queryKey: ['/api/feedback/counts'] });
+      
+      // Also invalidate the project list to update any counts there
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      
       if (onSuccess) {
         onSuccess();
       }

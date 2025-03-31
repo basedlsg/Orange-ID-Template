@@ -823,6 +823,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch project feedback" });
     }
   });
+  
+  // Get all feedback counts in a single request
+  app.get("/api/feedback/counts", async (req, res) => {
+    try {
+      const feedbackCounts = await storage.getAllFeedbackCounts();
+      res.json(feedbackCounts);
+    } catch (error) {
+      console.error("Error getting feedback counts:", error);
+      return res.status(500).json({ error: "Failed to get feedback counts" });
+    }
+  });
 
   app.post("/api/feedback/:id/vote", async (req, res) => {
     try {

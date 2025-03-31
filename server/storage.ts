@@ -45,6 +45,7 @@ export interface IStorage {
   getProjectFeedbacks(projectId: number): Promise<Feedback[]>;
   getFeedbackById(id: number): Promise<Feedback | undefined>;
   deleteFeedback(id: number): Promise<void>;
+  getAllFeedbackCounts(): Promise<Record<number, number>>;
   
   // Feedback vote operations
   createFeedbackVote(vote: InsertFeedbackVote): Promise<FeedbackVote>;
@@ -347,6 +348,25 @@ export class DatabaseStorage implements IStorage {
       .from(feedbackVotes)
       .where(eq(feedbackVotes.orangeId, orangeId));
     return userVotes.map(vote => vote.feedbackId);
+  }
+  
+  async getAllFeedbackCounts(): Promise<Record<number, number>> {
+    // Use SQL's COUNT and GROUP BY to efficiently get counts by project
+    const counts = await db
+      .select({
+        projectId: feedbacks.projectId,
+        count: sql<number>`COUNT(*)`,
+      })
+      .from(feedbacks)
+      .groupBy(feedbacks.projectId);
+    
+    // Convert array of counts to a map of projectId -> count
+    const countMap: Record<number, number> = {};
+    for (const item of counts) {
+      countMap[item.projectId] = item.count;
+    }
+    
+    return countMap;
   }
 }
 

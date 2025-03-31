@@ -59,7 +59,27 @@ export function ProjectCard({
   // Use a local state to track if we've rendered the component at least once
   const [isInitialRender, setIsInitialRender] = useState(true);
   
-  // Use React Query to fetch and cache feedback count
+  // Use feedback count from the global feedback counts query, which is more efficient
+  const { data: allFeedbackCounts = {} } = useQuery<Record<number, number>>({
+    queryKey: ['/api/feedback/counts'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/feedback/counts');
+        if (response.ok) {
+          return await response.json();
+        }
+        return {};
+      } catch (error) {
+        console.error("Error fetching feedback counts:", error);
+        return {};
+      }
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes before refetching
+    placeholderData: {},
+    refetchOnWindowFocus: false,
+  });
+
+  // If we need the actual feedback data (not just the count), only fetch it when expanded
   const { data: feedbackData = [] } = useQuery<FeedbackItem[]>({
     queryKey: [`/api/projects/${project.id}/feedback`],
     queryFn: async () => {
@@ -70,11 +90,12 @@ export function ProjectCard({
         }
         return [];
       } catch (error) {
-        console.error("Error fetching feedback count:", error);
+        console.error("Error fetching feedback:", error);
         return [];
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes before refetching
+    enabled: expanded, // Only fetch when the project is expanded
+    staleTime: 5 * 60 * 1000,
     placeholderData: [],
     refetchOnWindowFocus: false,
   });
@@ -121,6 +142,11 @@ export function ProjectCard({
       // Also invalidate feedback data when likes change
       queryClient.invalidateQueries({ 
         queryKey: [`/api/projects/${project.id}/feedback`],
+      });
+      
+      // Also invalidate the global feedback counts
+      queryClient.invalidateQueries({ 
+        queryKey: ['/api/feedback/counts'],
       });
     },
     onError: (error) => {
@@ -206,6 +232,11 @@ export function ProjectCard({
     queryClient.refetchQueries({ 
       queryKey: [`/api/projects/${project.id}/feedback`],
       exact: true
+    });
+    
+    // Also refetch the global feedback counts
+    queryClient.refetchQueries({ 
+      queryKey: ['/api/feedback/counts'],
     });
     
     if (expanded) {
@@ -332,7 +363,12 @@ export function ProjectCard({
               >
                 <MessageSquare className="mr-2 h-4 w-4" />
                 {/* Show the number of feedback items */}
-                <span className="text-xs">{feedbackData?.length || 0}</span>
+                <span className="text-xs">
+                  {expanded 
+                    ? (feedbackData?.length || 0) // When expanded, use the detailed feedback data
+                    : (allFeedbackCounts[project.id] || 0) // Otherwise use the more efficient counts
+                  }
+                </span>
               </Button>
               <Button
                 variant="ghost"

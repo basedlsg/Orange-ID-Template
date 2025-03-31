@@ -71,6 +71,9 @@ export function FeedbackList({ projectId }: FeedbackListProps) {
       // Invalidate the user's votes
       queryClient.invalidateQueries({ queryKey: ["/api/users", user?.id, "feedback-votes"] });
       
+      // Invalidate the global feedback counts
+      queryClient.invalidateQueries({ queryKey: ['/api/feedback/counts'] });
+      
       // Ensure the home page project list is updated with new counts
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
     },
