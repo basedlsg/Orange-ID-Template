@@ -10,6 +10,7 @@ import { useRef, useEffect } from "react";
 import { FeedbackForm } from "@/components/feedback-form";
 import { FeedbackList } from "@/components/feedback-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useBedrockPassport } from "@bedrock_org/passport";
 
 export default function ProjectPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -17,6 +18,7 @@ export default function ProjectPage() {
   const { toast } = useToast();
   // Create a reference for the feedback section for scrolling
   const feedbackRef = useRef<HTMLDivElement>(null);
+  const { isLoggedIn } = useBedrockPassport();
 
   // Parse URL parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -30,6 +32,19 @@ export default function ProjectPage() {
       feedbackRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [tabParam, feedbackRef]);
+  
+  // Check for pending feedback actions after login
+  useEffect(() => {
+    if (isLoggedIn && feedbackRef.current) {
+      // If the user just logged in for feedback and we have returned to the project page,
+      // scroll to the feedback section automatically
+      if (window.location.pathname.includes("/projects/") && !tabParam) {
+        setTimeout(() => {
+          feedbackRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 500); // Small timeout to ensure everything is loaded
+      }
+    }
+  }, [isLoggedIn, tabParam, feedbackRef]);
 
   const { data: project, isLoading } = useQuery<Project>({
     queryKey: ["/api/projects/by-slug", slug.split("?")[0]], // Remove query params from slug

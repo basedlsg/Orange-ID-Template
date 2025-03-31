@@ -3,7 +3,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { LoginDialog } from "./login-dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, Bug, Lightbulb } from "lucide-react";
@@ -74,8 +74,32 @@ export function FeedbackList({ projectId }: FeedbackListProps) {
     },
   });
 
+  // Auto-vote after login if there's a pending vote
+  useEffect(() => {
+    if (isLoggedIn && user?.id && feedbacks && feedbacks.length > 0) {
+      const pendingVoteId = sessionStorage.getItem('vote_feedback_id');
+      if (pendingVoteId) {
+        const feedbackId = parseInt(pendingVoteId, 10);
+        // Only vote if the feedback belongs to this project and isn't already voted
+        if (
+          feedbacks?.some(f => f.id === feedbackId) && 
+          !userVotes.includes(feedbackId)
+        ) {
+          // Clear the pending vote first to prevent multiple attempts
+          sessionStorage.removeItem('vote_feedback_id');
+          voteMutation.mutate(feedbackId);
+        }
+      }
+    }
+  }, [isLoggedIn, user?.id, feedbacks, userVotes, voteMutation]);
+
   const handleVote = (feedbackId: number) => {
     if (!isLoggedIn) {
+      // Save the current state before opening login dialog
+      sessionStorage.setItem('feedback_project_id', projectId.toString());
+      sessionStorage.setItem('vote_feedback_id', feedbackId.toString());
+      sessionStorage.setItem('feedback_return_to', window.location.pathname + window.location.search);
+      
       setShowLoginDialog(true);
       return;
     }
