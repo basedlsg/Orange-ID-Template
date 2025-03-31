@@ -60,12 +60,11 @@ export function ProjectCard({
   const [isInitialRender, setIsInitialRender] = useState(true);
   
   // Use React Query to fetch and cache feedback count
-  const { data: feedbackData = [], isLoading } = useQuery<FeedbackItem[]>({
+  const { data: feedbackData = [] } = useQuery<FeedbackItem[]>({
     queryKey: [`/api/projects/${project.id}/feedback`],
-    queryFn: async ({ queryKey }) => {
+    queryFn: async () => {
       try {
-        const endpoint = queryKey[0] as string;
-        const response = await fetch(endpoint);
+        const response = await fetch(`/api/projects/${project.id}/feedback`);
         if (response.ok) {
           return await response.json();
         }
@@ -75,11 +74,9 @@ export function ProjectCard({
         return [];
       }
     },
-    // Only fetch when the project is expanded/viewed
-    // This prevents excessive API calls on the homepage
-    enabled: expanded, 
-    // Fallback data when not fetched
+    staleTime: 5 * 60 * 1000, // 5 minutes before refetching
     placeholderData: [],
+    refetchOnWindowFocus: false,
   });
   
   // Mark that we're no longer in the initial render once we've mounted
@@ -335,15 +332,7 @@ export function ProjectCard({
               >
                 <MessageSquare className="mr-2 h-4 w-4" />
                 {/* Show the number of feedback items */}
-                <span className="text-xs">
-                  {expanded ? (
-                    // Only show actual feedback count when expanded
-                    isLoading ? "..." : feedbackData.length
-                  ) : (
-                    // Otherwise show a placeholder symbol
-                    "•"
-                  )}
-                </span>
+                <span className="text-xs">{feedbackData?.length || 0}</span>
               </Button>
               <Button
                 variant="ghost"

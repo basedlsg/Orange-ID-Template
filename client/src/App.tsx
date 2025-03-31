@@ -305,33 +305,8 @@ function Router() {
   );
 }
 
-// Component that handles app-level data synchronization
-function DataPrefetcher() {
-  const [hasPrefetched, setHasPrefetched] = useState(false);
-  
-  useEffect(() => {
-    // Only run once when app loads
-    if (!hasPrefetched) {
-      // Flag that we've run initialization
-      setHasPrefetched(true);
-      
-      // Configure the query client defaults
-      queryClient.setDefaultOptions({
-        queries: {
-          staleTime: 300000, // 5 minutes - reduce unnecessary refetches
-          gcTime: 600000,    // 10 minutes - keep data in cache longer
-          retry: 1,          // Only retry failed requests once
-          refetchOnWindowFocus: false // Don't refetch when window regains focus
-        }
-      });
-      
-      // We're not prefetching anything by default - data will load when needed
-      console.log('Initialized data management with optimal caching');
-    }
-  }, [hasPrefetched]);
-  
-  return null;
-}
+// No data prefetcher component needed 
+// We've set the query client defaults in lib/queryClient.ts
 
 function App() {
   return (
@@ -395,7 +370,6 @@ function App() {
         <Router />
         <Toaster />
         <StoreUserData />
-        <DataPrefetcher />
       </OrangeAuthProvider>
     </QueryClientProvider>
   );
