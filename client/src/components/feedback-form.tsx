@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -35,7 +35,6 @@ interface FeedbackFormProps {
 
 export function FeedbackForm({ projectId, onSuccess }: FeedbackFormProps) {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
-  const [pendingFeedback, setPendingFeedback] = useState<FeedbackFormValues | null>(null);
   const { isLoggedIn, user } = useBedrockPassport();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -47,15 +46,6 @@ export function FeedbackForm({ projectId, onSuccess }: FeedbackFormProps) {
       type: "feature",
     },
   });
-  
-  // Check if user just logged in and has pending feedback
-  useEffect(() => {
-    if (isLoggedIn && pendingFeedback) {
-      // Submit the pending feedback
-      feedbackMutation.mutate(pendingFeedback);
-      setPendingFeedback(null);
-    }
-  }, [isLoggedIn, pendingFeedback]);
 
   const feedbackMutation = useMutation({
     mutationFn: async (values: FeedbackFormValues) => {
@@ -93,8 +83,6 @@ export function FeedbackForm({ projectId, onSuccess }: FeedbackFormProps) {
 
   const onSubmit = (data: FeedbackFormValues) => {
     if (!isLoggedIn) {
-      // Store the feedback data for after login
-      setPendingFeedback(data);
       setShowLoginDialog(true);
       return;
     }
