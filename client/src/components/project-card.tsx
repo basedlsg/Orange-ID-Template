@@ -187,7 +187,11 @@ export function ProjectCard({
       queryKey: [`/api/projects/${project.id}/feedback`],
     });
     
-    if (!expanded) {
+    if (expanded) {
+      // If already on project page, scroll to the feedback section
+      document.getElementById('feedback')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Navigate to project page with feedback section in URL
       setLocation(`/projects/${project.slug}?tab=feedback`);
     }
   };

@@ -6,8 +6,7 @@ import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRef, useEffect } from "react";
 import { FeedbackForm } from "@/components/feedback-form";
 import { FeedbackList } from "@/components/feedback-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +15,8 @@ export default function ProjectPage() {
   const { slug } = useParams<{ slug: string }>();
   const [location, setLocation] = useLocation();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("project");
+  // Create a reference for the feedback section for scrolling
+  const feedbackRef = useRef<HTMLDivElement>(null);
 
   // Parse URL parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -24,12 +24,12 @@ export default function ProjectPage() {
   const creatorHandle = urlParams.get("handle");
   const tabParam = urlParams.get("tab");
   
-  // Set active tab based on URL param if present
+  // Scroll to feedback section if feedback tab is in URL
   useEffect(() => {
-    if (tabParam === "feedback") {
-      setActiveTab("feedback");
+    if (tabParam === "feedback" && feedbackRef.current) {
+      feedbackRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [tabParam]);
+  }, [tabParam, feedbackRef]);
 
   const { data: project, isLoading } = useQuery<Project>({
     queryKey: ["/api/projects/by-slug", slug.split("?")[0]], // Remove query params from slug
@@ -151,52 +151,35 @@ export default function ProjectPage() {
           </Button>
         </div>
 
-        <div className="max-w-3xl mx-auto">
-          <Tabs
-            defaultValue="project"
-            value={activeTab}
-            onValueChange={setActiveTab}
-          >
-            <TabsList className="grid w-full grid-cols-2 bg-zinc-900 border-zinc-800">
-              <TabsTrigger
-                value="project"
-                className="data-[state=active]:bg-zinc-800"
-              >
-                Project Details
-              </TabsTrigger>
-              <TabsTrigger
-                value="feedback"
-                className="data-[state=active]:bg-zinc-800"
-              >
-                <MessageSquare className="h-4 w-4 mr-2" />
-                Feedback
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="project">
-              <ProjectCard project={project} expanded={true} />
-            </TabsContent>
-            <TabsContent value="feedback">
-              <Card className="bg-zinc-900 border-zinc-800">
-                <CardHeader>
-                  <CardTitle className="text-xl text-white">
-                    Project Feedback
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div>
-                    <FeedbackForm projectId={project.id} />
-                  </div>
+        <div className="max-w-3xl mx-auto space-y-8">
+          {/* Project Details */}
+          <div>
+            <ProjectCard project={project} expanded={true} />
+          </div>
+          
+          {/* Feedback Section with ref for scrolling */}
+          <div ref={feedbackRef} id="feedback" className="pt-4">
+            <Card className="bg-zinc-900 border-zinc-800">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-xl text-white flex items-center">
+                  <MessageSquare className="h-5 w-5 mr-2" />
+                  Project Feedback
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <FeedbackForm projectId={project.id} />
+                </div>
 
-                  <div>
-                    <h3 className="text-sm font-medium mb-4 text-zinc-300">
-                      Community Feedback
-                    </h3>
-                    <FeedbackList projectId={project.id} />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                <div>
+                  <h3 className="text-sm font-medium mb-4 text-zinc-300">
+                    Community Feedback
+                  </h3>
+                  <FeedbackList projectId={project.id} />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
