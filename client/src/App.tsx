@@ -28,6 +28,7 @@ import {
 import Advertise from "@/pages/advertise";
 import Leaderboard from "@/pages/leaderboard"; // Import Leaderboard component
 import Creator from "@/pages/creator"; // Add this import
+import FAQ from "@/pages/faq"; // Import FAQ page
 import { Helmet } from "react-helmet";
 import { FAQButton } from "@/components/faq-dialog";
 
@@ -299,6 +300,7 @@ function Router() {
       <Route path="/advertise" component={Advertise} />
       <Route path="/leaderboard" component={Leaderboard} />
       <Route path="/creator/:handle" component={Creator} />
+      <Route path="/faq" component={FAQ} />
       <Route path="/auth/callback" component={AuthCallback} />
       <Route component={NotFound} />
     </Switch>
