@@ -205,7 +205,10 @@ export function ProjectCard({
 
   const handleXClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(`https://x.com/${project.xHandle}`, "_blank");
+    const handle = project.xHandle?.startsWith('@') 
+      ? project.xHandle.substring(1) 
+      : project.xHandle;
+    window.open(`https://x.com/${handle}`, "_blank");
   };
 
   const handleSponsorshipClick = (e: React.MouseEvent) => {
@@ -330,7 +333,7 @@ export function ProjectCard({
           </div>
           <div className="flex items-center justify-between gap-4 mt-auto">
             <div className="flex items-center gap-4 text-sm text-zinc-400">
-              {project.xHandle && (
+              {project.xHandle && project.xHandle !== '@' && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -338,7 +341,7 @@ export function ProjectCard({
                   className="text-zinc-400 hover:text-blue-400 p-0 h-auto z-30 flex items-center gap-1"
                 >
                   <SiX className="h-4 w-4" />
-                  <span>X</span>
+                  <span>@{project.xHandle.startsWith('@') ? project.xHandle.substring(1) : project.xHandle}</span>
                 </Button>
               )}
             </div>
