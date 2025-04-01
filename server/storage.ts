@@ -282,8 +282,18 @@ export class DatabaseStorage implements IStorage {
 
   // Feedback methods
   async createFeedback(insertFeedback: InsertFeedback): Promise<Feedback> {
-    const [feedback] = await db.insert(feedbacks).values(insertFeedback).returning();
-    return feedback;
+    return await db.transaction(async (tx) => {
+      // Create the feedback
+      const [feedback] = await tx.insert(feedbacks).values(insertFeedback).returning();
+      
+      // Increment the project's feedback count
+      await tx
+        .update(projects)
+        .set({ feedbackCount: sql`${projects.feedbackCount} + 1` })
+        .where(eq(projects.id, insertFeedback.projectId));
+      
+      return feedback;
+    });
   }
 
   async getProjectFeedbacks(projectId: number): Promise<Feedback[]> {
@@ -300,7 +310,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteFeedback(id: number): Promise<void> {
-    await db.delete(feedbacks).where(eq(feedbacks.id, id));
+    await db.transaction(async (tx) => {
+      // First get the feedback to know which project it belongs to
+      const [feedback] = await tx.select().from(feedbacks).where(eq(feedbacks.id, id));
+      
+      if (!feedback) {
+        throw new Error("Feedback not found");
+      }
+      
+      // Delete the feedback
+      await tx.delete(feedbacks).where(eq(feedbacks.id, id));
+      
+      // Decrement the project's feedback count
+      await tx
+        .update(projects)
+        .set({ feedbackCount: sql`${projects.feedbackCount} - 1` })
+        .where(eq(projects.id, feedback.projectId));
+    });
   }
 
   // Feedback vote methods
