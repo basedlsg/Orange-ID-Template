@@ -335,9 +335,10 @@ export function ProjectCard({
                   variant="ghost"
                   size="sm"
                   onClick={handleXClick}
-                  className="text-zinc-400 hover:text-blue-400 p-0 h-auto z-30"
+                  className="text-zinc-400 hover:text-blue-400 p-0 h-auto z-30 flex items-center gap-1"
                 >
                   <SiX className="h-4 w-4" />
+                  <span>X</span>
                 </Button>
               )}
             </div>
