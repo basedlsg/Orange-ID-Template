@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Eye, Sparkles, Heart, Share2, MessageSquare } from "lucide-react";
+import { ExternalLink, Sparkles, Heart, Share2, MessageSquare } from "lucide-react";
 import { SiX } from "react-icons/si";
 import type { Project } from "@shared/schema";
 import defaultThumbnail from "../logocode.png";
@@ -59,25 +59,7 @@ export function ProjectCard({
   // Use a local state to track if we've rendered the component at least once
   const [isInitialRender, setIsInitialRender] = useState(true);
   
-  // Use feedback count from the global feedback counts query, which is more efficient
-  const { data: allFeedbackCounts = {} } = useQuery<Record<number, number>>({
-    queryKey: ['/api/feedback/counts'],
-    queryFn: async () => {
-      try {
-        const response = await fetch('/api/feedback/counts');
-        if (response.ok) {
-          return await response.json();
-        }
-        return {};
-      } catch (error) {
-        console.error("Error fetching feedback counts:", error);
-        return {};
-      }
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes before refetching
-    placeholderData: {},
-    refetchOnWindowFocus: false,
-  });
+  // No need to query feedback counts separately as we now use project.feedbackCount directly
 
   // If we need the actual feedback data (not just the count), only fetch it when expanded
   const { data: feedbackData = [] } = useQuery<FeedbackItem[]>({
@@ -143,11 +125,6 @@ export function ProjectCard({
       // Also invalidate feedback data when likes change
       queryClient.invalidateQueries({ 
         queryKey: [`/api/projects/${project.id}/feedback`],
-      });
-      
-      // Also invalidate the global feedback counts
-      queryClient.invalidateQueries({ 
-        queryKey: ['/api/feedback/counts'],
       });
     },
     onError: (error) => {
@@ -264,11 +241,6 @@ export function ProjectCard({
       exact: true
     });
     
-    // Also refetch the global feedback counts
-    queryClient.refetchQueries({ 
-      queryKey: ['/api/feedback/counts'],
-    });
-    
     if (expanded) {
       // If already on project page, scroll to the feedback section
       document.getElementById('feedback')?.scrollIntoView({ behavior: 'smooth' });
@@ -358,10 +330,6 @@ export function ProjectCard({
           </div>
           <div className="flex items-center justify-between gap-4 mt-auto">
             <div className="flex items-center gap-4 text-sm text-zinc-400">
-              <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4" />
-                <span>{project.views}</span>
-              </div>
               {project.xHandle && (
                 <Button
                   variant="ghost"
@@ -396,7 +364,7 @@ export function ProjectCard({
                 <span className="text-xs">
                   {expanded 
                     ? (feedbackData?.length || 0) // When expanded, use the detailed feedback data
-                    : (allFeedbackCounts[project.id] || 0) // Otherwise use the more efficient counts
+                    : (project.feedbackCount || 0) // Use the feedbackCount field from the project
                   }
                 </span>
               </Button>

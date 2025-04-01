@@ -62,6 +62,7 @@ export const projects = pgTable("projects", {
   approved: boolean("approved").notNull().default(false),
   views: integer("views").notNull().default(0),
   likeCount: integer("like_count").notNull().default(0),
+  feedbackCount: integer("feedback_count").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -93,6 +94,7 @@ export const insertProjectSchema = createInsertSchema(projects)
     approved: true,
     views: true,
     likeCount: true,
+    feedbackCount: true,
     createdAt: true,
     slug: true, // Omit slug as it will be generated from name
   })
