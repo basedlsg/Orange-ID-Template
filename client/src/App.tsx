@@ -7,30 +7,20 @@ import { useToast } from "@/hooks/use-toast";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { X, Plus, User, Trophy } from "lucide-react";
+import { User } from "lucide-react";
 import { Logo } from "@/components/logo";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
-import Submit from "@/pages/submit";
-import Admin from "@/pages/admin";
 import AuthCallback from "@/pages/AuthCallback";
 import { LoginDialog } from "@/components/login-dialog";
 import React from "react";
-import Profile from "@/pages/profile";
-import Project from "@/pages/project";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Advertise from "@/pages/advertise";
-import Leaderboard from "@/pages/leaderboard"; // Import Leaderboard component
-import Creator from "@/pages/creator"; // Add this import
-import FAQ from "@/pages/faq"; // Import FAQ page
 import { Helmet } from "react-helmet";
-import { FAQButton } from "@/components/faq-dialog";
 
 async function storeUserInDB(user: any) {
   if (!user) {
@@ -106,7 +96,7 @@ function LoginButton() {
   return (
     <div className="flex items-center gap-3">
       <span className="text-sm text-zinc-400 hidden sm:inline">
-        Login to save favorites — more soon!
+        Login with OrangeID
       </span>
       <Button
         variant="outline"
@@ -197,89 +187,37 @@ function Navigation() {
     }
   };
 
-  const AdvertiseButton = () => (
-    <Button
-      variant="outline"
-      onClick={() => setLocation("/advertise")}
-      className="text-sm font-medium bg-orange-500 text-white hover:bg-orange-600"
-    >
-      Advertise in Orange Vibe Jam
-    </Button>
-  );
-
   return (
-    <>
-      <nav className="border-b">
-        <div className="container mx-auto flex h-16 items-center px-4">
-          <Link href="/">
-            <Logo className="cursor-pointer" />
-          </Link>
-          <div className="ml-4 flex items-center space-x-4">
-            {/* Commented out Leaderboard as requested */}
-            {/* 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setLocation("/leaderboard")}
-              className="text-sm font-medium hover:text-primary"
-            >
-              <Trophy className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Leaderboard</span>
-            </Button>
-            */}
-            
-            {/* Navigation buttons will go here if needed */}
-          </div>
-          <div className="ml-auto flex items-center space-x-4">
-            {/* Hide on mobile, show on desktop */}
-            <div className="hidden sm:flex items-center space-x-3">
-              <FAQButton />
-              <AdvertiseButton />
-            </div>
-            {isLoggedIn ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-sm font-medium hover:text-primary"
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    <span className="hidden sm:inline">Account</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setLocation("/profile")}>
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <LoginButton />
-            )}
-          </div>
-        </div>
-      </nav>
-      {/* Show on mobile only */}
-      <div className="sm:hidden container mx-auto px-4 py-2 space-y-3">
-        <div className="grid grid-cols-1 gap-3">
-          {/* Mobile buttons start here */}
-          
-          <Button
-            variant="outline"
-            onClick={() => setLocation("/advertise")}
-            className="w-full text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 border-orange-400"
-          >
-            Advertise in Orange Vibe Jam
-          </Button>
-          
-          <FAQButton className="w-full border-2 border-orange-300 rounded-md" />
+    <nav className="border-b">
+      <div className="container mx-auto flex h-16 items-center px-4">
+        <Link href="/">
+          <Logo className="cursor-pointer" />
+        </Link>
+        <div className="ml-auto flex items-center space-x-4">
+          {isLoggedIn ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm font-medium hover:text-primary"
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Account</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleLogout}>
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <LoginButton />
+          )}
         </div>
       </div>
-    </>
+    </nav>
   );
 }
 
@@ -287,20 +225,6 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
-      <Route path="/submit">
-        <ProtectedRoute component={Submit} />
-      </Route>
-      <Route path="/admin">
-        <ProtectedRoute component={Admin} requiresAdmin={true} />
-      </Route>
-      <Route path="/profile">
-        <ProtectedRoute component={Profile} />
-      </Route>
-      <Route path="/projects/:slug" component={Project} />
-      <Route path="/advertise" component={Advertise} />
-      <Route path="/leaderboard" component={Leaderboard} />
-      <Route path="/creator/:handle" component={Creator} />
-      <Route path="/faq" component={FAQ} />
       <Route path="/auth/callback" component={AuthCallback} />
       <Route component={NotFound} />
     </Switch>
@@ -315,20 +239,20 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <OrangeAuthProvider>
         <Helmet>
-          <title>VibeCodingList - Discover AI-Powered Coding Projects</title>
+          <title>OrangeID Authentication Template</title>
           <meta
             name="description"
-            content="Browse and discover the best AI-generated coding projects. Find tools built with ChatGPT, Grok, Claude, and more."
+            content="A simple authentication template using OrangeID for user management."
           />
 
           {/* OpenGraph Meta Tags */}
           <meta
             property="og:title"
-            content="VibeCodingList - Discover AI-Powered Coding Projects"
+            content="OrangeID Authentication Template"
           />
           <meta
             property="og:description"
-            content="Browse and discover the best AI-generated coding projects. Find tools built with ChatGPT, Grok, Claude, and more."
+            content="A simple authentication template using OrangeID for user management."
           />
           <meta
             property="og:image"
@@ -338,18 +262,17 @@ function App() {
           <meta property="og:image:height" content="630" />
           <meta property="og:url" content={window.location.origin} />
           <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="VibeCodingList" />
+          <meta property="og:site_name" content="OrangeID Auth Template" />
 
           {/* Twitter Card Meta Tags */}
           <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:site" content="@vibecodinglist" />
           <meta
             name="twitter:title"
-            content="VibeCodingList - Discover AI-Powered Coding Projects"
+            content="OrangeID Authentication Template"
           />
           <meta
             name="twitter:description"
-            content="Browse and discover the best AI-generated coding projects. Find tools built with ChatGPT, Grok, Claude, and more."
+            content="A simple authentication template using OrangeID for user management."
           />
           <meta
             name="twitter:image"
@@ -357,15 +280,15 @@ function App() {
           />
           <meta
             name="twitter:image:alt"
-            content="VibeCodingList - Discover AI-Powered Coding Projects"
+            content="OrangeID Authentication Template"
           />
 
           {/* Additional SEO Meta Tags */}
           <meta name="robots" content="index, follow" />
-          <meta name="author" content="VibeCodingList" />
+          <meta name="author" content="OrangeID Auth Template" />
           <meta
             name="keywords"
-            content="AI, coding projects, ChatGPT, Grok, Claude, developers, tools"
+            content="authentication, template, OrangeID, user management"
           />
         </Helmet>
         <Navigation />
