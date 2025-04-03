@@ -10,7 +10,7 @@ export interface IStorage {
   getUserByOrangeId(orangeId: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  getAllUsers(): Promise<Omit<User, 'authToken'>[]>;
+  getAllUsers(): Promise<User[]>;
   getUsersCreatedByDay(): Promise<{ date: string; count: number }[]>;
 }
 
@@ -35,18 +35,10 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   
-  async getAllUsers(): Promise<Omit<User, 'authToken'>[]> {
-    // Select all users but exclude the authToken field for security
+  async getAllUsers(): Promise<User[]> {
+    // Select all users
     const result = await db
-      .select({
-        id: users.id,
-        orangeId: users.orangeId,
-        username: users.username,
-        email: users.email,
-        role: users.role,
-        isAdmin: users.isAdmin,
-        createdAt: users.createdAt
-      })
+      .select()
       .from(users)
       .orderBy(users.createdAt);
     

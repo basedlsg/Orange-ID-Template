@@ -43,17 +43,12 @@ async function storeUserInDB(user: any) {
     throw new Error("Missing Orange ID (sub or id)");
   }
 
-  const token = JSON.parse(localStorage.getItem("passport-token")!).state
-    .accessToken;
-  if (!token) throw new Error("Missing access token");
-
   try {
     const userData = {
       orangeId,
       username: user.name || user.displayName || orangeId,
       role: user.role || "user",
       email: user.email || "",
-      authToken: token,
     };
 
     const response = await fetch("/api/users", {

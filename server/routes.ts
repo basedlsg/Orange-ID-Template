@@ -7,9 +7,27 @@ import {
   type InsertUser
 } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
+import 'express-session';
+
+// Extend Express Request type to include session
+declare module 'express-session' {
+  interface SessionData {
+    userId?: number;
+    orangeId?: string;
+    isAdmin?: boolean;
+  }
+}
 
 async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId: string } | null> {
-  // Get orangeId from the authenticated user's token
+  // Get user info from session if available
+  if (req.session && req.session.userId && req.session.orangeId) {
+    return {
+      userId: req.session.userId,
+      orangeId: req.session.orangeId
+    };
+  }
+  
+  // Fall back to query parameters if session is not available
   const orangeId = req.body.orangeId || req.query.orangeId;
   if (!orangeId) {
     return null;
@@ -19,6 +37,13 @@ async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId:
   const user = await storage.getUserByOrangeId(orangeId);
   if (!user) {
     return null;
+  }
+
+  // Store in session for future requests
+  if (req.session) {
+    req.session.userId = user.id;
+    req.session.orangeId = user.orangeId;
+    req.session.isAdmin = user.isAdmin;
   }
 
   return { userId: user.id, orangeId };
@@ -39,12 +64,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const existingUser = await storage.getUserByOrangeId(validatedData.orangeId);
       if (existingUser) {
         console.log("User already exists, returning existing user:", existingUser);
+        
+        // Store user info in the session
+        if (req.session) {
+          req.session.userId = existingUser.id;
+          req.session.orangeId = existingUser.orangeId;
+          req.session.isAdmin = existingUser.isAdmin;
+        }
+        
         return res.json(existingUser); // Return existing user if found
       }
 
       // Create new user
       const user = await storage.createUser(validatedData);
       console.log("Created user:", user);
+      
+      // Store user info in the session
+      if (req.session) {
+        req.session.userId = user.id;
+        req.session.orangeId = user.orangeId;
+        req.session.isAdmin = user.isAdmin;
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("User creation error:", error);
@@ -57,6 +98,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const existingUser = await storage.getUserByOrangeId(req.body.orangeId);
           if (existingUser) {
             console.log("Recovered existing user after duplicate key error:", existingUser);
+            
+            // Store user info in the session
+            if (req.session) {
+              req.session.userId = existingUser.id;
+              req.session.orangeId = existingUser.orangeId;
+              req.session.isAdmin = existingUser.isAdmin;
+            }
+            
             return res.json(existingUser);
           }
         } catch (fetchError) {
@@ -79,6 +128,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/users/check-admin", async (req, res) => {
     try {
+      // First check if admin status is stored in session
+      if (req.session && typeof req.session.isAdmin === 'boolean') {
+        return res.json({ isAdmin: req.session.isAdmin });
+      }
+      
+      // Fall back to query parameter
       const { orangeId } = req.query;
 
       if (!orangeId) {
@@ -89,6 +144,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!user) {
         return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Store in session for future requests
+      if (req.session) {
+        req.session.userId = user.id;
+        req.session.orangeId = user.orangeId;
+        req.session.isAdmin = user.isAdmin;
       }
 
       return res.json({ isAdmin: user.isAdmin });
@@ -103,6 +165,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware to check if user is admin
   const checkAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      // First check if admin status is stored in session
+      if (req.session && req.session.isAdmin === true) {
+        return next();
+      }
+      
+      // Fall back to query param/header if session doesn't have admin status
       const orangeId = req.query.adminId || req.headers['x-admin-id'];
       
       if (!orangeId) {
@@ -113,6 +181,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!user || !user.isAdmin) {
         return res.status(403).json({ error: "Unauthorized access" });
+      }
+      
+      // Store admin status in session for future requests
+      if (req.session) {
+        req.session.userId = user.id;
+        req.session.orangeId = user.orangeId;
+        req.session.isAdmin = user.isAdmin;
       }
       
       next();

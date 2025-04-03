@@ -14,7 +14,6 @@ export const users = pgTable("users", {
   username: text("username").notNull(),
   email: text("email"),
   role: text("role").notNull().default("user"),
-  authToken: text("auth_token"),
   isAdmin: boolean("is_admin").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
