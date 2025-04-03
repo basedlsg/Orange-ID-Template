@@ -5,7 +5,7 @@ export default function Home() {
   const { isLoggedIn, user } = useBedrockPassport();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-black text-white">
       <Helmet>
         <title>OrangeID Authentication Template</title>
         <meta 
@@ -24,9 +24,9 @@ export default function Home() {
           </p>
 
           {isLoggedIn ? (
-            <div className="bg-white shadow-lg rounded-lg p-8 mb-8">
+            <div className="bg-zinc-900 shadow-lg rounded-lg p-8 mb-8">
               <h2 className="text-2xl font-bold mb-4">You are logged in!</h2>
-              <div className="bg-gray-50 p-4 rounded-md mb-4">
+              <div className="bg-zinc-800 p-4 rounded-md mb-4">
                 <p className="text-gray-700"><strong>Orange ID:</strong> {user?.id}</p>
                 <p className="text-gray-700"><strong>Username:</strong> {user?.name}</p>
                 <p className="text-gray-700"><strong>Email:</strong> {user?.email || "Not provided"}</p>
@@ -37,9 +37,9 @@ export default function Home() {
               </p>
             </div>
           ) : (
-            <div className="bg-white shadow-lg rounded-lg p-8">
+            <div className="bg-zinc-900 shadow-lg rounded-lg p-8">
               <h2 className="text-2xl font-bold mb-4">Authentication Ready</h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-zinc-300 mb-6">
                 Click the Login button in the top-right corner to authenticate with your OrangeID.
               </p>
               <div className="bg-gray-50 p-4 rounded-md text-left">
