@@ -34,7 +34,7 @@ export function LoginDialog({
             panelClass="bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-b-lg shadow-lg"
             buttonClass="w-full bg-[#F37920] hover:bg-[#D86A10] text-white transition-all duration-200"
             headerClass="justify-center pb-6"
-            logo="/orange_logo.png"
+            logo="/orangelogo.svg"
             title=""
             titleClass="text-xl font-semibold text-[#F37920]"
             logoAlt="Orange Auth"
