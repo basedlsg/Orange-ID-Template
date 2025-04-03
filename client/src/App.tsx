@@ -7,7 +7,18 @@ import { useToast } from "@/hooks/use-toast";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { User } from "lucide-react";
+import { User as UserIcon } from "lucide-react";
+
+// Define a type for the Bedrock user
+interface BedrockUser {
+  id?: string;
+  sub?: string;
+  name?: string;
+  email?: string;
+  role?: string;
+  displayName?: string;
+  // ...other properties
+}
 import { Logo } from "@/components/logo";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -138,7 +149,11 @@ function ProtectedRoute({
   // Check admin status only if this is an admin route
   if (requiresAdmin && user) {
     // Get the user data from our database to check admin status
-    fetch(`/api/users/check-admin?orangeId=${user.id}`)
+    // @ts-ignore - type is too complex to handle directly
+    const orangeId = (user as any).sub || (user as any).id;
+    if (!orangeId) return null;
+    
+    fetch(`/api/users/check-admin?orangeId=${orangeId}`)
       .then((response) => response.json())
       .then((data) => {
         if (!data.isAdmin) {
@@ -168,6 +183,28 @@ function Navigation() {
   const { isLoggedIn, user, signOut } = useBedrockPassport();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+
+  // Check if the user is an admin
+  useEffect(() => {
+    if (isLoggedIn && user) {
+      // Extract the orange ID from the user object
+      // @ts-ignore - type is too complex to handle directly
+      const orangeId = (user as any).sub || (user as any).id;
+      if (!orangeId) return;
+      
+      fetch(`/api/users/check-admin?orangeId=${orangeId}`)
+        .then(response => response.json())
+        .then(data => {
+          setIsAdmin(data.isAdmin);
+        })
+        .catch(error => {
+          console.error("Error checking admin status:", error);
+        });
+    } else {
+      setIsAdmin(null);
+    }
+  }, [isLoggedIn, user]);
 
   const handleLogout = async () => {
     try {
@@ -193,6 +230,18 @@ function Navigation() {
         <Link href="/">
           <Logo className="cursor-pointer" />
         </Link>
+
+        {/* Navigation links */}
+        <div className="mx-4 flex space-x-4">
+          {isLoggedIn && isAdmin && (
+            <Link href="/admin">
+              <Button variant="ghost" size="sm" className="text-sm font-medium">
+                Admin Dashboard
+              </Button>
+            </Link>
+          )}
+        </div>
+
         <div className="ml-auto flex items-center space-x-4">
           {isLoggedIn ? (
             <DropdownMenu>
@@ -202,11 +251,16 @@ function Navigation() {
                   size="sm"
                   className="text-sm font-medium hover:text-primary"
                 >
-                  <User className="h-4 w-4 mr-2" />
+                  <UserIcon className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Account</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin">Admin Dashboard</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleLogout}>
                   Logout
                 </DropdownMenuItem>
@@ -221,11 +275,23 @@ function Navigation() {
   );
 }
 
+// Lazy load the admin page to reduce initial bundle size
+const AdminPage = React.lazy(() => import('@/pages/admin'));
+
+function AdminRoute() {
+  return (
+    <React.Suspense fallback={<div className="p-4">Loading admin dashboard...</div>}>
+      <AdminPage />
+    </React.Suspense>
+  );
+}
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/auth/callback" component={AuthCallback} />
+      <Route path="/admin" component={AdminRoute} />
       <Route component={NotFound} />
     </Switch>
   );
