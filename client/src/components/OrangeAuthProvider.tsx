@@ -1,3 +1,4 @@
+
 import { BedrockPassportProvider } from "@bedrock_org/passport";
 
 export function OrangeAuthProvider({
@@ -5,7 +6,6 @@ export function OrangeAuthProvider({
 }: {
   children?: React.ReactNode;
 }) {
-  // Get the origin but handle potential undefined window during SSR
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
   return (

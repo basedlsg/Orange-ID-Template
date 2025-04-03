@@ -101,14 +101,14 @@ function LoginButton() {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm text-zinc-400 hidden sm:inline">
-        Login with OrangeID
+      <span className="text-sm text-orange-500 hidden sm:inline">
+        Login with Orange ID
       </span>
       <Button
-        variant="outline"
         onClick={handleOpenLogin}
-        className="text-sm font-medium hover:text-primary"
+        className="text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 border-none"
       >
+        <UserIcon className="h-4 w-4 mr-2" />
         Login
       </Button>
       <LoginDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
@@ -176,8 +176,14 @@ function ProtectedRoute({
   // Loading state can be determined from isLoggedIn being null
   if (isLoggedIn === null || (requiresAdmin && isCheckingAdmin)) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-orange-400">Loading...</div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+        <img src="/orange_logo.png" alt="Orange Logo" className="h-12 mb-4" />
+        <div className="animate-pulse text-orange-500 font-medium">
+          Loading authentication state...
+        </div>
+        <div className="mt-4 w-24 h-1 bg-orange-200 rounded-full relative overflow-hidden">
+          <div className="absolute top-0 left-0 h-full bg-orange-500 animate-loading"></div>
+        </div>
       </div>
     );
   }
@@ -254,7 +260,7 @@ function Navigation() {
   };
 
   return (
-    <nav className="border-b">
+    <nav className="border-b border-orange-100">
       <div className="container mx-auto flex h-16 items-center px-4">
         <Link href="/">
           <Logo className="cursor-pointer" />
@@ -264,7 +270,11 @@ function Navigation() {
         <div className="mx-4 flex space-x-4">
           {isLoggedIn && isAdmin && (
             <Link href="/admin">
-              <Button variant="ghost" size="sm" className="text-sm font-medium">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-sm font-medium text-orange-500 hover:text-orange-700 hover:bg-orange-50"
+              >
                 Admin Dashboard
               </Button>
             </Link>
@@ -278,19 +288,22 @@ function Navigation() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-sm font-medium hover:text-primary"
+                  className="text-sm font-medium text-orange-500 hover:text-orange-700 hover:bg-orange-50"
                 >
                   <UserIcon className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Account</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="border border-orange-200">
                 {isAdmin && (
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild className="text-orange-500 hover:text-orange-700 focus:text-orange-700 hover:bg-orange-50 focus:bg-orange-50">
                     <Link href="/admin">Admin Dashboard</Link>
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={handleLogout}>
+                <DropdownMenuItem 
+                  onClick={handleLogout}
+                  className="text-orange-500 hover:text-orange-700 focus:text-orange-700 hover:bg-orange-50 focus:bg-orange-50"
+                >
                   Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -309,7 +322,19 @@ const AdminPage = React.lazy(() => import('@/pages/admin'));
 
 function AdminRoute() {
   return (
-    <React.Suspense fallback={<div className="p-4">Loading admin dashboard...</div>}>
+    <React.Suspense 
+      fallback={
+        <div className="container mx-auto py-12 px-4">
+          <div className="flex flex-col items-center justify-center">
+            <h2 className="text-2xl font-bold text-orange-500 mb-4">Admin Dashboard</h2>
+            <div className="animate-pulse text-orange-400 mb-4">Loading dashboard resources...</div>
+            <div className="w-32 h-1 bg-orange-100 rounded-full relative overflow-hidden">
+              <div className="absolute top-0 left-0 h-full bg-orange-500 animate-loading"></div>
+            </div>
+          </div>
+        </div>
+      }
+    >
       <AdminPage />
     </React.Suspense>
   );
@@ -334,20 +359,20 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <OrangeAuthProvider>
         <Helmet>
-          <title>OrangeID Authentication Template</title>
+          <title>Orange Auth Template</title>
           <meta
             name="description"
-            content="A simple authentication template using OrangeID for user management."
+            content="A clean, ready-to-use authentication system with Orange ID integration."
           />
 
           {/* OpenGraph Meta Tags */}
           <meta
             property="og:title"
-            content="OrangeID Authentication Template"
+            content="Orange Auth Template"
           />
           <meta
             property="og:description"
-            content="A simple authentication template using OrangeID for user management."
+            content="A clean, ready-to-use authentication system with Orange ID integration."
           />
           <meta
             property="og:image"
@@ -357,17 +382,17 @@ function App() {
           <meta property="og:image:height" content="630" />
           <meta property="og:url" content={window.location.origin} />
           <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="OrangeID Auth Template" />
+          <meta property="og:site_name" content="Orange Auth Template" />
 
           {/* Twitter Card Meta Tags */}
           <meta name="twitter:card" content="summary_large_image" />
           <meta
             name="twitter:title"
-            content="OrangeID Authentication Template"
+            content="Orange Auth Template"
           />
           <meta
             name="twitter:description"
-            content="A simple authentication template using OrangeID for user management."
+            content="A clean, ready-to-use authentication system with Orange ID integration."
           />
           <meta
             name="twitter:image"
@@ -375,15 +400,15 @@ function App() {
           />
           <meta
             name="twitter:image:alt"
-            content="OrangeID Authentication Template"
+            content="Orange Auth Template"
           />
 
           {/* Additional SEO Meta Tags */}
           <meta name="robots" content="index, follow" />
-          <meta name="author" content="OrangeID Auth Template" />
+          <meta name="author" content="Orange Auth Template" />
           <meta
             name="keywords"
-            content="authentication, template, OrangeID, user management"
+            content="authentication, template, Orange ID, user management, session-based"
           />
         </Helmet>
         <Navigation />
