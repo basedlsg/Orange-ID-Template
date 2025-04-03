@@ -10,10 +10,10 @@ export function OrangeAuthProvider({
 
   return (
     <BedrockPassportProvider
-      baseUrl="https://orange-id.orange-dao.org"
+      baseUrl="https://api.bedrockpassport.com"
       authCallbackUrl={`${origin}/auth/callback`}
       tenantId="orange-vibe"
-      walletConnectId={import.meta.env.VITE_WALLETCONNECT_PROJECT_ID}
+      walletConnectId="591d21ef88b24c6837599a5c2a0ce03d"
     >
       {children}
     </BedrockPassportProvider>

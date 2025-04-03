@@ -38,6 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user already exists by orangeId
       const existingUser = await storage.getUserByOrangeId(validatedData.orangeId);
       if (existingUser) {
+        console.log("User already exists, returning existing user:", existingUser);
         return res.json(existingUser); // Return existing user if found
       }
 
@@ -47,8 +48,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(user);
     } catch (error) {
       console.error("User creation error:", error);
-      const validationError = fromZodError(error as any);
-      res.status(400).json({ error: validationError.message });
+      
+      // Check if it's a duplicate key error
+      if (error instanceof Error && 
+          error.message.includes('duplicate key value violates unique constraint')) {
+        // If it's a duplicate key error, try to fetch the user and return it
+        try {
+          const existingUser = await storage.getUserByOrangeId(req.body.orangeId);
+          if (existingUser) {
+            console.log("Recovered existing user after duplicate key error:", existingUser);
+            return res.json(existingUser);
+          }
+        } catch (fetchError) {
+          console.error("Error fetching user after duplicate key error:", fetchError);
+        }
+      }
+      
+      // Handle Zod validation errors
+      if (error instanceof Error && error.name === 'ZodError') {
+        const validationError = fromZodError(error as any);
+        return res.status(400).json({ error: validationError.message });
+      }
+      
+      // General error handling
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "An unknown error occurred" 
+      });
     }
   });
 
