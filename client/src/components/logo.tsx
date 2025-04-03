@@ -13,7 +13,7 @@ export function Logo({ className, ...props }: LogoProps) {
         alt="Orange Logo"
         className="h-8"
       />
-      <span className="text-xl font-bold text-orange-500">Orange Auth Template</span>
+      <span className="text-xl font-bold text-[#F37920]">Orange Auth Template</span>
     </div>
   );
 }

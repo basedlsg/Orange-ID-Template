@@ -53,8 +53,14 @@ export default function AuthCallback() {
   }, [loginCallback, setLocation, toast]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-pulse text-blue-400">Signing in...</div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black">
+      <img src="/orange_logo.png" alt="Orange Logo" className="h-12 mb-4" />
+      <div className="animate-pulse text-[#F37920] font-medium">
+        Signing in...
+      </div>
+      <div className="mt-4 w-24 h-1 bg-gray-800 rounded-full relative overflow-hidden">
+        <div className="absolute top-0 left-0 h-full bg-[#F37920] animate-loading"></div>
+      </div>
     </div>
   );
 }
