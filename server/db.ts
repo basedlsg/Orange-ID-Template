@@ -13,3 +13,6 @@ if (!process.env.DATABASE_URL) {
 
 export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 export const db = drizzle({ client: pool, schema });
+
+// Extend db to include the pool for direct queries
+(db as any).pool = pool;
