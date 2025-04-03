@@ -1,45 +1,6 @@
-# Global rules for AI Project Discovery Platform
+# Allow all robots to access the site
 User-agent: *
 Allow: /
-Allow: /projects/*
 
-# Block sensitive routes
-Disallow: /api/
-Disallow: /admin/
-Disallow: /internal/
-Disallow: /dev/
-Disallow: /*?query=
-Disallow: /*?filter=
-Disallow: /*?sort=
-
-# Specific rules for Googlebot (Note: Google ignores 'Crawl-delay')
-User-agent: Googlebot
-Allow: /*.js
-Allow: /*.css
-Allow: /*.png
-Allow: /*.jpg
-Allow: /*.gif
-Allow: /*.svg
-Crawl-delay: 1
-
-# Specific rules for Bingbot
-User-agent: Bingbot
-Crawl-delay: 2
-
-# Specific rules for DuckDuckBot
-User-agent: DuckDuckBot
-Crawl-delay: 2
-
-# Optimize for social media crawlers
-User-agent: Twitterbot
-Allow: /*.jpg
-Allow: /*.png
-Allow: /*.gif
-
-User-agent: facebookexternalhit
-Allow: /*.jpg
-Allow: /*.png
-Allow: /*.gif
-
-# Reference to sitemap
-Sitemap: https://vibecodinglist.com/sitemap.xml
+# Sitemap location
+Sitemap: https://yourdomain.com/sitemap.xml
