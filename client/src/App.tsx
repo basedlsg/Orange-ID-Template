@@ -126,9 +126,55 @@ function ProtectedRoute({
   const { isLoggedIn, user } = useBedrockPassport();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
+
+  // Check if the user is an admin when needed
+  useEffect(() => {
+    if (requiresAdmin && isLoggedIn && user) {
+      setIsCheckingAdmin(true);
+      // @ts-ignore - type is too complex to handle directly
+      const orangeId = (user as any).sub || (user as any).id;
+      if (!orangeId) {
+        setIsAdmin(false);
+        setIsCheckingAdmin(false);
+        return;
+      }
+      
+      console.log(`ProtectedRoute checking admin status for: ${orangeId}`);
+      fetch(`/api/users/check-admin?orangeId=${orangeId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(`Admin check result:`, data);
+          setIsAdmin(data.isAdmin);
+          
+          if (!data.isAdmin) {
+            toast({
+              variant: "destructive",
+              title: "Access Denied",
+              description: "You need admin privileges to access this page.",
+            });
+            setLocation("/");
+          }
+        })
+        .catch((error) => {
+          console.error("Error checking admin status:", error);
+          setIsAdmin(false);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not verify admin privileges.",
+          });
+          setLocation("/");
+        })
+        .finally(() => {
+          setIsCheckingAdmin(false);
+        });
+    }
+  }, [isLoggedIn, user, requiresAdmin, toast, setLocation]);
 
   // Loading state can be determined from isLoggedIn being null
-  if (isLoggedIn === null) {
+  if (isLoggedIn === null || (requiresAdmin && isCheckingAdmin)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-orange-400">Loading...</div>
@@ -141,34 +187,9 @@ function ProtectedRoute({
     return <LoginButton />;
   }
 
-  // Check admin status only if this is an admin route
-  if (requiresAdmin && user) {
-    // Get the user data from our database to check admin status
-    // @ts-ignore - type is too complex to handle directly
-    const orangeId = (user as any).sub || (user as any).id;
-    if (!orangeId) return null;
-    
-    fetch(`/api/users/check-admin?orangeId=${orangeId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        if (!data.isAdmin) {
-          toast({
-            variant: "destructive",
-            title: "Access Denied",
-            description: "You need admin privileges to access this page.",
-          });
-          setLocation("/");
-        }
-      })
-      .catch((error) => {
-        console.error("Error checking admin status:", error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Could not verify admin privileges.",
-        });
-        setLocation("/");
-      });
+  // If this is an admin route, only render the component if we've confirmed the user is an admin
+  if (requiresAdmin && !isAdmin) {
+    return null;
   }
 
   return <Component />;
@@ -179,25 +200,38 @@ function Navigation() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
 
   // Check if the user is an admin
   useEffect(() => {
     if (isLoggedIn && user) {
+      setIsCheckingAdmin(true);
       // Extract the orange ID from the user object
       // @ts-ignore - type is too complex to handle directly
       const orangeId = (user as any).sub || (user as any).id;
-      if (!orangeId) return;
+      if (!orangeId) {
+        setIsAdmin(false);
+        setIsCheckingAdmin(false);
+        return;
+      }
       
+      console.log(`Navigation checking admin status for: ${orangeId}`);
       fetch(`/api/users/check-admin?orangeId=${orangeId}`)
         .then(response => response.json())
         .then(data => {
+          console.log(`Navigation admin check result:`, data);
           setIsAdmin(data.isAdmin);
         })
         .catch(error => {
           console.error("Error checking admin status:", error);
+          setIsAdmin(false);
+        })
+        .finally(() => {
+          setIsCheckingAdmin(false);
         });
     } else {
       setIsAdmin(null);
+      setIsCheckingAdmin(false);
     }
   }, [isLoggedIn, user]);
 

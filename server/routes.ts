@@ -128,32 +128,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/users/check-admin", async (req, res) => {
     try {
-      // First check if admin status is stored in session
-      if (req.session && typeof req.session.isAdmin === 'boolean') {
+      // Always prioritize the query parameter for explicit checks
+      const { orangeId } = req.query;
+
+      if (orangeId) {
+        console.log(`Checking admin status for explicit orangeId: ${orangeId}`);
+        const user = await storage.getUserByOrangeId(orangeId as string);
+
+        if (!user) {
+          return res.status(404).json({ error: "User not found" });
+        }
+        
+        // Store in session for future requests
+        if (req.session) {
+          req.session.userId = user.id;
+          req.session.orangeId = user.orangeId;
+          req.session.isAdmin = user.isAdmin;
+        }
+        
+        console.log(`Admin check for orangeId ${orangeId}: isAdmin=${user.isAdmin}`);
+        return res.json({ isAdmin: user.isAdmin });
+      }
+      
+      // If no orangeId provided, check session
+      if (req.session && req.session.orangeId && typeof req.session.isAdmin === 'boolean') {
+        console.log(`Using session data for admin check: orangeId=${req.session.orangeId}, isAdmin=${req.session.isAdmin}`);
         return res.json({ isAdmin: req.session.isAdmin });
       }
       
-      // Fall back to query parameter
-      const { orangeId } = req.query;
-
-      if (!orangeId) {
-        return res.status(400).json({ error: "orangeId is required" });
-      }
-
-      const user = await storage.getUserByOrangeId(orangeId as string);
-
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      
-      // Store in session for future requests
-      if (req.session) {
-        req.session.userId = user.id;
-        req.session.orangeId = user.orangeId;
-        req.session.isAdmin = user.isAdmin;
-      }
-
-      return res.json({ isAdmin: user.isAdmin });
+      // No session or query param available
+      return res.status(400).json({ error: "orangeId is required" });
     } catch (error) {
       console.error("Error checking admin status:", error);
       res.status(500).json({ error: "Failed to check admin status" });
@@ -165,23 +169,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware to check if user is admin
   const checkAdmin = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // First check if admin status is stored in session
-      if (req.session && req.session.isAdmin === true) {
+      // Always log the request information
+      console.log(`Admin middleware check - Session: ${JSON.stringify({
+        userId: req.session?.userId,
+        orangeId: req.session?.orangeId,
+        isAdmin: req.session?.isAdmin
+      })}`);
+      
+      // First check if admin status is stored in session and it's explicitly true
+      if (req.session && req.session.isAdmin === true && req.session.orangeId) {
+        console.log(`Using session for admin check: ${req.session.orangeId} is admin`);
         return next();
       }
       
-      // Fall back to query param/header if session doesn't have admin status
+      // Fall back to query param/header if session doesn't indicate admin privileges
       const orangeId = req.query.adminId || req.headers['x-admin-id'];
       
+      // If not in session and no ID provided, deny access
       if (!orangeId) {
+        console.log('No admin identification found in request');
         return res.status(401).json({ error: "Admin ID not provided" });
       }
       
+      // Validate the user exists and is an admin
+      console.log(`Checking admin status for orangeId: ${orangeId}`);
       const user = await storage.getUserByOrangeId(orangeId as string);
       
-      if (!user || !user.isAdmin) {
+      if (!user) {
+        console.log(`User with orangeId ${orangeId} not found`);
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      if (!user.isAdmin) {
+        console.log(`User ${orangeId} is not an admin`);
         return res.status(403).json({ error: "Unauthorized access" });
       }
+      
+      console.log(`Confirmed user ${orangeId} is an admin`);
       
       // Store admin status in session for future requests
       if (req.session) {
