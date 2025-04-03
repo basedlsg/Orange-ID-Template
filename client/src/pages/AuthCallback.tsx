@@ -18,35 +18,7 @@ export default function AuthCallback() {
             description: "Welcome back!",
           });
           
-          // Check for specific feedback related return path first
-          const feedbackReturnPath = sessionStorage.getItem("feedback_return_to");
-          if (feedbackReturnPath) {
-            // Don't remove the storage items immediately - let the components use them first
-            // The individual components will clean up their own sessionStorage items after using them
-            
-            // Capture the values for logging
-            const projectId = sessionStorage.getItem("feedback_project_id");
-            const voteFeedbackId = sessionStorage.getItem("vote_feedback_id");
-            const formValues = sessionStorage.getItem("feedback_form_values");
-            const likeProjectId = sessionStorage.getItem("like_project_id");
-            
-            console.log("Auth callback redirecting with pending actions:", {
-              projectId,
-              voteFeedbackId,
-              hasFormValues: !!formValues,
-              likeProjectId,
-              returnPath: feedbackReturnPath
-            });
-            
-            // Only remove the return path since we're using it now
-            sessionStorage.removeItem("feedback_return_to");
-            
-            // Return to the feedback page
-            setLocation(feedbackReturnPath);
-            return;
-          }
-          
-          // Fall back to general return path
+          // Return to the previous page or home
           const returnPath = sessionStorage.getItem("returnPath") || "/";
           sessionStorage.removeItem("returnPath"); // Clean up
           setLocation(returnPath);
