@@ -8,37 +8,12 @@ interface LogoProps extends HTMLAttributes<HTMLDivElement> {
 export function Logo({ className, ...props }: LogoProps) {
   return (
     <div className={cn("flex items-center gap-2", className)} {...props}>
-      <svg
-        width="32"
-        height="32"
-        viewBox="0 0 32 32"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="text-primary"
-      >
-        <path
-          d="M16 2L3 9L16 16L29 9L16 2Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M3 23L16 30L29 23"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M3 16L16 23L29 16"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <span className="text-xl font-bold">VibeCodingList.com</span>
+      <img
+        src="/orange_logo.png"
+        alt="Orange Logo"
+        className="h-8"
+      />
+      <span className="text-xl font-bold text-orange-500">Orange Auth Template</span>
     </div>
   );
 }
