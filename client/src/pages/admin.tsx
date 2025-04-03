@@ -154,9 +154,12 @@ export default function AdminPage() {
   // Loading state
   if (isAdmin === null || usersLoading || statsLoading) {
     return (
-      <div className="container mx-auto py-8 text-center">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-        <p>Loading...</p>
+      <div className="container mx-auto py-8 text-center bg-black text-white">
+        <h1 className="text-3xl font-bold mb-6 text-[#F37920]">Admin Dashboard</h1>
+        <div className="animate-pulse text-[#F37920] mb-4">Loading dashboard data...</div>
+        <div className="w-32 h-1 bg-gray-800 rounded-full relative overflow-hidden mx-auto">
+          <div className="absolute top-0 left-0 h-full bg-[#F37920] animate-loading"></div>
+        </div>
       </div>
     );
   }
@@ -164,22 +167,22 @@ export default function AdminPage() {
   // Error state
   if (usersError || statsError) {
     return (
-      <div className="container mx-auto py-8 text-center">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      <div className="container mx-auto py-8 text-center bg-black text-white">
+        <h1 className="text-3xl font-bold mb-6 text-[#F37920]">Admin Dashboard</h1>
         <p className="text-red-500">Error loading admin data. Please try again.</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+    <div className="container mx-auto py-8 bg-black text-white">
+      <h1 className="text-3xl font-bold mb-6 text-[#F37920]">Admin Dashboard</h1>
       
       {/* User Growth Chart */}
-      <Card className="mb-8">
+      <Card className="mb-8 bg-gray-900 border-gray-800">
         <CardHeader>
-          <CardTitle>User Growth</CardTitle>
-          <CardDescription>New user signups per day</CardDescription>
+          <CardTitle className="text-[#F37920]">User Growth</CardTitle>
+          <CardDescription className="text-gray-400">New user signups per day</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[400px]">
@@ -188,17 +191,23 @@ export default function AdminPage() {
                 data={growthStats}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                <XAxis dataKey="date" stroke="#999" />
+                <YAxis stroke="#999" />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#333', 
+                    border: '1px solid #555',
+                    color: 'white' 
+                  }} 
+                />
                 <Legend />
                 <Line 
                   type="monotone" 
                   dataKey="count" 
                   name="Users" 
-                  stroke="#8884d8" 
-                  activeDot={{ r: 8 }} 
+                  stroke="#F37920" 
+                  activeDot={{ r: 8, fill: "#F37920" }} 
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -207,39 +216,40 @@ export default function AdminPage() {
       </Card>
       
       {/* Users Table */}
-      <Card>
+      <Card className="bg-gray-900 border-gray-800">
         <CardHeader>
-          <CardTitle>All Users</CardTitle>
-          <CardDescription>List of all registered users</CardDescription>
+          <CardTitle className="text-[#F37920]">All Users</CardTitle>
+          <CardDescription className="text-gray-400">List of all registered users</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
-            <TableCaption>A list of all registered users in the system.</TableCaption>
+            <TableCaption className="text-gray-400">A list of all registered users in the system.</TableCaption>
             <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Username</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Admin</TableHead>
-                <TableHead>Date Joined</TableHead>
+              <TableRow className="border-gray-700">
+                <TableHead className="text-gray-300">ID</TableHead>
+                <TableHead className="text-gray-300">Username</TableHead>
+                <TableHead className="text-gray-300">Email</TableHead>
+                <TableHead className="text-gray-300">Role</TableHead>
+                <TableHead className="text-gray-300">Admin</TableHead>
+                <TableHead className="text-gray-300">Date Joined</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {users && users.length > 0 ? (
                 users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>{user.id}</TableCell>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.role}</TableCell>
-                    <TableCell>{user.isAdmin ? 'Yes' : 'No'}</TableCell>
-                    <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                  <TableRow key={user.id} className="border-gray-800 hover:bg-gray-800">
+                    <TableCell className="text-gray-300">{user.id}</TableCell>
+                    <TableCell className="text-gray-300">{user.username}</TableCell>
+                    <TableCell className="text-gray-300">{user.email}</TableCell>
+                    <TableCell className="text-gray-300">{user.role}</TableCell>
+                    <TableCell className="text-gray-300">{user.isAdmin ? 
+                      <span className="text-[#F37920]">Yes</span> : 'No'}</TableCell>
+                    <TableCell className="text-gray-300">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                   </TableRow>
                 ))
               ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center">No users found.</TableCell>
+                <TableRow className="border-gray-800">
+                  <TableCell colSpan={6} className="text-center text-gray-400">No users found.</TableCell>
                 </TableRow>
               )}
             </TableBody>

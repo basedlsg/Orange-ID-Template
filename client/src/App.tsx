@@ -101,12 +101,12 @@ function LoginButton() {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm text-orange-500 hidden sm:inline">
+      <span className="text-sm text-[#F37920] hidden sm:inline">
         Login with Orange ID
       </span>
       <Button
         onClick={handleOpenLogin}
-        className="text-sm font-medium bg-orange-500 text-white hover:bg-orange-600 border-none"
+        className="text-sm font-medium bg-[#F37920] text-white hover:bg-[#D86A10] border-none"
       >
         <UserIcon className="h-4 w-4 mr-2" />
         Login
@@ -176,13 +176,13 @@ function ProtectedRoute({
   // Loading state can be determined from isLoggedIn being null
   if (isLoggedIn === null || (requiresAdmin && isCheckingAdmin)) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black">
         <img src="/orange_logo.png" alt="Orange Logo" className="h-12 mb-4" />
-        <div className="animate-pulse text-orange-500 font-medium">
+        <div className="animate-pulse text-[#F37920] font-medium">
           Loading authentication state...
         </div>
-        <div className="mt-4 w-24 h-1 bg-orange-200 rounded-full relative overflow-hidden">
-          <div className="absolute top-0 left-0 h-full bg-orange-500 animate-loading"></div>
+        <div className="mt-4 w-24 h-1 bg-gray-800 rounded-full relative overflow-hidden">
+          <div className="absolute top-0 left-0 h-full bg-[#F37920] animate-loading"></div>
         </div>
       </div>
     );
@@ -260,7 +260,7 @@ function Navigation() {
   };
 
   return (
-    <nav className="border-b border-orange-100">
+    <nav className="border-b border-gray-800 bg-black">
       <div className="container mx-auto flex h-16 items-center px-4">
         <Link href="/">
           <Logo className="cursor-pointer" />
@@ -273,7 +273,7 @@ function Navigation() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="text-sm font-medium text-orange-500 hover:text-orange-700 hover:bg-orange-50"
+                className="text-sm font-medium text-[#F37920] hover:text-white hover:bg-gray-800"
               >
                 Admin Dashboard
               </Button>
@@ -288,21 +288,21 @@ function Navigation() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-sm font-medium text-orange-500 hover:text-orange-700 hover:bg-orange-50"
+                  className="text-sm font-medium text-[#F37920] hover:text-white hover:bg-gray-800"
                 >
                   <UserIcon className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Account</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="border border-orange-200">
+              <DropdownMenuContent align="end" className="border border-gray-700 bg-black">
                 {isAdmin && (
-                  <DropdownMenuItem asChild className="text-orange-500 hover:text-orange-700 focus:text-orange-700 hover:bg-orange-50 focus:bg-orange-50">
+                  <DropdownMenuItem asChild className="text-[#F37920] hover:text-white focus:text-white hover:bg-gray-800 focus:bg-gray-800">
                     <Link href="/admin">Admin Dashboard</Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem 
                   onClick={handleLogout}
-                  className="text-orange-500 hover:text-orange-700 focus:text-orange-700 hover:bg-orange-50 focus:bg-orange-50"
+                  className="text-[#F37920] hover:text-white focus:text-white hover:bg-gray-800 focus:bg-gray-800"
                 >
                   Logout
                 </DropdownMenuItem>
@@ -324,12 +324,12 @@ function AdminRoute() {
   return (
     <React.Suspense 
       fallback={
-        <div className="container mx-auto py-12 px-4">
+        <div className="container mx-auto py-12 px-4 bg-black text-white">
           <div className="flex flex-col items-center justify-center">
-            <h2 className="text-2xl font-bold text-orange-500 mb-4">Admin Dashboard</h2>
-            <div className="animate-pulse text-orange-400 mb-4">Loading dashboard resources...</div>
-            <div className="w-32 h-1 bg-orange-100 rounded-full relative overflow-hidden">
-              <div className="absolute top-0 left-0 h-full bg-orange-500 animate-loading"></div>
+            <h2 className="text-2xl font-bold text-[#F37920] mb-4">Admin Dashboard</h2>
+            <div className="animate-pulse text-[#F37920] mb-4">Loading dashboard resources...</div>
+            <div className="w-32 h-1 bg-gray-800 rounded-full relative overflow-hidden">
+              <div className="absolute top-0 left-0 h-full bg-[#F37920] animate-loading"></div>
             </div>
           </div>
         </div>
