@@ -2,38 +2,11 @@ import {
   pgTable,
   text,
   serial,
-  integer,
   boolean,
   timestamp,
-  unique,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-
-export const PREDEFINED_AI_TOOLS = [
-  "Replit AI",
-  "Cursor",
-  "ChatGPT",
-  "Claude",
-  "GitHub Copilot",
-  "Grok",
-  "Windsurf",
-  "Lovable",
-  "Bolt",
-  "v0",
-] as const;
-
-export const PREDEFINED_GENRES = [
-  "Games",
-  "Education",
-  "Productivity",
-  "Web3",
-  "Developer Tools",
-  "Social",
-  "Entertainment",
-  "Business",
-  "AI Research",
-] as const;
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -46,37 +19,6 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const projects = pgTable("projects", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  description: text("description").notNull(),
-  url: text("url").notNull(),
-  aiTools: text("ai_tools").array(),
-  genres: text("genres").array().notNull(),
-  thumbnail: text("thumbnail"),
-  xHandle: text("x_handle"),
-  sponsorshipEnabled: boolean("sponsorship_enabled").notNull().default(false),
-  sponsorshipUrl: text("sponsorship_url"),
-  userId: integer("user_id").references(() => users.id),
-  approved: boolean("approved").notNull().default(false),
-  views: integer("views").notNull().default(0),
-  likeCount: integer("like_count").notNull().default(0),
-  feedbackCount: integer("feedback_count").notNull().default(0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-export const likes = pgTable("likes", {
-  id: serial("id").primaryKey(),
-  orangeId: text("orange_id").notNull(),
-  projectId: integer("project_id")
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-}, (table) => ({
-  userProjectUnique: unique().on(table.orangeId, table.projectId),
-}));
-
 export const insertUserSchema = createInsertSchema(users)
   .omit({
     id: true,
@@ -87,125 +29,5 @@ export const insertUserSchema = createInsertSchema(users)
     role: z.enum(["user", "admin"]).default("user"),
   });
 
-export const insertProjectSchema = createInsertSchema(projects)
-  .omit({
-    id: true,
-    userId: true,
-    approved: true,
-    views: true,
-    likeCount: true,
-    feedbackCount: true,
-    createdAt: true,
-    slug: true, // Omit slug as it will be generated from name
-  })
-  .extend({
-    description: z
-      .string()
-      .max(200, "Description must be 200 characters or less"),
-    url: z.string().url(),
-    aiTools: z.array(z.string()).optional().default([]),
-    genres: z.array(z.string()).superRefine((val, ctx) => {
-      if (ctx.path.length > 0 && val.length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.too_small,
-          minimum: 1,
-          type: "array",
-          inclusive: true,
-          message: "Select at least one genre",
-        });
-      }
-    }),
-    thumbnailFile: z.any().optional(),
-    xHandle: z.string().optional(),
-    sponsorshipEnabled: z.boolean().default(false),
-    sponsorshipUrl: z.union([
-      z.string().url(),
-      z.string().length(0),
-      z.undefined()
-    ]).optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.sponsorshipEnabled && (!data.sponsorshipUrl || data.sponsorshipUrl.length === 0)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Sponsorship URL is required when sponsorship is enabled",
-        path: ["sponsorshipUrl"],
-      });
-    }
-  });
-
-export const insertLikeSchema = createInsertSchema(likes).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const advertisingRequests = pgTable("advertising_requests", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull(),
-  company: text("company").notNull(),
-  budget: text("budget").notNull(),
-  message: text("message").notNull(),
-  processed: boolean("processed").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-export const insertAdvertisingRequestSchema = createInsertSchema(advertisingRequests)
-  .omit({
-    id: true,
-    processed: true,
-    createdAt: true,
-  });
-
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type InsertProject = z.infer<typeof insertProjectSchema>;
-export type InsertLike = z.infer<typeof insertLikeSchema>;
 export type User = typeof users.$inferSelect;
-export type Project = typeof projects.$inferSelect;
-export type Like = typeof likes.$inferSelect;
-export const feedbacks = pgTable("feedbacks", {
-  id: serial("id").primaryKey(),
-  projectId: integer("project_id")
-    .notNull()
-    .references(() => projects.id, { onDelete: "cascade" }),
-  orangeId: text("orange_id").notNull(),
-  content: text("content").notNull(),
-  type: text("type").notNull().default("feature"),
-  upvoteCount: integer("upvote_count").notNull().default(0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-export const feedbackVotes = pgTable("feedback_votes", {
-  id: serial("id").primaryKey(),
-  feedbackId: integer("feedback_id")
-    .notNull()
-    .references(() => feedbacks.id, { onDelete: "cascade" }),
-  orangeId: text("orange_id").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-}, (table) => ({
-  userFeedbackUnique: unique().on(table.orangeId, table.feedbackId),
-}));
-
-export const insertFeedbackSchema = createInsertSchema(feedbacks)
-  .omit({
-    id: true,
-    upvoteCount: true,
-    createdAt: true,
-  })
-  .extend({
-    type: z.enum(["feature", "bug"]).default("feature"),
-    content: z.string().min(5, "Feedback must be at least 5 characters").max(500, "Feedback must be 500 characters or less"),
-  });
-
-export const insertFeedbackVoteSchema = createInsertSchema(feedbackVotes)
-  .omit({
-    id: true,
-    createdAt: true,
-  });
-
-export type InsertAdvertisingRequest = z.infer<typeof insertAdvertisingRequestSchema>;
-export type AdvertisingRequest = typeof advertisingRequests.$inferSelect;
-export type InsertFeedback = z.infer<typeof insertFeedbackSchema>;
-export type Feedback = typeof feedbacks.$inferSelect;
-export type InsertFeedbackVote = z.infer<typeof insertFeedbackVoteSchema>;
-export type FeedbackVote = typeof feedbackVotes.$inferSelect;

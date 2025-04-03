@@ -1,136 +1,60 @@
-import { useQuery } from "@tanstack/react-query";
-import { ProjectGrid } from "@/components/project-grid";
-import { FilterBar } from "@/components/filter-bar";
-import { useState } from "react";
-import type { Project } from "@shared/schema";
-import { queryClient } from "@/lib/queryClient";
-import { SiX } from "react-icons/si";
+import { useBedrockPassport } from "@bedrock_org/passport";
 import { Helmet } from "react-helmet";
 
 export default function Home() {
-  const [sortBy, setSortBy] = useState("likes");
-  const [aiTool, setAiTool] = useState("all");
-  const [sponsorshipFilter, setSponsorshipFilter] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const { data: projects, isLoading } = useQuery<Project[]>({
-    queryKey: ["/api/projects", { approved: true, sortBy }],
-    queryFn: async () => {
-      const response = await fetch(`/api/projects?approved=true&sortBy=${sortBy}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch projects");
-      }
-      return response.json();
-    }
-  });
-
-  const handleProjectView = (id: number) => {
-    queryClient.setQueryData<Project[]>(
-      ["/api/projects", { approved: true, sortBy }],
-      (old) =>
-        old?.map((p) =>
-          p.id === id ? { ...p, views: p.views + 1 } : p
-        )
-    );
-  };
-
-  const sortedAndFilteredProjects = projects
-    ?.filter((project) => {
-      // Apply search filter
-      if (searchQuery && !project.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !project.description.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false;
-      }
-      if (sponsorshipFilter && !project.sponsorshipEnabled) return false;
-      if (aiTool !== "all" && !project.aiTools?.includes(aiTool)) return false;
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === "likes") return (b.likeCount || 0) - (a.likeCount || 0);
-      if (sortBy === "views") return b.views - a.views;
-      if (sortBy === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      return 0;
-    });
+  const { isLoggedIn, user } = useBedrockPassport();
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white">
       <Helmet>
-        <title>VibeCodingList - AI-Powered Project Showcase</title>
+        <title>OrangeID Authentication Template</title>
         <meta 
           name="description" 
-          content="Explore the best AI-built vibe coding projects on VibeCodingList. Browse quick-turnaround creations, track trends, and submit your own—fast and easy." 
+          content="A simple authentication template using OrangeID for user management."
         />
         <link rel="canonical" href={window.location.href} />
-        
-        {/* OpenGraph Meta Tags */}
-        <meta property="og:title" content="VibeCodingList - AI-Powered Project Showcase" />
-        <meta property="og:description" content="Explore the best AI-built vibe coding projects on VibeCodingList. Browse quick-turnaround creations, track trends, and submit your own—fast and easy." />
-        <meta property="og:image" content={`${window.location.origin}/og-image.png`} />
-        <meta property="og:url" content={window.location.href} />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="VibeCodingList" />
-
-        {/* Twitter Card Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:site" content="@vibecodinglist" />
-        <meta name="twitter:creator" content="@vibecodinglist" />
-        <meta name="twitter:title" content="VibeCodingList - AI-Powered Project Showcase" />
-        <meta name="twitter:description" content="Explore the best AI-built vibe coding projects on VibeCodingList. Browse quick-turnaround creations, track trends, and submit your own—fast and easy." />
-        <meta name="twitter:image" content={`${window.location.origin}/twitter-card.png`} />
-        <meta name="twitter:image:alt" content="VibeCodingList - Discover AI-powered coding projects" />
-        <meta name="twitter:url" content={window.location.href} />
       </Helmet>
       
-      {/* Social Banner */}
-      <div className="border-b border-zinc-800 bg-gradient-to-r from-zinc-900 to-black">
-        <div className="container mx-auto px-4 py-3">
-          <a 
-            href="https://x.com/vibecodinglist" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center justify-center sm:justify-start gap-2 text-zinc-400 hover:text-white transition-colors"
-          >
-            <SiX className="h-4 w-4" />
-            <span className="text-sm">
-              Follow <span className="font-medium text-blue-400">@vibecodinglist</span> for weekly updates on the latest AI-powered projects
-            </span>
-          </a>
-        </div>
-      </div>
-      
-      {/* Orange Vibe Jam Banner */}
-      <div className="border-b border-orange-900/50 bg-gradient-to-r from-orange-950 to-orange-900">
-        <div className="container mx-auto px-4 py-3">
-          <a 
-            href="https://y1ot1gslj3w.typeform.com/OrangeHackathon" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center justify-center sm:justify-start gap-2 text-orange-200 hover:text-white transition-colors"
-          >
-            <span className="animate-pulse">🔥</span>
-            <span className="text-sm font-medium">
-              Enter the <span className="font-bold text-orange-400">Orange Vibe Jam</span> with over $100K in prizes! ($25K for 1st place) - Deadline: April 7, 2025
-            </span>
-          </a>
-        </div>
-      </div>
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-3xl mx-auto text-center">
+          <h1 className="text-4xl font-bold mb-6">Welcome to OrangeID Auth Template</h1>
+          <p className="text-xl mb-10 text-gray-600">
+            This is a simple template with OrangeID authentication ready to use.
+            Login with your OrangeID to get started.
+          </p>
 
-      <div className="container mx-auto px-4 py-8">
-        <FilterBar 
-          sortBy={sortBy} 
-          aiTool={aiTool}
-          sponsorshipFilter={sponsorshipFilter}
-          searchQuery={searchQuery}
-          onSortChange={setSortBy}
-          onAiToolChange={setAiTool}
-          onSponsorshipFilterChange={setSponsorshipFilter}
-          onSearchChange={setSearchQuery}
-        />
-        <ProjectGrid
-          projects={sortedAndFilteredProjects || []}
-          onProjectView={handleProjectView}
-          isLoading={isLoading}
-        />
+          {isLoggedIn ? (
+            <div className="bg-white shadow-lg rounded-lg p-8 mb-8">
+              <h2 className="text-2xl font-bold mb-4">You are logged in!</h2>
+              <div className="bg-gray-50 p-4 rounded-md mb-4">
+                <p className="text-gray-700"><strong>Orange ID:</strong> {user?.id}</p>
+                <p className="text-gray-700"><strong>Username:</strong> {user?.name}</p>
+                <p className="text-gray-700"><strong>Email:</strong> {user?.email || "Not provided"}</p>
+              </div>
+              <p className="text-gray-600">
+                This template stores your basic user information in a PostgreSQL database
+                and provides the foundation for building authenticated applications.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white shadow-lg rounded-lg p-8">
+              <h2 className="text-2xl font-bold mb-4">Authentication Ready</h2>
+              <p className="text-gray-600 mb-6">
+                Click the Login button in the top-right corner to authenticate with your OrangeID.
+              </p>
+              <div className="bg-gray-50 p-4 rounded-md text-left">
+                <h3 className="font-bold mb-2">Features included:</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>OrangeID Authentication</li>
+                  <li>User data storage in PostgreSQL</li>
+                  <li>Session management</li>
+                  <li>Role-based authorization</li>
+                  <li>Secure API endpoints</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
