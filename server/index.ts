@@ -1,23 +1,21 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { pool } from "./db";
+import path from "path";
+import fs from "fs";
+
+// Determine if we should use SQLite or PostgreSQL
+const useSqlite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL;
 
 // Setup express
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Set up express-session with PostgreSQL store
-const PgSession = connectPgSimple(session);
-app.use(session({
-  store: new PgSession({
-    pool: pool,
-    tableName: 'session', // Create this table if it doesn't exist
-    createTableIfMissing: true
-  }),
+// Session configuration - changes based on database type
+const sessionConfig: session.SessionOptions = {
   secret: process.env.SESSION_SECRET || 'orange-vibe-session-secret',
   resave: false,
   saveUninitialized: false,
@@ -26,7 +24,21 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
   }
-}));
+};
+
+// Ensure data directory exists for SQLite
+if (useSqlite) {
+  const dataDir = path.join(process.cwd(), 'data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+}
+
+// Use simple in-memory session store for development
+console.log("Using in-memory session store for development");
+
+// Apply session middleware
+app.use(session(sessionConfig));
 
 app.use((req, res, next) => {
   const start = Date.now();
