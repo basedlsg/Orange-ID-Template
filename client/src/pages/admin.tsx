@@ -59,17 +59,25 @@ export default function AdminPage() {
   const { user, isLoggedIn } = useBedrockPassport();
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [, setLocation] = useLocation(); // Move hook to top level
   
   // Check if user is admin
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!user) return;
+      if (!user) {
+        // If not logged in, redirect to home
+        setLocation('/');
+        return;
+      }
       
       try {
         // Orange ID is stored in 'sub' or 'id'
         // @ts-ignore - type is too complex to handle directly
         const orangeId = (user as any).sub || (user as any).id;
-        if (!orangeId) return;
+        if (!orangeId) {
+          setLocation('/');
+          return;
+        }
         
         const response = await fetch(`/api/users/check-admin?orangeId=${orangeId}`);
         const data = await response.json();
@@ -81,6 +89,7 @@ export default function AdminPage() {
             description: "You don't have admin privileges to view this page.",
             variant: "destructive"
           });
+          setLocation('/');
         }
       } catch (error) {
         console.error("Error checking admin status:", error);
@@ -89,11 +98,12 @@ export default function AdminPage() {
           description: "Failed to verify admin status.",
           variant: "destructive"
         });
+        setLocation('/');
       }
     };
     
     checkAdminStatus();
-  }, [user, toast]);
+  }, [user, toast, setLocation]);
   
   // Fetch users data
   const { 
@@ -136,20 +146,6 @@ export default function AdminPage() {
     },
     enabled: !!user && isAdmin === true
   });
-  
-  // If not logged in, redirect to home
-  if (!user) {
-    const [, setLocation] = useLocation();
-    setLocation('/');
-    return null;
-  }
-  
-  // If checked and not admin, redirect to home
-  if (isAdmin === false) {
-    const [, setLocation] = useLocation();
-    setLocation('/');
-    return null;
-  }
 
   // Loading state
   if (isAdmin === null || usersLoading || statsLoading) {

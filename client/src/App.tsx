@@ -140,14 +140,14 @@ function ProtectedRoute({
         setIsCheckingAdmin(false);
         return;
       }
-      
+
       console.log(`ProtectedRoute checking admin status for: ${orangeId}`);
       fetch(`/api/users/check-admin?orangeId=${orangeId}`)
         .then((response) => response.json())
         .then((data) => {
           console.log(`Admin check result:`, data);
           setIsAdmin(data.isAdmin);
-          
+
           if (!data.isAdmin) {
             toast({
               variant: "destructive",
@@ -220,15 +220,15 @@ function Navigation() {
         setIsCheckingAdmin(false);
         return;
       }
-      
+
       console.log(`Navigation checking admin status for: ${orangeId}`);
       fetch(`/api/users/check-admin?orangeId=${orangeId}`)
-        .then(response => response.json())
-        .then(data => {
+        .then((response) => response.json())
+        .then((data) => {
           console.log(`Navigation admin check result:`, data);
           setIsAdmin(data.isAdmin);
         })
-        .catch(error => {
+        .catch((error) => {
           console.error("Error checking admin status:", error);
           setIsAdmin(false);
         })
@@ -270,9 +270,9 @@ function Navigation() {
         <div className="mx-4 flex space-x-4">
           {isLoggedIn && isAdmin && (
             <Link href="/admin">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="text-sm font-medium text-[#F37920] hover:text-white hover:bg-gray-800"
               >
                 Admin Dashboard
@@ -294,13 +294,19 @@ function Navigation() {
                   <span className="hidden sm:inline">Account</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="border border-gray-700 bg-black">
+              <DropdownMenuContent
+                align="end"
+                className="border border-gray-700 bg-black"
+              >
                 {isAdmin && (
-                  <DropdownMenuItem asChild className="text-[#F37920] hover:text-white focus:text-white hover:bg-gray-800 focus:bg-gray-800">
+                  <DropdownMenuItem
+                    asChild
+                    className="text-[#F37920] hover:text-white focus:text-white hover:bg-gray-800 focus:bg-gray-800"
+                  >
                     <Link href="/admin">Admin Dashboard</Link>
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={handleLogout}
                   className="text-[#F37920] hover:text-white focus:text-white hover:bg-gray-800 focus:bg-gray-800"
                 >
@@ -318,16 +324,20 @@ function Navigation() {
 }
 
 // Lazy load the admin page to reduce initial bundle size
-const AdminPage = React.lazy(() => import('@/pages/admin'));
+const AdminPage = React.lazy(() => import("@/pages/admin"));
 
 function AdminRoute() {
   return (
-    <React.Suspense 
+    <React.Suspense
       fallback={
         <div className="container mx-auto py-12 px-4 bg-black text-white">
           <div className="flex flex-col items-center justify-center">
-            <h2 className="text-2xl font-bold text-[#F37920] mb-4">Admin Dashboard</h2>
-            <div className="animate-pulse text-[#F37920] mb-4">Loading dashboard resources...</div>
+            <h2 className="text-2xl font-bold text-[#F37920] mb-4">
+              Admin Dashboard
+            </h2>
+            <div className="animate-pulse text-[#F37920] mb-4">
+              Loading dashboard resources...
+            </div>
             <div className="w-32 h-1 bg-gray-800 rounded-full relative overflow-hidden">
               <div className="absolute top-0 left-0 h-full bg-[#F37920] animate-loading"></div>
             </div>
@@ -351,7 +361,7 @@ function Router() {
   );
 }
 
-// No data prefetcher component needed 
+// No data prefetcher component needed
 // We've set the query client defaults in lib/queryClient.ts
 
 function App() {
@@ -366,10 +376,7 @@ function App() {
           />
 
           {/* OpenGraph Meta Tags */}
-          <meta
-            property="og:title"
-            content="Orange Auth Template"
-          />
+          <meta property="og:title" content="Orange Auth Template" />
           <meta
             property="og:description"
             content="A clean, ready-to-use authentication system with Orange ID integration."
@@ -386,10 +393,7 @@ function App() {
 
           {/* Twitter Card Meta Tags */}
           <meta name="twitter:card" content="summary_large_image" />
-          <meta
-            name="twitter:title"
-            content="Orange Auth Template"
-          />
+          <meta name="twitter:title" content="Orange Auth Template" />
           <meta
             name="twitter:description"
             content="A clean, ready-to-use authentication system with Orange ID integration."
@@ -398,10 +402,7 @@ function App() {
             name="twitter:image"
             content={`${window.location.origin}/twitter-card.png`}
           />
-          <meta
-            name="twitter:image:alt"
-            content="Orange Auth Template"
-          />
+          <meta name="twitter:image:alt" content="Orange Auth Template" />
 
           {/* Additional SEO Meta Tags */}
           <meta name="robots" content="index, follow" />
