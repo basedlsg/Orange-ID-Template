@@ -4,3 +4,10 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+data/
+*.db
+*.sqlite
+*.sqlite3data/
+*.db
+*.sqlite
+*.sqlite3

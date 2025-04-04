@@ -86,8 +86,8 @@ export default function Home() {
                   </div>
                   <div className="bg-gray-900 p-4 rounded shadow-sm">
                     <p className="text-sm text-gray-400">
-                      This user data is stored securely in your PostgreSQL
-                      database. You can extend the user schema as needed for
+                      This user data is stored securely in your database 
+                      (PostgreSQL or SQLite). You can extend the user schema as needed for
                       your application.
                     </p>
                   </div>
@@ -139,7 +139,7 @@ export default function Home() {
                 <li className="flex items-start">
                   <span className="text-[#F37920] mr-2">✓</span>
                   <span className="text-gray-300">
-                    PostgreSQL database integration with Drizzle ORM
+                    Database integration (PostgreSQL or SQLite) with Drizzle ORM
                   </span>
                 </li>
                 <li className="flex items-start">

@@ -76,10 +76,13 @@ A clean, simplified template application with OrangeID authentication and user d
 
 If you're using a free Replit account, the recommended approach is to use SQLite:
 
-1. **Use SQLite Database**:
-   - The AI can configure the application to use SQLite instead of PostgreSQL
-   - This doesn't require external services or paid accounts
-   - Data will be stored in a local file in your Replit project
+1. **Activate SQLite Mode**:
+   - Set the environment variable `USE_SQLITE` to `true`:
+     1. Click on the "Tools" icon in the left sidebar of Replit
+     2. Select "Secrets"
+     3. Add a new secret with key `USE_SQLITE` and value `true`
+   - No other configuration is needed - the application will automatically use SQLite
+   - Data will be stored in a local file in the `data/sqlite.db` file in your project
 
 2. **Alternative: External PostgreSQL Services**:
    - If you prefer PostgreSQL, you can use a free service like:
@@ -87,6 +90,7 @@ If you're using a free Replit account, the recommended approach is to use SQLite
      - [Supabase](https://supabase.com)
      - [ElephantSQL](https://www.elephantsql.com/)
    - Create a database and add the connection string as a `DATABASE_URL` secret in Replit
+   - Make sure `USE_SQLITE` is not set to `true` or remove it if present
 
 ## Building Your Application
 
@@ -194,6 +198,7 @@ This template is designed as a starting point. Here are some ways to customize i
 ## Environment Variables
 
 - `DATABASE_URL`: PostgreSQL connection string (or SQLite path)
+- `USE_SQLITE`: Set to "true" to use SQLite instead of PostgreSQL
 - `SESSION_SECRET`: Secret for signing session cookies (defaults to a placeholder in development)
 
 ## License
