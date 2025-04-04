@@ -64,6 +64,52 @@ When a user indicates they are a Core (paid) Replit user, you should:
    - Update the schema in `shared/schema.ts`
    - Push the schema changes using Drizzle's migration tools
 
+## Managing Admin Accounts
+
+### For SQLite Users
+
+1. **Customizing Admin Access**:
+   The enhanced `init-sqlite.ts` script supports customizing admin accounts with various options:
+
+   ```bash
+   # Clean database and create custom admin (recommended for new projects)
+   npx tsx scripts/init-sqlite.ts --clean --admin-id=your-orange-id --admin-username=your-username
+   
+   # Remove default users and only add your admin account
+   npx tsx scripts/init-sqlite.ts --skip-default-users --admin-id=your-orange-id --admin-username=your-username
+   
+   # Clean up all existing users and data
+   npx tsx scripts/init-sqlite.ts --clean
+   ```
+
+2. **Available Options**:
+   - `--clean` or `-c`: Remove all existing users and data
+   - `--skip-default-users` or `-s`: Skip creating default admin and test users
+   - `--admin-id=value`: Set custom admin OrangeID (must match their Orange authentication ID)
+   - `--admin-username=value`: Set custom admin username
+   - `--admin-email=value`: Set custom admin email
+
+3. **Explaining to Users**:
+   - Inform users that they must use their actual OrangeID from the authentication system
+   - After successful setup, instruct users to log in with their OrangeID
+   - Explain that the admin account grants access to the `/admin` dashboard
+
+### For PostgreSQL Users
+
+For PostgreSQL users, admin account management is typically done through SQL. You can help them by:
+
+1. Creating a PostgreSQL admin setup script, similar to the SQLite version
+2. Showing how to execute SQL commands to update admin status:
+
+   ```typescript
+   // Example for updating admin status in the database
+   const makeUserAdmin = async (db, orangeId, isAdmin) => {
+     await db.update(users)
+       .set({ isAdmin: isAdmin ? 1 : 0, role: isAdmin ? 'admin' : 'user' })
+       .where(eq(users.orangeId, orangeId));
+   };
+   ```
+
 ## Implementing Common Application Types
 
 ### Games
