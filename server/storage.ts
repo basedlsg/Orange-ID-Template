@@ -103,30 +103,50 @@ export class DatabaseStorage implements IStorage {
       return await (db as any).getUsersCreatedByDay();
     }
     
-    // Otherwise, use the PostgreSQL pool if available
-    if (pool) {
-      try {
-        const result = await pool.query(`
-          SELECT 
-            TO_CHAR(created_at, 'YYYY-MM-DD') as date,
-            COUNT(*) as count
-          FROM users
-          GROUP BY TO_CHAR(created_at, 'YYYY-MM-DD')
-          ORDER BY date
-        `);
-        
-        return result.rows.map((row: any) => ({
-          date: row.date,
-          count: parseInt(row.count, 10)
-        }));
-      } catch (error) {
-        console.error("Error running user growth stats query:", error);
-        return [];
+    // For direct database operations using Drizzle ORM
+    try {
+      // This approach works for both PostgreSQL and SQLite using Drizzle ORM's SQL functionality
+      // The SQL syntax will be adapted to the correct dialect by Drizzle
+      const result = await db.execute(sql`
+        SELECT 
+          DATE(created_at) as date,
+          COUNT(*) as count
+        FROM users
+        GROUP BY DATE(created_at)
+        ORDER BY date
+      `);
+      
+      return result.map((row: any) => ({
+        date: row.date,
+        count: parseInt(row.count, 10)
+      }));
+    } catch (error) {
+      console.error("Error running user growth stats query:", error);
+      
+      // If we have PostgreSQL pool as a fallback, try that
+      if (pool) {
+        try {
+          const result = await pool.query(`
+            SELECT 
+              TO_CHAR(created_at, 'YYYY-MM-DD') as date,
+              COUNT(*) as count
+            FROM users
+            GROUP BY TO_CHAR(created_at, 'YYYY-MM-DD')
+            ORDER BY date
+          `);
+          
+          return result.rows.map((row: any) => ({
+            date: row.date,
+            count: parseInt(row.count, 10)
+          }));
+        } catch (poolError) {
+          console.error("Error running PostgreSQL fallback query:", poolError);
+          return [];
+        }
       }
+      
+      return [];
     }
-    
-    // If we don't have a custom implementation or pool, return empty array
-    return [];
   }
 }
 
