@@ -1,30 +1,64 @@
 # OrangeID Authentication Template
 
+> **Quick Start:** Click the "Use Template" button to create your own copy. After remixing, you'll find this README again in your project files.
+
+## 🚀 Quick Start with AI
+
+### Free User Quick Setup (SQLite)
+
+Simply ask the AI agent:
+
+```
+I want to set up the Orange Auth Template with SQLite for my project. I'm a free Replit user.
+I'd like to build a [describe your app/game] that uses the existing auth system.
+```
+
+The AI will:
+1. Configure SQLite database (no external services needed)
+2. Start the application
+3. Guide you on how to customize for your needs
+
+### Core User Quick Setup (PostgreSQL)
+
+Simply ask the AI agent:
+
+```
+I want to set up the Orange Auth Template with PostgreSQL for my project. I'm a Core Replit user.
+I'd like to build a [describe your app/game] that uses the existing auth system.
+```
+
+The AI will:
+1. Guide you to click "Create PostgreSQL Database" in the Database tab
+2. Start the application once you've created the database
+3. Help you customize based on your needs
+
+---
+
+## Detailed Documentation
+
 A clean, simplified template application with OrangeID authentication and user database storage. It serves as a starting point for developers who want to build applications with pre-configured authentication, removing the complexity of implementing an auth system from scratch.
 
-## Features
+### Features
 
 - **OrangeID Authentication**: Simple login/logout system using Orange ID
 - **Session Management**: Secure session-based authentication using express-session
-- **User Database**: PostgreSQL storage for user information
+- **User Database**: Storage for user information (PostgreSQL or SQLite)
 - **Clean Interface**: Minimalist UI with dark theme and orange accents
 - **Role-based Authorization**: Support for admin and regular user roles
 - **Admin Dashboard**: User management and analytics for administrators
 - **API Endpoints**: Pre-configured endpoints for user creation and admin status checking
 
-## Technology Stack
+### Technology Stack
 
 - Frontend: React with TypeScript, Vite, Tailwind CSS, Shadcn UI components
 - Backend: Express.js with session management
-- Database: PostgreSQL with Drizzle ORM
+- Database: PostgreSQL or SQLite with Drizzle ORM
 - Authentication: OrangeID (via Bedrock Passport)
-- Sessions: express-session with PostgreSQL session storage
+- Sessions: express-session with database storage
 
-## Getting Started
+## Detailed Setup Guide
 
-### Setup Options
-
-#### For Replit Core (Paid) Users
+### For Replit Core (Paid) Users
 
 1. **Database Setup Using Replit PostgreSQL**:
    - Click on the "Tools" icon in the left sidebar of Replit
@@ -33,55 +67,28 @@ A clean, simplified template application with OrangeID authentication and user d
    - Click "Create a PostgreSQL Database" button
    - Wait for the database to be created (this sets up all required environment variables automatically)
 
-2. **Initialize the Database**:
-   - The database structure is automatically created based on the schema in `shared/schema.ts`
-   - No need to manually run migrations - the application will connect to the database upon start
-
-3. **Start the Application**:
+2. **Start the Application**:
    - The default workflow "Start application" is already configured to run the server
    - Click "Run" in Replit to start the application
    - The application will be accessible at the web view URL
 
-#### For Free Users
+### For Free Users
 
-If you're using a free Replit account without access to the PostgreSQL database feature, you have several options:
+If you're using a free Replit account, the recommended approach is to use SQLite:
 
-1. **Use an External Database Service**:
-   - Sign up for a free database service like [Neon](https://neon.tech), [Supabase](https://supabase.com), or [Render](https://render.com)
-   - Create a PostgreSQL database on their platform
-   - Get the connection string from the service
-   - Add the connection string as a secret in Replit:
-     - Navigate to "Secrets" in the Tools sidebar
-     - Add a new secret with the key `DATABASE_URL` and the connection string as the value
+1. **Use SQLite Database**:
+   - The AI can configure the application to use SQLite instead of PostgreSQL
+   - This doesn't require external services or paid accounts
+   - Data will be stored in a local file in your Replit project
 
-2. **Use SQLite Instead**:
-   This requires modifying the code to use SQLite, which doesn't need external hosting:
-   - Modify `server/db.ts` to use SQLite instead of PostgreSQL
-   - Update the Drizzle configuration in `drizzle.config.ts`
-   - Run the application - data will be stored in a local file
+2. **Alternative: External PostgreSQL Services**:
+   - If you prefer PostgreSQL, you can use a free service like:
+     - [Neon](https://neon.tech)
+     - [Supabase](https://supabase.com)
+     - [ElephantSQL](https://www.elephantsql.com/)
+   - Create a database and add the connection string as a `DATABASE_URL` secret in Replit
 
-3. **Generate a Free Tier PostgreSQL Database Using Third-Party Hosting**:
-   - Services like [Elephant SQL](https://www.elephantsql.com/) offer free tier PostgreSQL databases
-   - Create an account and obtain a connection string
-   - Add it as a `DATABASE_URL` secret in Replit
-
-Once you have configured your database with any of these methods, start the application using the default workflow.
-
-### Using an AI Agent for Setup
-
-You can use Replit's AI agent to help with the setup process by prompting it like this:
-
-```
-I want to set up the Orange Auth Template for my project. Please:
-
-1. Help me set up a database connection (suggest options for free users)
-2. Start the application
-3. Help me understand how I can modify it to build [describe your game/app here]
-```
-
-The AI agent can guide you through the setup process and customization options.
-
-## Building Your Application on this Template
+## Building Your Application
 
 This template is designed to be a foundation for building your own applications. After setup, you should:
 
@@ -91,26 +98,9 @@ This template is designed to be a foundation for building your own applications.
 
 3. **Add application-specific pages**: Create new pages in the `client/src/pages` directory and register them in the router in `client/src/App.tsx`
 
-### Example Agent Prompts for Building Applications
+### Example Application Scenarios
 
-Here are example prompts to help the AI agent build your application on top of this template:
-
-#### General Application Template
-
-```
-I want to build a [type of game/app] with the following features:
-- [Feature 1]
-- [Feature 2]
-- [Feature 3]
-
-The application should use the existing authentication system provided by the Orange Auth Template, but replace the home page content with the actual game/app functionality.
-
-I'd like to keep the admin dashboard for user management, but may need to extend it to include [specific admin features].
-
-Please help me implement this while maintaining the dark theme with orange accents.
-```
-
-#### Specific Application Example: Quiz Game
+#### Quiz Game Example
 
 ```
 I want to build a multiplayer quiz game using the Orange Auth Template. My game should have:
@@ -125,7 +115,7 @@ I'd like to extend the admin dashboard to include quiz management features where
 Please help me implement this while maintaining the dark theme with orange accents.
 ```
 
-#### Specific Application Example: Task Management
+#### Task Management Example
 
 ```
 I want to build a team task management app using the Orange Auth Template. My app should have:
@@ -203,7 +193,7 @@ This template is designed as a starting point. Here are some ways to customize i
 
 ## Environment Variables
 
-- `DATABASE_URL`: PostgreSQL connection string
+- `DATABASE_URL`: PostgreSQL connection string (or SQLite path)
 - `SESSION_SECRET`: Secret for signing session cookies (defaults to a placeholder in development)
 
 ## License
