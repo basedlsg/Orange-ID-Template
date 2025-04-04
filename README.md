@@ -22,9 +22,11 @@ A clean, simplified template application with OrangeID authentication and user d
 
 ## Getting Started
 
-### Step-by-Step Setup Guide
+### Setup Options
 
-1. **Database Setup**:
+#### For Replit Core (Paid) Users
+
+1. **Database Setup Using Replit PostgreSQL**:
    - Click on the "Tools" icon in the left sidebar of Replit
    - Select "Secrets" and confirm that `DATABASE_URL` is not set
    - Click on "Database" in the left sidebar
@@ -40,6 +42,31 @@ A clean, simplified template application with OrangeID authentication and user d
    - Click "Run" in Replit to start the application
    - The application will be accessible at the web view URL
 
+#### For Free Users
+
+If you're using a free Replit account without access to the PostgreSQL database feature, you have several options:
+
+1. **Use an External Database Service**:
+   - Sign up for a free database service like [Neon](https://neon.tech), [Supabase](https://supabase.com), or [Render](https://render.com)
+   - Create a PostgreSQL database on their platform
+   - Get the connection string from the service
+   - Add the connection string as a secret in Replit:
+     - Navigate to "Secrets" in the Tools sidebar
+     - Add a new secret with the key `DATABASE_URL` and the connection string as the value
+
+2. **Use SQLite Instead**:
+   This requires modifying the code to use SQLite, which doesn't need external hosting:
+   - Modify `server/db.ts` to use SQLite instead of PostgreSQL
+   - Update the Drizzle configuration in `drizzle.config.ts`
+   - Run the application - data will be stored in a local file
+
+3. **Generate a Free Tier PostgreSQL Database Using Third-Party Hosting**:
+   - Services like [Elephant SQL](https://www.elephantsql.com/) offer free tier PostgreSQL databases
+   - Create an account and obtain a connection string
+   - Add it as a `DATABASE_URL` secret in Replit
+
+Once you have configured your database with any of these methods, start the application using the default workflow.
+
 ### Using an AI Agent for Setup
 
 You can use Replit's AI agent to help with the setup process by prompting it like this:
@@ -47,12 +74,12 @@ You can use Replit's AI agent to help with the setup process by prompting it lik
 ```
 I want to set up the Orange Auth Template for my project. Please:
 
-1. Create a PostgreSQL database for the application
+1. Help me set up a database connection (suggest options for free users)
 2. Start the application
 3. Help me understand how I can modify it to build [describe your game/app here]
 ```
 
-The AI agent can handle the setup process and guide you through customization, but you'll still need to manually create the database as that requires user interaction.
+The AI agent can guide you through the setup process and customization options.
 
 ## Building Your Application on this Template
 
