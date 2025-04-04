@@ -49,7 +49,10 @@ const mockDb = {
   async getUsersCreatedByDay() {
     const usersByDay = new Map<string, number>();
     
-    for (const user of this.users.values()) {
+    // Use Array.from to convert the map values iterator to an array first
+    const userArray = Array.from(this.users.values());
+    
+    for (const user of userArray) {
       const date = user.createdAt.split('T')[0];
       usersByDay.set(date, (usersByDay.get(date) || 0) + 1);
     }
