@@ -4,33 +4,76 @@
 
 ## 🚀 Quick Start with AI
 
-### Free User Quick Setup (SQLite)
+Just copy and paste one of these prompts to get started. The AI will handle everything else!
 
-Simply ask the AI agent:
+### For Free Users (SQLite)
 
 ```
 I want to set up the Orange Auth Template with SQLite for my project. I'm a free Replit user.
-I'd like to build a [describe your app/game] that uses the existing auth system.
+
+I'd like to build a [game/app type] with these features:
+- [Feature 1]
+- [Feature 2]
+- [Feature 3]
+
+Replace the home screen with [your main feature] and keep the admin dashboard as is.
+Make sure users need to log in before accessing any of the game/app features.
+Initialize the SQLite database with sample users and make sure everything is working.
 ```
 
-The AI will:
-1. Configure SQLite database (no external services needed)
-2. Start the application
-3. Guide you on how to customize for your needs
-
-### Core User Quick Setup (PostgreSQL)
-
-Simply ask the AI agent:
+### For Core Users (PostgreSQL)
 
 ```
 I want to set up the Orange Auth Template with PostgreSQL for my project. I'm a Core Replit user.
-I'd like to build a [describe your app/game] that uses the existing auth system.
+
+I'd like to build a [game/app type] with these features:
+- [Feature 1]
+- [Feature 2]
+- [Feature 3]
+
+Help me create a PostgreSQL database in Replit, configure the application to use it,
+and replace the home page with [your main feature]. Keep the admin dashboard, but extend
+it to include [custom admin feature]. Ensure users must log in to access my application.
 ```
 
-The AI will:
-1. Guide you to click "Create PostgreSQL Database" in the Database tab
-2. Start the application once you've created the database
-3. Help you customize based on your needs
+### Complete Example Prompt (Game)
+
+```
+I want to build a multiplayer snake game using the Orange Auth Template. I'm a free Replit user.
+
+My game should have:
+- A classic snake game with arrow key controls
+- A persistent leaderboard showing top 10 scores
+- Different difficulty levels (easy, medium, hard)
+- Custom snake colors based on user preference
+
+Replace the home screen with the game canvas and menu options.
+Keep the admin dashboard as is and make sure users need to log in before playing.
+Set up the SQLite database and add fields to store user scores and preferences.
+Add a way for admins to reset scores or ban users who use inappropriate names.
+
+Please implement this while maintaining the dark theme with orange accents.
+```
+
+### Complete Example Prompt (Web App)
+
+```
+I want to build a to-do list application using the Orange Auth Template. I'm a Core Replit user.
+
+My app should have:
+- Task creation with title, description, due date, and priority
+- Task categorization with custom categories/tags
+- Task filtering and sorting options
+- Task sharing between users
+- Weekly productivity reports with charts
+
+Help me create a PostgreSQL database in Replit, then set up the application.
+Replace the home page with the task dashboard and ensure users must log in to see their tasks.
+Extend the admin dashboard to include system-wide statistics about task completion rates.
+Add the necessary database fields for tasks, categories, and sharing permissions.
+
+Please implement this while maintaining the dark theme with orange accents.
+```
 
 ---
 
