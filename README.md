@@ -82,9 +82,20 @@ If you're using a free Replit account, the recommended approach is to use SQLite
      2. Select "Secrets"
      3. Add a new secret with key `USE_SQLITE` and value `true`
    - No other configuration is needed - the application will automatically use SQLite
-   - Data will be stored in a local file in the `data/sqlite.db` file in your project
+   - Data will be stored in a local file in the `data/orange_auth.db` file in your project
 
-2. **Alternative: External PostgreSQL Services**:
+2. **Initialize the SQLite Database**:
+   - Run the initialization script to set up the tables and sample users:
+     ```bash
+     npx tsx scripts/init-sqlite.ts
+     ```
+   - This will:
+     - Create the database file if it doesn't exist
+     - Set up the required table structure
+     - Create a sample admin user and a test user
+     - The admin user credentials will be displayed in the console
+
+3. **Alternative: External PostgreSQL Services**:
    - If you prefer PostgreSQL, you can use a free service like:
      - [Neon](https://neon.tech)
      - [Supabase](https://supabase.com)
@@ -194,6 +205,8 @@ This template is designed as a starting point. Here are some ways to customize i
   - `db.ts`: Database connection setup
   - `index.ts`: Server setup with session management
 - `/shared/schema.ts`: Database schema definitions
+- `/scripts`: Utility scripts
+  - `init-sqlite.ts`: Initialize the SQLite database with tables and sample users
 
 ## Environment Variables
 
