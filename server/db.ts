@@ -1,11 +1,17 @@
 import * as schema from "@shared/schema";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { drizzle as drizzleSQLite } from "drizzle-orm/better-sqlite3";
+import { migrate as migratePg } from "drizzle-orm/postgres-js/migrator";
+import postgres from "postgres";
+import Database from "better-sqlite3";
 import fs from 'fs';
 import path from 'path';
+import { sql } from "drizzle-orm";
 
-// Using a simple in-memory database for development
-console.log("Using in-memory database for development");
+// Import the shouldUseSqlite helper function
+import { shouldUseSqlite } from "@shared/schema";
 
-// Create a simple in-memory database for debugging
+// Create a simple in-memory database for debugging or when no database is available
 const mockDb = {
   users: new Map<number, any>(),
   userIdCounter: 1,
@@ -65,7 +71,7 @@ const mockDb = {
   }
 };
 
-// Create test admin user
+// Create test admin user in the mock DB
 mockDb.createUser({
   orangeId: 'admin123',
   username: 'admin',
@@ -74,8 +80,66 @@ mockDb.createUser({
   isAdmin: true
 });
 
-// Export mock database
-const db = mockDb;
-const pool = null;
+// Determine which database to use
+let db: any;
+let pool: any = null;
 
-export { db, pool };
+try {
+  const useSqlite = shouldUseSqlite();
+  
+  if (useSqlite) {
+    console.log("Using SQLite database");
+    
+    // Setup SQLite database
+    // Create uploads directory if it doesn't exist
+    const dbDir = path.join(process.cwd(), 'data');
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+    
+    // Create or open the SQLite database file
+    const dbPath = path.join(dbDir, 'orange_auth.db');
+    const sqlite = new Database(dbPath);
+    
+    // Create the drizzle SQLite client
+    db = drizzleSQLite(sqlite, { schema });
+    
+    // Handle user creation date stats query for SQLite
+    // This is needed because SQLite date functions differ from PostgreSQL
+    db.getUsersCreatedByDay = async () => {
+      // SQLite version of the date grouping query
+      const results = await sqlite.prepare(`
+        SELECT 
+          DATE(created_at) as date,
+          COUNT(*) as count
+        FROM users
+        GROUP BY DATE(created_at)
+        ORDER BY date
+      `).all();
+      
+      return results.map((row: any) => ({
+        date: row.date,
+        count: row.count
+      }));
+    };
+  } else {
+    // PostgreSQL setup
+    console.log("Using PostgreSQL database");
+    
+    if (!process.env.DATABASE_URL) {
+      console.log("No DATABASE_URL found. Using in-memory mock database instead.");
+      db = mockDb;
+    } else {
+      // Setup PostgreSQL client
+      const connectionString = process.env.DATABASE_URL || '';
+      pool = postgres(connectionString, { max: 10 });
+      db = drizzle(pool, { schema });
+    }
+  }
+} catch (error) {
+  console.error("Error setting up database:", error);
+  console.log("Falling back to in-memory mock database");
+  db = mockDb;
+}
+
+export { db, pool, mockDb };

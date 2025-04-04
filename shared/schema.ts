@@ -41,7 +41,29 @@ export const sqliteUsers = sqliteTable("users", {
 });
 
 // We'll use a unified schema for operations based on environment
-export const users = process.env.USE_SQLITE ? sqliteUsers : pgUsers;
+// Function to determine if SQLite should be used
+export function shouldUseSqlite() {
+  // First check for global runtime setting (for demonstration purposes)
+  if (typeof global !== 'undefined' && (global as any).USE_SQLITE !== undefined) {
+    return (global as any).USE_SQLITE;
+  }
+  
+  // Then check environment variable
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.USE_SQLITE === 'true';
+  }
+  
+  // Default based on DATABASE_URL availability
+  if (typeof process !== 'undefined' && process.env) {
+    return !process.env.DATABASE_URL;
+  }
+  
+  // Final fallback (should not reach here in normal operation)
+  return false;
+}
+
+// Dynamically select the table based on the current configuration
+export const users = shouldUseSqlite() ? sqliteUsers : pgUsers;
 
 // Create insert schema from the appropriate table
 export const insertUserSchema = createInsertSchema(users)

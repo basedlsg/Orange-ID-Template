@@ -255,37 +255,51 @@ export default function Home() {
             </h3>
             <p className="text-gray-300 mb-4">
               This template supports both PostgreSQL (for Replit paid users) and SQLite (for free users).
-              You can switch between them using the toggle below or by setting the <code className="bg-gray-800 px-1 rounded text-gray-200">USE_SQLITE</code> environment variable.
+              During development, the selection is session-based and non-persistent. In production, set the 
+              <code className="bg-gray-800 px-1 mx-1 rounded text-gray-200">USE_SQLITE</code> 
+              environment variable.
             </p>
             
-            <div className="flex items-center justify-between p-4 bg-gray-800 rounded-md">
-              {isLoadingDbType ? (
-                <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
-                  <span className="text-gray-300">Loading database configuration...</span>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-300">
-                    Currently using: <span className="font-semibold text-[#F37920]">
-                      {dbType === 'sqlite' ? 'SQLite Database' : 'PostgreSQL Database'}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-gray-800 rounded-md">
+                {isLoadingDbType ? (
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
+                    <span className="text-gray-300">Loading database configuration...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-gray-300">
+                      Currently using: <span className="font-semibold text-[#F37920]">
+                        {dbType === 'sqlite' ? 'SQLite Database' : 'PostgreSQL Database'}
+                      </span>
                     </span>
-                  </span>
-                </div>
-              )}
+                  </div>
+                )}
+                
+                <form action="/api/switch-database" method="post" className="flex flex-col items-end">
+                  <input type="hidden" name="dbType" value={dbType === 'sqlite' ? 'postgres' : 'sqlite'} />
+                  <button 
+                    type="submit"
+                    className="px-4 py-2 bg-[#F37920] text-white rounded-md hover:bg-[#D86A10] transition-colors"
+                    disabled={isLoadingDbType}
+                  >
+                    Switch to {dbType === 'sqlite' ? 'PostgreSQL' : 'SQLite'}
+                  </button>
+                  <p className="text-xs text-gray-400 mt-1">Session-only demonstration</p>
+                </form>
+              </div>
               
-              <form action="/api/switch-database" method="post" className="flex flex-col items-end">
-                <input type="hidden" name="dbType" value={dbType === 'sqlite' ? 'postgres' : 'sqlite'} />
-                <button 
-                  type="submit"
-                  className="px-4 py-2 bg-[#F37920] text-white rounded-md hover:bg-[#D86A10] transition-colors"
-                  disabled={isLoadingDbType}
-                >
-                  Switch to {dbType === 'sqlite' ? 'PostgreSQL' : 'SQLite'}
-                </button>
-                <p className="text-xs text-gray-400 mt-1">Requires restart after changing</p>
-              </form>
+              <div className="p-4 bg-gray-800 rounded-md">
+                <h4 className="text-sm font-semibold text-[#F37920] mb-2">Instructions for AI Assistant Use</h4>
+                <p className="text-sm text-gray-300">
+                  <span className="font-semibold">For paid Replit users:</span> The AI should configure this app to use PostgreSQL by default, which is already set up.
+                </p>
+                <p className="text-sm text-gray-300 mt-1">
+                  <span className="font-semibold">For free Replit users:</span> The AI should modify the code to set <code className="bg-gray-700 px-1 rounded">USE_SQLITE=true</code> in the .env file to use SQLite instead.
+                </p>
+              </div>
             </div>
           </div>
 
