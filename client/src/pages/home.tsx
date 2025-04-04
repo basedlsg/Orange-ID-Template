@@ -1,10 +1,61 @@
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { Helmet } from "react-helmet";
 import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 export default function Home() {
   const { isLoggedIn, user } = useBedrockPassport();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [dbType, setDbType] = useState<string>("sqlite");
+  const [isLoadingDbType, setIsLoadingDbType] = useState<boolean>(true);
+  const { toast } = useToast();
+  const [location] = useLocation();
+
+  // Check URL params for database switch notifications
+  useEffect(() => {
+    // Parse the URL query parameters
+    const params = new URLSearchParams(window.location.search);
+    
+    // Check for database switch success
+    if (params.get('db_switched') === 'true') {
+      const type = params.get('type');
+      toast({
+        title: "Database Configuration Updated",
+        description: `Successfully switched to ${type === 'sqlite' ? 'SQLite' : 'PostgreSQL'} database. Restart the application for changes to take effect.`,
+        variant: "default",
+      });
+      
+      // Remove the query parameters without causing a page reload
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
+    // Check for database switch error
+    if (params.get('db_error') === 'true') {
+      toast({
+        title: "Database Configuration Error",
+        description: "Failed to switch database type. Please check the server logs for details.",
+        variant: "destructive",
+      });
+      
+      // Remove the query parameters without causing a page reload
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [location, toast]);
+
+  // Get current database type
+  useEffect(() => {
+    fetch('/api/database-type')
+      .then(response => response.json())
+      .then(data => {
+        setDbType(data.type);
+        setIsLoadingDbType(false);
+      })
+      .catch(error => {
+        console.error("Error fetching database type:", error);
+        setIsLoadingDbType(false);
+      });
+  }, []);
 
   // Check if the user is an admin
   useEffect(() => {
@@ -195,6 +246,46 @@ export default function Home() {
                   objects from the Orange ID provider
                 </li>
               </ol>
+            </div>
+          </div>
+
+          <div className="bg-gray-900 shadow rounded-lg p-6 border border-gray-800 mb-8">
+            <h3 className="text-xl font-semibold mb-3 text-[#F37920]">
+              Database Configuration
+            </h3>
+            <p className="text-gray-300 mb-4">
+              This template supports both PostgreSQL (for Replit paid users) and SQLite (for free users).
+              You can switch between them using the toggle below or by setting the <code className="bg-gray-800 px-1 rounded text-gray-200">USE_SQLITE</code> environment variable.
+            </p>
+            
+            <div className="flex items-center justify-between p-4 bg-gray-800 rounded-md">
+              {isLoadingDbType ? (
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
+                  <span className="text-gray-300">Loading database configuration...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-gray-300">
+                    Currently using: <span className="font-semibold text-[#F37920]">
+                      {dbType === 'sqlite' ? 'SQLite Database' : 'PostgreSQL Database'}
+                    </span>
+                  </span>
+                </div>
+              )}
+              
+              <form action="/api/switch-database" method="post" className="flex flex-col items-end">
+                <input type="hidden" name="dbType" value={dbType === 'sqlite' ? 'postgres' : 'sqlite'} />
+                <button 
+                  type="submit"
+                  className="px-4 py-2 bg-[#F37920] text-white rounded-md hover:bg-[#D86A10] transition-colors"
+                  disabled={isLoadingDbType}
+                >
+                  Switch to {dbType === 'sqlite' ? 'PostgreSQL' : 'SQLite'}
+                </button>
+                <p className="text-xs text-gray-400 mt-1">Requires restart after changing</p>
+              </form>
             </div>
           </div>
 

@@ -50,6 +50,73 @@ async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId:
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // API Route to get current database type
+  app.get("/api/database-type", async (req, res) => {
+    const useSqlite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL;
+    res.json({ type: useSqlite ? 'sqlite' : 'postgres' });
+  });
+
+  // API Route to switch database type
+  app.post("/api/switch-database", async (req, res) => {
+    try {
+      // Get the target database type from the form submission
+      // For GET requests or form submissions, use req.query; for POST form submissions, use req.body
+      const targetDbType = req.body && req.body.dbType ? req.body.dbType : (req.query.dbType || 'sqlite');
+      const useSqlite = targetDbType === 'sqlite';
+      
+      console.log(`Switching database to: ${targetDbType} (useSqlite=${useSqlite})`);
+      
+      // Update .env file
+      const fs = require('fs');
+      const envPath = './.env';
+
+      try {
+        // Read existing content if file exists
+        let envContent = '';
+        if (fs.existsSync(envPath)) {
+          envContent = fs.readFileSync(envPath, 'utf8');
+        }
+
+        // Check if USE_SQLITE exists in the file
+        if (envContent.includes('USE_SQLITE=')) {
+          // Replace the existing value
+          envContent = envContent.replace(/USE_SQLITE=.*(\n|$)/, `USE_SQLITE=${useSqlite ? 'true' : 'false'}\n`);
+        } else {
+          // Add the setting
+          envContent += `\nUSE_SQLITE=${useSqlite ? 'true' : 'false'}\n`;
+        }
+
+        // Write back to the file
+        fs.writeFileSync(envPath, envContent);
+        console.log(`Successfully updated .env file to use ${useSqlite ? 'SQLite' : 'PostgreSQL'}`);
+      } catch (fsError) {
+        console.error("Error updating .env file:", fsError);
+        throw new Error("Failed to update database configuration");
+      }
+      
+      // If this is an AJAX request, respond with JSON
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.json({ 
+          success: true, 
+          message: `Database switched to ${useSqlite ? 'SQLite' : 'PostgreSQL'}. Please restart the application.`,
+          type: useSqlite ? 'sqlite' : 'postgres'
+        });
+      }
+      
+      // For form submissions, redirect back to the home page with a success message
+      res.redirect('/?db_switched=true&type=' + (useSqlite ? 'sqlite' : 'postgres'));
+    } catch (error) {
+      console.error("Error switching database type:", error);
+      
+      // If this is an AJAX request, respond with JSON error
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(500).json({ message: "Failed to switch database type" });
+      }
+      
+      // For form submissions, redirect back to the home page with an error message
+      res.redirect('/?db_error=true');
+    }
+  });
 
   // User API
   app.post("/api/users", async (req, res) => {
