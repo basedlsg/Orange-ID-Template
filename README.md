@@ -36,6 +36,19 @@ and replace the home page with [your main feature]. Keep the admin dashboard, bu
 it to include [custom admin feature]. Ensure users must log in to access my application.
 ```
 
+### Setting up Admin Access Example
+
+```
+I want to use Orange Auth Template for my project. I'm a free Replit user.
+
+Help me set up my application with SQLite and create a custom admin account
+with my OrangeID instead of using the default admin. I'll need to clean up
+any sample accounts since this will be a production project.
+
+After that, help me understand how the admin dashboard works and what features
+it provides for monitoring user growth and activity.
+```
+
 ### Complete Example Prompt (Game)
 
 ```
@@ -137,6 +150,25 @@ If you're using a free Replit account, the recommended approach is to use SQLite
      - Set up the required table structure
      - Create a sample admin user and a test user
      - The admin user credentials will be displayed in the console
+   
+   - **Customizing Admin Accounts**: You can change the default admin or create a custom admin account:
+     ```bash
+     # Clean existing database and create a custom admin (recommended for new projects)
+     npx tsx scripts/init-sqlite.ts --clean --admin-id=your-orange-id --admin-username=your-username --admin-email=your@email.com
+     
+     # Skip creating default users and only add your custom admin
+     npx tsx scripts/init-sqlite.ts --skip-default-users --admin-id=your-orange-id --admin-username=your-username
+     
+     # Clean up all existing users/data
+     npx tsx scripts/init-sqlite.ts --clean
+     ```
+   
+   - **Available Options**:
+     - `--clean` or `-c`: Remove all existing data
+     - `--skip-default-users` or `-s`: Don't create default admin and test users
+     - `--admin-id=value`: Set custom admin OrangeID (the ID from Orange authentication)
+     - `--admin-username=value`: Set custom admin username
+     - `--admin-email=value`: Set custom admin email
 
 3. **Alternative: External PostgreSQL Services**:
    - If you prefer PostgreSQL, you can use a free service like:
