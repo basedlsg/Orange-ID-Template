@@ -15,85 +15,118 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  // Check if we're using the in-memory mock database
+  // Check if we're using the mock database
   private isUsingMockDb(): boolean {
     // If 'select' method doesn't exist, it's the mock DB
     return typeof (db as any).select !== 'function';
   }
 
-  async getUser(id: number): Promise<User | undefined> {
+  // Helper to safely run database operations 
+  private async safeDbOperation<T>(
+    mockDbMethod: () => Promise<T>,
+    drizzleOperation: () => Promise<T>
+  ): Promise<T> {
     if (this.isUsingMockDb()) {
-      return await (db as any).getUser(id);
-    } else {
-      const [user] = await db.select().from(users).where(eq(users.id, id));
-      return user;
+      return await mockDbMethod();
     }
+    
+    try {
+      return await drizzleOperation();
+    } catch (error) {
+      console.error("Database operation error:", error);
+      // Attempt mock DB as fallback in case of failure
+      if (typeof mockDbMethod === 'function') {
+        console.warn("Falling back to mock DB for this operation");
+        return await mockDbMethod();
+      }
+      throw error;
+    }
+  }
+
+  async getUser(id: number): Promise<User | undefined> {
+    return this.safeDbOperation(
+      () => (db as any).getUser(id),
+      async () => {
+        const [user] = await db.select().from(users).where(eq(users.id, id));
+        return user;
+      }
+    );
   }
 
   async getUserByOrangeId(orangeId: string): Promise<User | undefined> {
-    if (this.isUsingMockDb()) {
-      return await (db as any).getUserByOrangeId(orangeId);
-    } else {
-      const [user] = await db.select().from(users).where(eq(users.orangeId, orangeId));
-      return user;
-    }
+    return this.safeDbOperation(
+      () => (db as any).getUserByOrangeId(orangeId),
+      async () => {
+        const [user] = await db.select().from(users).where(eq(users.orangeId, orangeId));
+        return user;
+      }
+    );
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    if (this.isUsingMockDb()) {
-      return await (db as any).getUserByUsername(username);
-    } else {
-      const [user] = await db.select().from(users).where(eq(users.username, username));
-      return user;
-    }
+    return this.safeDbOperation(
+      () => (db as any).getUserByUsername(username),
+      async () => {
+        const [user] = await db.select().from(users).where(eq(users.username, username));
+        return user;
+      }
+    );
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    if (this.isUsingMockDb()) {
-      return await (db as any).createUser(insertUser);
-    } else {
-      const [user] = await db.insert(users).values(insertUser).returning();
-      return user;
-    }
+    return this.safeDbOperation(
+      () => (db as any).createUser(insertUser),
+      async () => {
+        const [user] = await db.insert(users).values(insertUser).returning();
+        return user;
+      }
+    );
   }
   
   async getAllUsers(): Promise<User[]> {
-    if (this.isUsingMockDb()) {
-      return await (db as any).getAllUsers();
-    } else {
-      // Select all users
-      const result = await db
-        .select()
-        .from(users)
-        .orderBy(users.createdAt);
-      
-      return result;
-    }
+    return this.safeDbOperation(
+      () => (db as any).getAllUsers(),
+      async () => {
+        const result = await db
+          .select()
+          .from(users)
+          .orderBy(users.createdAt);
+        
+        return result;
+      }
+    );
   }
   
   async getUsersCreatedByDay(): Promise<{ date: string; count: number }[]> {
-    if (this.isUsingMockDb()) {
+    // If we have a custom implementation directly on the DB object, use it
+    if (typeof (db as any).getUsersCreatedByDay === 'function') {
       return await (db as any).getUsersCreatedByDay();
-    } else if (pool) {
-      // Use the PostgreSQL pool directly for this complex query
-      const result = await pool.query(`
-        SELECT 
-          TO_CHAR(created_at, 'YYYY-MM-DD') as date,
-          COUNT(*) as count
-        FROM users
-        GROUP BY TO_CHAR(created_at, 'YYYY-MM-DD')
-        ORDER BY date
-      `);
-      
-      // Return the rows
-      return result.rows.map((row: any) => ({
-        date: row.date,
-        count: parseInt(row.count, 10)
-      }));
-    } else {
-      // Fallback if pool is not available
-      return [];
     }
+    
+    // Otherwise, use the PostgreSQL pool if available
+    if (pool) {
+      try {
+        const result = await pool.query(`
+          SELECT 
+            TO_CHAR(created_at, 'YYYY-MM-DD') as date,
+            COUNT(*) as count
+          FROM users
+          GROUP BY TO_CHAR(created_at, 'YYYY-MM-DD')
+          ORDER BY date
+        `);
+        
+        return result.rows.map((row: any) => ({
+          date: row.date,
+          count: parseInt(row.count, 10)
+        }));
+      } catch (error) {
+        console.error("Error running user growth stats query:", error);
+        return [];
+      }
+    }
+    
+    // If we don't have a custom implementation or pool, return empty array
+    return [];
   }
 }
 

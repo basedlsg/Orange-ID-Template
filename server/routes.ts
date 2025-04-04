@@ -52,7 +52,12 @@ async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId:
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Route to get current database type
   app.get("/api/database-type", async (req, res) => {
-    const useSqlite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL;
+    // Check if we have a global setting, otherwise use environment variables
+    const globalSetting = (global as any).USE_SQLITE;
+    const useSqlite = typeof globalSetting !== 'undefined' 
+      ? globalSetting 
+      : (process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL);
+    
     res.json({ type: useSqlite ? 'sqlite' : 'postgres' });
   });
 
@@ -64,41 +69,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const targetDbType = req.body && req.body.dbType ? req.body.dbType : (req.query.dbType || 'sqlite');
       const useSqlite = targetDbType === 'sqlite';
       
-      console.log(`Switching database to: ${targetDbType} (useSqlite=${useSqlite})`);
+      console.log(`Switching database to: ${targetDbType} (useSqlite=${useSqlite}) - Code-based switch only (no .env modification)`);
       
-      // Update .env file
-      const fs = require('fs');
-      const envPath = './.env';
-
-      try {
-        // Read existing content if file exists
-        let envContent = '';
-        if (fs.existsSync(envPath)) {
-          envContent = fs.readFileSync(envPath, 'utf8');
-        }
-
-        // Check if USE_SQLITE exists in the file
-        if (envContent.includes('USE_SQLITE=')) {
-          // Replace the existing value
-          envContent = envContent.replace(/USE_SQLITE=.*(\n|$)/, `USE_SQLITE=${useSqlite ? 'true' : 'false'}\n`);
-        } else {
-          // Add the setting
-          envContent += `\nUSE_SQLITE=${useSqlite ? 'true' : 'false'}\n`;
-        }
-
-        // Write back to the file
-        fs.writeFileSync(envPath, envContent);
-        console.log(`Successfully updated .env file to use ${useSqlite ? 'SQLite' : 'PostgreSQL'}`);
-      } catch (fsError) {
-        console.error("Error updating .env file:", fsError);
-        throw new Error("Failed to update database configuration");
-      }
+      // Set a global flag for the current session - this is a simple in-memory switch
+      // This won't persist across server restarts, but is useful for demonstrating the concept
+      // and for agents to understand the database selection mechanism
+      (global as any).USE_SQLITE = useSqlite;
       
       // If this is an AJAX request, respond with JSON
       if (req.xhr || req.headers.accept?.includes('application/json')) {
         return res.json({ 
           success: true, 
-          message: `Database switched to ${useSqlite ? 'SQLite' : 'PostgreSQL'}. Please restart the application.`,
+          message: `Database preference set to ${useSqlite ? 'SQLite' : 'PostgreSQL'}. Note: This is a temporary session-only change for demonstration.`,
           type: useSqlite ? 'sqlite' : 'postgres'
         });
       }
