@@ -113,15 +113,38 @@ export default function AdminPage() {
   } = useQuery({
     queryKey: ['/api/admin/users'],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user) {
+        console.log('No user found for admin API call');
+        return [];
+      }
+      
       // Orange ID is stored in 'sub' or 'id'
       // @ts-ignore - type is too complex to handle directly
       const orangeId = (user as any).sub || (user as any).id;
-      if (!orangeId) return [];
+      console.log('Admin API call with orangeId:', orangeId);
       
-      const response = await fetch(`/api/admin/users?adminId=${orangeId}`);
-      if (!response.ok) throw new Error('Failed to fetch users');
-      return response.json() as Promise<User[]>;
+      if (!orangeId) {
+        console.log('No orangeId found for admin API call');
+        return [];
+      }
+      
+      console.log(`Fetching users with admin ID: ${orangeId}`);
+      try {
+        const response = await fetch(`/api/admin/users?adminId=${orangeId}`);
+        console.log('Admin API response status:', response.status);
+        
+        if (!response.ok) {
+          console.error('Error response from admin API:', response.statusText);
+          throw new Error('Failed to fetch users');
+        }
+        
+        const data = await response.json();
+        console.log('Received admin data:', data);
+        return data as User[];
+      } catch (error) {
+        console.error('Error in admin API call:', error);
+        throw error;
+      }
     },
     enabled: !!user && isAdmin === true
   });
