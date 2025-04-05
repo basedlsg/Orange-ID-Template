@@ -59,11 +59,15 @@ export default function AdminPage() {
   const { user, isLoggedIn } = useBedrockPassport();
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-  const [, setLocation] = useLocation(); // Move hook to top level
+  const [users, setUsers] = useState<User[]>([]);
+  const [growthStats, setGrowthStats] = useState<UserGrowthData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
   
-  // Check if user is admin
+  // All data fetching in one useEffect
   useEffect(() => {
-    const checkAdminStatus = async () => {
+    const fetchAdminData = async () => {
       if (!user) {
         // If not logged in, redirect to home
         setLocation('/');
@@ -71,7 +75,7 @@ export default function AdminPage() {
       }
       
       try {
-        // Orange ID is stored in 'sub' or 'id'
+        // Get the orangeId from the user object
         // @ts-ignore - type is too complex to handle directly
         const orangeId = (user as any).sub || (user as any).id;
         if (!orangeId) {
@@ -79,99 +83,67 @@ export default function AdminPage() {
           return;
         }
         
-        const response = await fetch(`/api/users/check-admin?orangeId=${orangeId}`);
-        const data = await response.json();
-        setIsAdmin(data.isAdmin);
+        console.log('Checking admin status with orangeId:', orangeId);
         
-        if (!data.isAdmin) {
+        // Check if the user is an admin
+        const adminCheckResponse = await fetch(`/api/users/check-admin?orangeId=${orangeId}`);
+        const adminData = await adminCheckResponse.json();
+        
+        console.log('Admin check response:', adminData);
+        setIsAdmin(adminData.isAdmin);
+        
+        if (!adminData.isAdmin) {
           toast({
             title: "Access Denied",
             description: "You don't have admin privileges to view this page.",
             variant: "destructive"
           });
           setLocation('/');
+          return;
         }
-      } catch (error) {
-        console.error("Error checking admin status:", error);
+        
+        setIsLoading(true);
+        
+        // Fetch all users
+        console.log('Fetching users with admin ID:', orangeId);
+        const usersResponse = await fetch(`/api/admin/users?adminId=${orangeId}`);
+        if (!usersResponse.ok) {
+          throw new Error(`Failed to fetch users: ${usersResponse.statusText}`);
+        }
+        
+        const usersData = await usersResponse.json();
+        console.log('Users data:', usersData);
+        setUsers(usersData);
+        
+        // Fetch growth stats
+        console.log('Fetching growth stats with admin ID:', orangeId);
+        const statsResponse = await fetch(`/api/admin/stats/user-growth?adminId=${orangeId}`);
+        if (!statsResponse.ok) {
+          throw new Error(`Failed to fetch growth stats: ${statsResponse.statusText}`);
+        }
+        
+        const statsData = await statsResponse.json();
+        console.log('Growth stats:', statsData);
+        setGrowthStats(statsData);
+        
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error in admin data fetching:", err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+        setIsLoading(false);
         toast({
           title: "Error",
-          description: "Failed to verify admin status.",
+          description: "Failed to load admin data. Please try again.",
           variant: "destructive"
         });
-        setLocation('/');
       }
     };
     
-    checkAdminStatus();
+    fetchAdminData();
   }, [user, toast, setLocation]);
-  
-  // Fetch users data
-  const { 
-    data: users, 
-    isLoading: usersLoading, 
-    error: usersError 
-  } = useQuery({
-    queryKey: ['/api/admin/users'],
-    queryFn: async () => {
-      if (!user) {
-        console.log('No user found for admin API call');
-        return [];
-      }
-      
-      // Orange ID is stored in 'sub' or 'id'
-      // @ts-ignore - type is too complex to handle directly
-      const orangeId = (user as any).sub || (user as any).id;
-      console.log('Admin API call with orangeId:', orangeId);
-      
-      if (!orangeId) {
-        console.log('No orangeId found for admin API call');
-        return [];
-      }
-      
-      console.log(`Fetching users with admin ID: ${orangeId}`);
-      try {
-        const response = await fetch(`/api/admin/users?adminId=${orangeId}`);
-        console.log('Admin API response status:', response.status);
-        
-        if (!response.ok) {
-          console.error('Error response from admin API:', response.statusText);
-          throw new Error('Failed to fetch users');
-        }
-        
-        const data = await response.json();
-        console.log('Received admin data:', data);
-        return data as User[];
-      } catch (error) {
-        console.error('Error in admin API call:', error);
-        throw error;
-      }
-    },
-    enabled: !!user && isAdmin === true
-  });
-  
-  // Fetch user growth statistics
-  const { 
-    data: growthStats, 
-    isLoading: statsLoading, 
-    error: statsError 
-  } = useQuery({
-    queryKey: ['/api/admin/stats/user-growth'],
-    queryFn: async () => {
-      if (!user) return [];
-      // Orange ID is stored in 'sub' or 'id'
-      // @ts-ignore - type is too complex to handle directly
-      const orangeId = (user as any).sub || (user as any).id;
-      if (!orangeId) return [];
-      
-      const response = await fetch(`/api/admin/stats/user-growth?adminId=${orangeId}`);
-      if (!response.ok) throw new Error('Failed to fetch user growth statistics');
-      return response.json() as Promise<UserGrowthData[]>;
-    },
-    enabled: !!user && isAdmin === true
-  });
 
   // Loading state
-  if (isAdmin === null || usersLoading || statsLoading) {
+  if (isAdmin === null || isLoading) {
     return (
       <div className="container mx-auto py-8 text-center bg-black text-white">
         <h1 className="text-3xl font-bold mb-6 text-[#F37920]">Admin Dashboard</h1>
@@ -184,11 +156,11 @@ export default function AdminPage() {
   }
 
   // Error state
-  if (usersError || statsError) {
+  if (error) {
     return (
       <div className="container mx-auto py-8 text-center bg-black text-white">
         <h1 className="text-3xl font-bold mb-6 text-[#F37920]">Admin Dashboard</h1>
-        <p className="text-red-500">Error loading admin data. Please try again.</p>
+        <p className="text-red-500">Error loading admin data: {error}</p>
       </div>
     );
   }
