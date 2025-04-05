@@ -83,7 +83,8 @@ export class DatabaseStorage implements IStorage {
         // If this is the first user, make them an admin
         const userToCreate = {
           ...insertUser,
-          isAdmin: isFirstUser ? true : false
+          isAdmin: isFirstUser ? true : false,
+          createdAt: new Date().toISOString()
         };
         
         // Call the createUser method on the mock DB
@@ -97,7 +98,8 @@ export class DatabaseStorage implements IStorage {
         // If this is the first user, make them an admin
         const userToCreate = {
           ...insertUser,
-          isAdmin: isFirstUser ? true : false
+          isAdmin: isFirstUser ? true : false,
+          createdAt: new Date().toISOString()
         };
         
         const [user] = await db.insert(users).values(userToCreate).returning();
