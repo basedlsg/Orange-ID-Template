@@ -4,10 +4,8 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
-data/
-*.db
-*.sqlite
-*.sqlite3data/
-*.db
-*.sqlite
+# Keep the database file in data directory
+# But ignore other database files
+data/old/
+data/backups/
 *.sqlite3

@@ -246,12 +246,10 @@ export default function Home() {
                   Configure your Orange ID credentials
                 </li>
                 <li className="text-gray-300">
-                  Run the setup script: <code className="bg-gray-800 px-1 rounded text-gray-200">
-                    npx tsx scripts/setup.ts
-                  </code>
+                  Start developing right away - no setup required
                 </li>
                 <li className="text-gray-300">
-                  Be the first to log in to become an admin
+                  Be the first to log in to automatically become an admin
                 </li>
                 <li className="text-gray-300">
                   Extend the user schema as needed in{" "}
