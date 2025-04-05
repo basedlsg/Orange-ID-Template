@@ -11,14 +11,16 @@ Just copy and paste one of these prompts to get started. The AI will handle ever
 ```
 I want to set up the Orange Auth Template with SQLite for my project. I'm a free Replit user.
 
-I'd like to build a [game/app type] with these features:
+First, run the setup script to initialize the database:
+npx tsx scripts/setup.ts
+
+Then help me build a [game/app type] with these features:
 - [Feature 1]
 - [Feature 2]
 - [Feature 3]
 
 Replace the home screen with [your main feature] and keep the admin dashboard as is.
 Make sure users need to log in before accessing any of the game/app features.
-Initialize the SQLite database with sample users and make sure everything is working.
 ```
 
 ### For Core Users (PostgreSQL)
@@ -26,13 +28,15 @@ Initialize the SQLite database with sample users and make sure everything is wor
 ```
 I want to set up the Orange Auth Template with PostgreSQL for my project. I'm a Core Replit user.
 
+Help me create a PostgreSQL database in Replit first, then run the setup script:
+npx tsx scripts/setup.ts
+
 I'd like to build a [game/app type] with these features:
 - [Feature 1]
 - [Feature 2]
 - [Feature 3]
 
-Help me create a PostgreSQL database in Replit, configure the application to use it,
-and replace the home page with [your main feature]. Keep the admin dashboard, but extend
+Replace the home page with [your main feature]. Keep the admin dashboard, but extend
 it to include [custom admin feature]. Ensure users must log in to access my application.
 ```
 
@@ -101,6 +105,22 @@ A clean, simplified template application with OrangeID authentication and user d
 
 ## Detailed Setup Guide
 
+### Universal Setup Script
+
+This template includes a unified setup script that automatically detects your environment and sets up the appropriate database (SQLite or PostgreSQL):
+
+1. **Run the Setup Script**:
+   ```bash
+   npx tsx scripts/setup.ts
+   ```
+
+2. **The script will**:
+   - Detect if SQLite or PostgreSQL should be used based on environment variables
+   - Create the necessary database tables
+   - Add sample admin and test users
+   - Verify database connectivity
+   - Display the admin credentials for logging in
+
 ### For Replit Core (Paid) Users
 
 1. **Database Setup Using Replit PostgreSQL**:
@@ -110,7 +130,12 @@ A clean, simplified template application with OrangeID authentication and user d
    - Click "Create a PostgreSQL Database" button
    - Wait for the database to be created (this sets up all required environment variables automatically)
 
-2. **Start the Application**:
+2. **Run the Setup Script**:
+   ```bash
+   npx tsx scripts/setup.ts
+   ```
+
+3. **Start the Application**:
    - The default workflow "Start application" is already configured to run the server
    - Click "Run" in Replit to start the application
    - The application will be accessible at the web view URL
@@ -124,19 +149,12 @@ If you're using a free Replit account, the recommended approach is to use SQLite
      1. Click on the "Tools" icon in the left sidebar of Replit
      2. Select "Secrets"
      3. Add a new secret with key `USE_SQLITE` and value `true`
-   - No other configuration is needed - the application will automatically use SQLite
-   - Data will be stored in a local file in the `data/orange_auth.db` file in your project
+   - Alternatively, you can omit DATABASE_URL entirely and SQLite will be used by default
 
-2. **Initialize the SQLite Database**:
-   - Run the initialization script to set up the tables and sample users:
-     ```bash
-     npx tsx scripts/init-sqlite.ts
-     ```
-   - This will:
-     - Create the database file if it doesn't exist
-     - Set up the required table structure
-     - Create a sample admin user and a test user
-     - The admin user credentials will be displayed in the console
+2. **Run the Setup Script**:
+   ```bash
+   npx tsx scripts/setup.ts
+   ```
 
 3. **Alternative: External PostgreSQL Services**:
    - If you prefer PostgreSQL, you can use a free service like:
@@ -249,7 +267,7 @@ This template is designed as a starting point. Here are some ways to customize i
   - `index.ts`: Server setup with session management
 - `/shared/schema.ts`: Database schema definitions
 - `/scripts`: Utility scripts
-  - `init-sqlite.ts`: Initialize the SQLite database with tables and sample users
+  - `setup.ts`: Unified database setup script for both SQLite and PostgreSQL
 
 ## Environment Variables
 
