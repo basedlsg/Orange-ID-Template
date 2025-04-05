@@ -295,33 +295,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const users = await storage.getAllUsers();
       console.log(`Retrieved ${users.length} users from database`);
       
-      // More detailed debug info
-      users.forEach((user, index) => {
-        console.log(`User ${index + 1}:`, {
-          id: user.id,
-          orangeId: user.orangeId,
-          username: user.username, 
-          isAdmin: user.isAdmin,
-          createdAtRaw: user.createdAt,
-          createdAtParsed: user.createdAt ? new Date(user.createdAt).toString() : null,
-          isValidDate: user.createdAt && !isNaN(new Date(user.createdAt).getTime())
-        });
-      });
+      // Log basic user info
+      if (users.length > 0) {
+        console.log(`Found ${users.length} users in database`);
+      }
       
-      // Fix invalid dates for the frontend
-      const formattedUsers = users.map(user => {
-        // If created date is invalid, set it to now
-        if (!user.createdAt || isNaN(new Date(user.createdAt).getTime())) {
-          console.log(`Fixing invalid date for user ${user.id}`);
-          return {
-            ...user,
-            createdAt: new Date().toISOString()
-          };
-        }
-        return user;
-      });
+      // Set current date for any invalid dates
+      const formattedUsers = users.map(user => ({
+        ...user,
+        createdAt: (!user.createdAt || isNaN(new Date(user.createdAt).getTime())) 
+          ? new Date().toISOString() 
+          : user.createdAt
+      }));
       
-      console.log(`Sending ${formattedUsers.length} formatted users to client`);
       res.json(formattedUsers);
     } catch (error) {
       console.error("Error fetching all users:", error);

@@ -14,23 +14,43 @@ export default function Home() {
 
   // No need for database switch notifications anymore
 
-  // Get current database type
+  // Get current database type only once when component mounts
   useEffect(() => {
-    fetch('/api/database-type')
-      .then(response => response.json())
-      .then(data => {
-        setDbType(data.type);
-        setIsLoadingDbType(false);
-      })
-      .catch(error => {
-        console.error("Error fetching database type:", error);
-        setIsLoadingDbType(false);
-      });
+    let isMounted = true;
+    const cachedDbType = sessionStorage.getItem('dbType');
+    
+    if (cachedDbType) {
+      setDbType(cachedDbType);
+      setIsLoadingDbType(false);
+    } else {
+      fetch('/api/database-type')
+        .then(response => response.json())
+        .then(data => {
+          if (isMounted) {
+            setDbType(data.type);
+            // Cache the result in session storage
+            sessionStorage.setItem('dbType', data.type);
+            setIsLoadingDbType(false);
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching database type:", error);
+          if (isMounted) {
+            setIsLoadingDbType(false);
+          }
+        });
+    }
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // Check if the user is an admin
+  // Check if the user is an admin with caching
   useEffect(() => {
     if (isLoggedIn && user) {
+      let isMounted = true;
+      
       // Extract the orange ID from the user object
       // @ts-ignore - type is too complex to handle directly
       const orangeId = (user as any).sub || (user as any).id;
@@ -38,16 +58,35 @@ export default function Home() {
         setIsAdmin(false);
         return;
       }
-
+      
+      // Check for cached admin status for this user
+      const cachedAdminStatus = sessionStorage.getItem(`adminStatus-${orangeId}`);
+      if (cachedAdminStatus !== null) {
+        setIsAdmin(cachedAdminStatus === 'true');
+        return;
+      }
+      
+      // If not cached, fetch from server
       fetch(`/api/users/check-admin?orangeId=${orangeId}`)
         .then((response) => response.json())
         .then((data) => {
-          setIsAdmin(data.isAdmin || false);
+          if (isMounted) {
+            const isUserAdmin = data.isAdmin || false;
+            setIsAdmin(isUserAdmin);
+            // Cache the result
+            sessionStorage.setItem(`adminStatus-${orangeId}`, isUserAdmin.toString());
+          }
         })
         .catch((error) => {
           console.error("Error checking admin status:", error);
-          setIsAdmin(false);
+          if (isMounted) {
+            setIsAdmin(false);
+          }
         });
+        
+      return () => {
+        isMounted = false;
+      };
     } else {
       setIsAdmin(false);
     }
