@@ -230,7 +230,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // First check if admin status is stored in session and it's explicitly true
       // In SQLite, isAdmin is stored as 1/0 not true/false, so check for both
-      if (req.session && (req.session.isAdmin === true || req.session.isAdmin === 1 || Number(req.session.isAdmin) === 1) && req.session.userId) {
+      const isAdminValue = req.session?.isAdmin;
+      // Use type assertion to avoid TypeScript errors
+      const isAdminSession = 
+        isAdminValue === true || 
+        (isAdminValue as any) === 1 || 
+        (typeof isAdminValue !== 'undefined' && Number(isAdminValue) === 1);
+      
+      if (req.session && isAdminSession && req.session.userId) {
         console.log(`Using session for admin check: User ID ${req.session.userId} is admin`);
         return next();
       }
@@ -294,7 +301,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("Users debug info:", sanitizedDebug);
       
-      res.json(users);
+      // Fix invalid dates for the frontend
+      const formattedUsers = users.map(user => {
+        // If created date is invalid, set it to now
+        if (!user.createdAt || isNaN(new Date(user.createdAt).getTime())) {
+          return {
+            ...user,
+            createdAt: new Date().toISOString()
+          };
+        }
+        return user;
+      });
+      
+      res.json(formattedUsers);
     } catch (error) {
       console.error("Error fetching all users:", error);
       res.status(500).json({ error: "Failed to fetch users" });
