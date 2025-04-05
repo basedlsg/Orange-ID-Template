@@ -98,8 +98,8 @@ export class DatabaseStorage implements IStorage {
         // If this is the first user, make them an admin
         const userToCreate = {
           ...insertUser,
-          isAdmin: isFirstUser ? true : false
-          // Let the database handle createdAt with its default value
+          isAdmin: isFirstUser ? true : false,
+          createdAt: new Date().toISOString()
         };
         
         const [user] = await db.insert(users).values(userToCreate).returning();
@@ -134,10 +134,10 @@ export class DatabaseStorage implements IStorage {
       // The SQL syntax will be adapted to the correct dialect by Drizzle
       const result = await db.execute(sql`
         SELECT 
-          DATE(created_at) as date,
+          SUBSTR(created_at, 1, 10) as date,
           COUNT(*) as count
         FROM users
-        GROUP BY DATE(created_at)
+        GROUP BY SUBSTR(created_at, 1, 10)
         ORDER BY date
       `);
       
