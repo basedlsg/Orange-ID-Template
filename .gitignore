@@ -9,3 +9,6 @@ vite.config.ts.*
 data/old/
 data/backups/
 *.sqlite3
+*.db-journal
+# Keep orange_auth.db in repo for zero-configuration setup
+!data/orange_auth.db
