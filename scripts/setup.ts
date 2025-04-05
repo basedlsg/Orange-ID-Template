@@ -82,7 +82,7 @@ async function setupSqlite() {
         email TEXT,
         role TEXT DEFAULT 'user',
         is_admin BOOLEAN DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TEXT NOT NULL
       )
     `);
     

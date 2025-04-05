@@ -18,7 +18,7 @@ export const sqliteUsers = sqliteTable("users", {
   email: text("email"),
   role: text("role").notNull().default("user"),
   isAdmin: integer("is_admin", { mode: "boolean" }).notNull().default(false),
-  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text("created_at").notNull(),
 });
 
 // ADVANCED: PostgreSQL Support (Optional)
