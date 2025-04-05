@@ -6,6 +6,7 @@ import {
   primaryKey,
 } from "drizzle-orm/sqlite-core";
 
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -17,7 +18,7 @@ export const sqliteUsers = sqliteTable("users", {
   email: text("email"),
   role: text("role").notNull().default("user"),
   isAdmin: integer("is_admin", { mode: "boolean" }).notNull().default(false),
-  createdAt: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
 // ADVANCED: PostgreSQL Support (Optional)

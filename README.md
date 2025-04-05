@@ -103,9 +103,8 @@ This template is pre-configured to work with SQLite, which requires zero configu
 2. **The script will**:
    - Create the SQLite database in the `data` directory
    - Create necessary database tables
-   - Add sample admin and test users
    - Verify database connectivity
-   - Display the admin credentials for logging in
+   - The first user to log in will automatically become the admin
 
 3. **Start the Application**:
    - The default workflow "Start application" is already configured to run the server
