@@ -95,6 +95,28 @@ let db: any;
 let pool: any = null;
 let sqlite: any = null;
 
+// Helper to format user with valid dates - defined at module level so it's available to all db implementations
+const formatUserDates = (user: any) => {
+  if (user && user.createdAt) {
+    try {
+      // Ensure createdAt is a valid date string
+      // Already stored as ISO string in database
+      const dateStr = user.createdAt;
+      const validDate = new Date(dateStr);
+      
+      // If it's an invalid date, use current date as fallback
+      if (isNaN(validDate.getTime())) {
+        console.log(`Invalid date detected: ${dateStr}, using fallback`);
+        user.createdAt = new Date().toISOString();
+      }
+    } catch (e) {
+      console.log(`Error parsing date: ${e}`);
+      user.createdAt = new Date().toISOString();
+    }
+  }
+  return user;
+};
+
 try {
   // Determine if we should use SQLite
   const useSqlite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL;
@@ -131,19 +153,20 @@ try {
       
       // Add additional methods to the db object to match the IStorage interface
       // This allows db to be used directly when needed
+      
       db.getUser = async (id: number) => {
         const [user] = await db.select().from(schema.users).where(eq(schema.users.id, id));
-        return user;
+        return formatUserDates(user);
       };
       
       db.getUserByOrangeId = async (orangeId: string) => {
         const [user] = await db.select().from(schema.users).where(eq(schema.users.orangeId, orangeId));
-        return user;
+        return formatUserDates(user);
       };
       
       db.getUserByUsername = async (username: string) => {
         const [user] = await db.select().from(schema.users).where(eq(schema.users.username, username));
-        return user;
+        return formatUserDates(user);
       };
       
       db.createUser = async (insertUser: any) => {
@@ -204,7 +227,9 @@ try {
       };
       
       db.getAllUsers = async () => {
-        return await db.select().from(schema.users).orderBy(schema.users.createdAt);
+        const users = await db.select().from(schema.users).orderBy(schema.users.createdAt);
+        // Format dates for all users
+        return users.map((user: any) => formatUserDates(user));
       };
       
       // Handle user creation date stats query for SQLite
@@ -252,19 +277,20 @@ try {
         
         // Add methods to match the IStorage interface
         // This allows db to be used directly when needed
+        // Reuse the same date formatting helper for PostgreSQL
         db.getUser = async (id: number) => {
           const [user] = await db.select().from(schema.users).where(eq(schema.users.id, id));
-          return user;
+          return formatUserDates(user);
         };
         
         db.getUserByOrangeId = async (orangeId: string) => {
           const [user] = await db.select().from(schema.users).where(eq(schema.users.orangeId, orangeId));
-          return user;
+          return formatUserDates(user);
         };
         
         db.getUserByUsername = async (username: string) => {
           const [user] = await db.select().from(schema.users).where(eq(schema.users.username, username));
-          return user;
+          return formatUserDates(user);
         };
         
         db.createUser = async (insertUser: any) => {
@@ -283,7 +309,9 @@ try {
         };
         
         db.getAllUsers = async () => {
-          return await db.select().from(schema.users).orderBy(schema.users.createdAt);
+          const users = await db.select().from(schema.users).orderBy(schema.users.createdAt);
+          // Format dates for all users in PostgreSQL too (using the same helper function)
+          return users.map((user: any) => formatUserDates(user));
         };
         
         // Add PostgreSQL-specific methods for analytics

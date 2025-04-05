@@ -271,7 +271,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all users (admin only)
   app.get("/api/admin/users", checkAdmin, async (req, res) => {
     try {
+      console.log("Admin API: Fetching all users");
       const users = await storage.getAllUsers();
+      console.log(`Retrieved ${users.length} users from database`);
+      
+      // Debug data without exposing sensitive information
+      const sanitizedDebug = users.map(user => ({
+        id: user.id,
+        username: user.username,
+        isAdmin: user.isAdmin,
+        hasValidDate: user.createdAt && !isNaN(new Date(user.createdAt).getTime())
+      }));
+      
+      console.log("Users debug info:", sanitizedDebug);
+      
       res.json(users);
     } catch (error) {
       console.error("Error fetching all users:", error);
@@ -282,7 +295,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user growth statistics (admin only)
   app.get("/api/admin/stats/user-growth", checkAdmin, async (req, res) => {
     try {
+      console.log("Admin API: Fetching user growth statistics");
       const stats = await storage.getUsersCreatedByDay();
+      console.log(`Retrieved statistics for ${stats.length} days`);
+      console.log("Growth statistics:", stats);
       res.json(stats);
     } catch (error) {
       console.error("Error fetching user growth stats:", error);
