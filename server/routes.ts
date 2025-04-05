@@ -288,23 +288,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/users", checkAdmin, async (req, res) => {
     try {
       console.log("Admin API: Fetching all users");
+      console.log("Admin ID from query:", req.query.adminId);
+      console.log("Admin ID from session:", req.session?.orangeId);
+      console.log("Admin status from session:", req.session?.isAdmin);
+      
       const users = await storage.getAllUsers();
       console.log(`Retrieved ${users.length} users from database`);
       
-      // Debug data without exposing sensitive information
-      const sanitizedDebug = users.map(user => ({
-        id: user.id,
-        username: user.username,
-        isAdmin: user.isAdmin,
-        hasValidDate: user.createdAt && !isNaN(new Date(user.createdAt).getTime())
-      }));
-      
-      console.log("Users debug info:", sanitizedDebug);
+      // More detailed debug info
+      users.forEach((user, index) => {
+        console.log(`User ${index + 1}:`, {
+          id: user.id,
+          orangeId: user.orangeId,
+          username: user.username, 
+          isAdmin: user.isAdmin,
+          createdAtRaw: user.createdAt,
+          createdAtParsed: user.createdAt ? new Date(user.createdAt).toString() : null,
+          isValidDate: user.createdAt && !isNaN(new Date(user.createdAt).getTime())
+        });
+      });
       
       // Fix invalid dates for the frontend
       const formattedUsers = users.map(user => {
         // If created date is invalid, set it to now
         if (!user.createdAt || isNaN(new Date(user.createdAt).getTime())) {
+          console.log(`Fixing invalid date for user ${user.id}`);
           return {
             ...user,
             createdAt: new Date().toISOString()
@@ -313,6 +321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return user;
       });
       
+      console.log(`Sending ${formattedUsers.length} formatted users to client`);
       res.json(formattedUsers);
     } catch (error) {
       console.error("Error fetching all users:", error);
