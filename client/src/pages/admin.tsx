@@ -65,7 +65,7 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [, setLocation] = useLocation();
   
-  // All data fetching in one useEffect
+  // All data fetching in one useEffect with caching
   useEffect(() => {
     const fetchAdminData = async () => {
       if (!user) {
@@ -83,16 +83,27 @@ export default function AdminPage() {
           return;
         }
         
-        console.log('Checking admin status with orangeId:', orangeId);
+        // Check for cached admin status
+        const cachedAdminStatus = sessionStorage.getItem(`adminStatus-${orangeId}`);
+        let isUserAdmin = false;
         
-        // Check if the user is an admin
-        const adminCheckResponse = await fetch(`/api/users/check-admin?orangeId=${orangeId}`);
-        const adminData = await adminCheckResponse.json();
+        if (cachedAdminStatus !== null) {
+          isUserAdmin = cachedAdminStatus === 'true';
+          setIsAdmin(isUserAdmin);
+        } else {
+          // If not cached, check admin status from server
+          const adminCheckResponse = await fetch(`/api/users/check-admin?orangeId=${orangeId}`);
+          const adminData = await adminCheckResponse.json();
+          
+          isUserAdmin = !!adminData.isAdmin;
+          setIsAdmin(isUserAdmin);
+          
+          // Cache the admin status
+          sessionStorage.setItem(`adminStatus-${orangeId}`, isUserAdmin.toString());
+        }
         
-        console.log('Admin check response:', adminData);
-        setIsAdmin(adminData.isAdmin);
-        
-        if (!adminData.isAdmin) {
+        // Redirect non-admin users
+        if (!isUserAdmin) {
           toast({
             title: "Access Denied",
             description: "You don't have admin privileges to view this page.",
@@ -104,27 +115,52 @@ export default function AdminPage() {
         
         setIsLoading(true);
         
-        // Fetch all users
-        console.log('Fetching users with admin ID:', orangeId);
-        const usersResponse = await fetch(`/api/admin/users?adminId=${orangeId}`);
-        if (!usersResponse.ok) {
-          throw new Error(`Failed to fetch users: ${usersResponse.statusText}`);
+        // Check for cached user data (valid for 30 seconds)
+        const cachedUsers = sessionStorage.getItem('admin-users-data');
+        const cachedUsersTimestamp = sessionStorage.getItem('admin-users-timestamp');
+        const cachedStats = sessionStorage.getItem('admin-stats-data');
+        const cachedStatsTimestamp = sessionStorage.getItem('admin-stats-timestamp');
+        
+        const now = Date.now();
+        const cacheValidTime = 30 * 1000; // 30 seconds
+        
+        // Use cached user data if available and fresh
+        if (cachedUsers && cachedUsersTimestamp && 
+            (now - parseInt(cachedUsersTimestamp)) < cacheValidTime) {
+          setUsers(JSON.parse(cachedUsers));
+        } else {
+          // Fetch all users
+          const usersResponse = await fetch(`/api/admin/users?adminId=${orangeId}`);
+          if (!usersResponse.ok) {
+            throw new Error(`Failed to fetch users: ${usersResponse.statusText}`);
+          }
+          
+          const usersData = await usersResponse.json();
+          setUsers(usersData);
+          
+          // Cache the results
+          sessionStorage.setItem('admin-users-data', JSON.stringify(usersData));
+          sessionStorage.setItem('admin-users-timestamp', now.toString());
         }
         
-        const usersData = await usersResponse.json();
-        console.log('Users data:', usersData);
-        setUsers(usersData);
-        
-        // Fetch growth stats
-        console.log('Fetching growth stats with admin ID:', orangeId);
-        const statsResponse = await fetch(`/api/admin/stats/user-growth?adminId=${orangeId}`);
-        if (!statsResponse.ok) {
-          throw new Error(`Failed to fetch growth stats: ${statsResponse.statusText}`);
+        // Use cached stats if available and fresh
+        if (cachedStats && cachedStatsTimestamp && 
+            (now - parseInt(cachedStatsTimestamp)) < cacheValidTime) {
+          setGrowthStats(JSON.parse(cachedStats));
+        } else {
+          // Fetch growth stats
+          const statsResponse = await fetch(`/api/admin/stats/user-growth?adminId=${orangeId}`);
+          if (!statsResponse.ok) {
+            throw new Error(`Failed to fetch growth stats: ${statsResponse.statusText}`);
+          }
+          
+          const statsData = await statsResponse.json();
+          setGrowthStats(statsData);
+          
+          // Cache the results
+          sessionStorage.setItem('admin-stats-data', JSON.stringify(statsData));
+          sessionStorage.setItem('admin-stats-timestamp', now.toString());
         }
-        
-        const statsData = await statsResponse.json();
-        console.log('Growth stats:', statsData);
-        setGrowthStats(statsData);
         
         setIsLoading(false);
       } catch (err) {
