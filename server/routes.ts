@@ -221,47 +221,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: req.session?.userId,
         orangeId: req.session?.orangeId,
         isAdmin: req.session?.isAdmin
+      })}, Headers: ${JSON.stringify({
+        origin: req.headers.origin,
+        referer: req.headers.referer,
+        host: req.headers.host,
+        adminId: req.headers['x-admin-id']
       })}`);
       
       // First check if admin status is stored in session and it's explicitly true
-      if (req.session && req.session.isAdmin === true && req.session.orangeId) {
-        console.log(`Using session for admin check: ${req.session.orangeId} is admin`);
+      // In SQLite, isAdmin is stored as 1/0 not true/false, so check for both
+      if (req.session && (req.session.isAdmin === true || req.session.isAdmin === 1 || Number(req.session.isAdmin) === 1) && req.session.userId) {
+        console.log(`Using session for admin check: User ID ${req.session.userId} is admin`);
         return next();
       }
       
-      // Fall back to query param/header if session doesn't indicate admin privileges
-      const orangeId = req.query.adminId || req.headers['x-admin-id'];
+      // Also check if the frontend has set an orangeId in the query param
+      const orangeId = req.query.adminId || 
+                       req.query.orangeId || 
+                       req.headers['x-admin-id'] || 
+                       req.session?.orangeId;
+      
+      // If we have a session orangeId but no adminId, check if that user is admin
+      if (orangeId) {
+        console.log(`Checking admin status for orangeId: ${orangeId}`);
+        const user = await storage.getUserByOrangeId(orangeId as string);
+        
+        if (!user) {
+          console.log(`User with orangeId ${orangeId} not found`);
+          return res.status(404).json({ error: "User not found" });
+        }
+        
+        if (!user.isAdmin) {
+          console.log(`User ${orangeId} is not an admin (isAdmin=${user.isAdmin})`);
+          return res.status(403).json({ error: "Unauthorized access" });
+        }
+        
+        console.log(`Confirmed user ${orangeId} is an admin (isAdmin=${user.isAdmin})`);
+        
+        // Store admin status in session for future requests
+        if (req.session) {
+          req.session.userId = user.id;
+          req.session.orangeId = user.orangeId;
+          req.session.isAdmin = user.isAdmin;
+        }
+        
+        return next();
+      }
       
       // If not in session and no ID provided, deny access
-      if (!orangeId) {
-        console.log('No admin identification found in request');
-        return res.status(401).json({ error: "Admin ID not provided" });
-      }
-      
-      // Validate the user exists and is an admin
-      console.log(`Checking admin status for orangeId: ${orangeId}`);
-      const user = await storage.getUserByOrangeId(orangeId as string);
-      
-      if (!user) {
-        console.log(`User with orangeId ${orangeId} not found`);
-        return res.status(404).json({ error: "User not found" });
-      }
-      
-      if (!user.isAdmin) {
-        console.log(`User ${orangeId} is not an admin`);
-        return res.status(403).json({ error: "Unauthorized access" });
-      }
-      
-      console.log(`Confirmed user ${orangeId} is an admin`);
-      
-      // Store admin status in session for future requests
-      if (req.session) {
-        req.session.userId = user.id;
-        req.session.orangeId = user.orangeId;
-        req.session.isAdmin = user.isAdmin;
-      }
-      
-      next();
+      console.log('No admin identification found in request');
+      return res.status(401).json({ error: "Admin ID not provided" });
     } catch (error) {
       console.error("Error in admin check middleware:", error);
       res.status(500).json({ error: "Internal server error" });
