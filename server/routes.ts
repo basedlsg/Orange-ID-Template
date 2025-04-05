@@ -4,7 +4,8 @@ import { storage } from "./storage";
 import {
   insertUserSchema,
   type User,
-  type InsertUser
+  type InsertUser,
+  shouldUseSqlite
 } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import 'express-session';
@@ -52,11 +53,8 @@ async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId:
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Route to get current database type
   app.get("/api/database-type", async (req, res) => {
-    // Check if we have a global setting, otherwise use environment variables
-    const globalSetting = (global as any).USE_SQLITE;
-    const useSqlite = typeof globalSetting !== 'undefined' 
-      ? globalSetting 
-      : (process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL);
+    // Use the environment variable directly
+    const useSqlite = process.env.USE_SQLITE === 'true';
     
     res.json({ type: useSqlite ? 'sqlite' : 'postgres' });
   });

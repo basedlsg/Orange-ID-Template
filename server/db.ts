@@ -7,6 +7,15 @@ import Database from "better-sqlite3";
 import fs from 'fs';
 import path from 'path';
 import { sql } from "drizzle-orm";
+import dotenv from "dotenv";
+
+// Load environment variables first
+dotenv.config();
+
+// Debug environment variables
+console.log("[db.ts] Environment variables:");
+console.log("[db.ts] - USE_SQLITE:", process.env.USE_SQLITE);
+console.log("[db.ts] - DEBUG_SQLITE:", process.env.DEBUG_SQLITE);
 
 // Import the shouldUseSqlite helper function
 import { shouldUseSqlite } from "@shared/schema";
@@ -85,7 +94,8 @@ let db: any;
 let pool: any = null;
 
 try {
-  const useSqlite = shouldUseSqlite();
+  // Force SQLite mode with environment variable
+  const useSqlite = process.env.USE_SQLITE === 'true';
   
   if (useSqlite) {
     console.log("Using SQLite database");

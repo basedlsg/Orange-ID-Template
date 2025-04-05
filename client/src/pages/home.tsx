@@ -134,12 +134,15 @@ export default function Home() {
                       <span className="font-semibold text-white">Role:</span>{" "}
                       {(user as any)?.role || "standard"}
                     </p>
+                    <p className="text-gray-300 mb-2">
+                      <span className="font-semibold text-white">Admin:</span>{" "}
+                      {isAdmin ? "Yes" : "No"}
+                    </p>
                   </div>
                   <div className="bg-gray-900 p-4 rounded shadow-sm">
                     <p className="text-sm text-gray-400">
-                      This user data is stored securely in your database 
-                      (PostgreSQL or SQLite). You can extend the user schema as needed for
-                      your application.
+                      This user data is stored securely in your SQLite database.
+                      You can extend the user schema as needed for your application.
                     </p>
                   </div>
                 </div>
@@ -165,13 +168,20 @@ export default function Home() {
               <h2 className="text-2xl font-bold mb-4 text-[#F37920]">
                 Getting Started
               </h2>
-              <p className="text-gray-300 mb-6">
+              <p className="text-gray-300 mb-4">
                 Click the{" "}
                 <span className="px-2 py-1 bg-gray-800 rounded text-[#F37920] font-semibold">
                   Login
                 </span>{" "}
                 button in the top-right corner to authenticate with Orange ID.
               </p>
+              <div className="p-4 bg-gray-800 rounded-md text-sm my-4">
+                <h4 className="font-semibold text-[#F37920] mb-2">🌟 First User Admin Feature</h4>
+                <p className="text-gray-300">
+                  The first user to log into a fresh installation will automatically become an administrator.
+                  This allows the template owner immediate access to all features.
+                </p>
+              </div>
             </div>
           )}
 
@@ -190,7 +200,7 @@ export default function Home() {
                 <li className="flex items-start">
                   <span className="text-[#F37920] mr-2">✓</span>
                   <span className="text-gray-300">
-                    Database integration (PostgreSQL or SQLite) with Drizzle ORM
+                    SQLite database integration with Drizzle ORM
                   </span>
                 </li>
                 <li className="flex items-start">
@@ -208,7 +218,7 @@ export default function Home() {
                 <li className="flex items-start">
                   <span className="text-[#F37920] mr-2">✓</span>
                   <span className="text-gray-300">
-                    User growth analytics visualization
+                    First-user-is-admin automatic privilege
                   </span>
                 </li>
               </ul>
@@ -226,24 +236,18 @@ export default function Home() {
                   Configure your Orange ID credentials
                 </li>
                 <li className="text-gray-300">
+                  Run the setup script: <code className="bg-gray-800 px-1 rounded text-gray-200">
+                    npx tsx scripts/setup.ts
+                  </code>
+                </li>
+                <li className="text-gray-300">
+                  Be the first to log in to become an admin
+                </li>
+                <li className="text-gray-300">
                   Extend the user schema as needed in{" "}
                   <code className="bg-gray-800 px-1 rounded text-gray-200">
                     shared/schema.ts
                   </code>
-                </li>
-                <li className="text-gray-300">
-                  Add your application-specific routes and components
-                </li>
-                <li className="text-gray-300">
-                  Use the{" "}
-                  <code className="bg-gray-800 px-1 rounded text-gray-200">
-                    isLoggedIn
-                  </code>{" "}
-                  and{" "}
-                  <code className="bg-gray-800 px-1 rounded text-gray-200">
-                    user
-                  </code>{" "}
-                  objects from the Orange ID provider
                 </li>
               </ol>
             </div>
@@ -254,10 +258,8 @@ export default function Home() {
               Database Configuration
             </h3>
             <p className="text-gray-300 mb-4">
-              This template supports both PostgreSQL (for Replit paid users) and SQLite (for free users).
-              During development, the selection is session-based and non-persistent. In production, set the 
-              <code className="bg-gray-800 px-1 mx-1 rounded text-gray-200">USE_SQLITE</code> 
-              environment variable.
+              This template uses SQLite by default, which requires zero configuration and works for all Replit users.
+              The database will be automatically created in the <code className="bg-gray-800 px-1 mx-1 rounded text-gray-200">data</code> directory.
             </p>
             
             <div className="space-y-4">
@@ -277,28 +279,6 @@ export default function Home() {
                     </span>
                   </div>
                 )}
-                
-                <form action="/api/switch-database" method="post" className="flex flex-col items-end">
-                  <input type="hidden" name="dbType" value={dbType === 'sqlite' ? 'postgres' : 'sqlite'} />
-                  <button 
-                    type="submit"
-                    className="px-4 py-2 bg-[#F37920] text-white rounded-md hover:bg-[#D86A10] transition-colors"
-                    disabled={isLoadingDbType}
-                  >
-                    Switch to {dbType === 'sqlite' ? 'PostgreSQL' : 'SQLite'}
-                  </button>
-                  <p className="text-xs text-gray-400 mt-1">Session-only demonstration</p>
-                </form>
-              </div>
-              
-              <div className="p-4 bg-gray-800 rounded-md">
-                <h4 className="text-sm font-semibold text-[#F37920] mb-2">Instructions for AI Assistant Use</h4>
-                <p className="text-sm text-gray-300">
-                  <span className="font-semibold">For paid Replit users:</span> The AI should configure this app to use PostgreSQL by default, which is already set up.
-                </p>
-                <p className="text-sm text-gray-300 mt-1">
-                  <span className="font-semibold">For free Replit users:</span> The AI should modify the code to set <code className="bg-gray-700 px-1 rounded">USE_SQLITE=true</code> in the .env file to use SQLite instead.
-                </p>
               </div>
             </div>
           </div>
@@ -313,14 +293,8 @@ export default function Home() {
             </p>
             <div className="inline-flex space-x-4">
               <a
-                href="https://github.com/your-repo/orange-auth-template"
-                className="px-4 py-2 bg-[#F37920] text-white rounded-md hover:bg-[#D86A10] transition-colors"
-              >
-                GitHub Repository
-              </a>
-              <a
                 href="/admin"
-                className="px-4 py-2 border border-[#F37920] text-[#F37920] rounded-md hover:bg-gray-700 transition-colors"
+                className="px-4 py-2 bg-[#F37920] text-white rounded-md hover:bg-[#D86A10] transition-colors"
               >
                 Admin Dashboard
               </a>

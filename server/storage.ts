@@ -75,9 +75,32 @@ export class DatabaseStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     return this.safeDbOperation(
-      () => (db as any).createUser(insertUser),
       async () => {
-        const [user] = await db.insert(users).values(insertUser).returning();
+        // Check if this is the first user being created
+        const allUsers = await this.getAllUsers();
+        const isFirstUser = allUsers.length === 0;
+        
+        // If this is the first user, make them an admin
+        const userToCreate = {
+          ...insertUser,
+          isAdmin: isFirstUser ? true : false
+        };
+        
+        // Call the createUser method on the mock DB
+        return (db as any).createUser(userToCreate);
+      },
+      async () => {
+        // Check if this is the first user by counting existing users
+        const userCount = await db.select({ count: sql`count(*)` }).from(users);
+        const isFirstUser = parseInt(userCount[0]?.count?.toString() || '0', 10) === 0;
+        
+        // If this is the first user, make them an admin
+        const userToCreate = {
+          ...insertUser,
+          isAdmin: isFirstUser ? true : false
+        };
+        
+        const [user] = await db.insert(users).values(userToCreate).returning();
         return user;
       }
     );

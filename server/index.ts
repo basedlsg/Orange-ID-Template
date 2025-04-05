@@ -5,6 +5,17 @@ import { setupVite, serveStatic, log } from "./vite";
 import { pool } from "./db";
 import path from "path";
 import fs from "fs";
+import dotenv from "dotenv";
+
+// Explicitly load environment variables from .env file
+dotenv.config();
+
+// Debug environment variables
+console.log("Environment variables:");
+console.log("- USE_SQLITE:", process.env.USE_SQLITE);
+console.log("- DEBUG_SQLITE:", process.env.DEBUG_SQLITE);
+console.log("- DATABASE_URL:", process.env.DATABASE_URL ? "is set" : "is not set");
+console.log("- Node env:", process.env.NODE_ENV);
 
 // Determine if we should use SQLite or PostgreSQL
 const useSqlite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL;
