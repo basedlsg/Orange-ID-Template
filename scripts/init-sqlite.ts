@@ -1,58 +1,33 @@
-// Script to initialize SQLite database with required tables
-import Database from "better-sqlite3";
+/**
+ * This script is a simple wrapper around the main setup.ts script
+ * for backward compatibility with older documentation.
+ * 
+ * It ensures that SQLite mode is activated and then runs the setup script.
+ */
+
+import { execSync } from 'child_process';
+import chalk from 'chalk';
 import path from 'path';
 import fs from 'fs';
 
-// Create data directory if it doesn't exist
-const dbDir = path.join(process.cwd(), 'data');
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+// Ensure the .env file exists
+const envPath = path.join(process.cwd(), '.env');
+if (!fs.existsSync(envPath)) {
+  fs.writeFileSync(envPath, 'USE_SQLITE=true\n');
+} else {
+  // Check if USE_SQLITE is in the .env file
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  if (!envContent.includes('USE_SQLITE=true')) {
+    fs.appendFileSync(envPath, '\nUSE_SQLITE=true\n');
+  }
 }
 
-// Create or open the SQLite database file
-const dbPath = path.join(dbDir, 'orange_auth.db');
-console.log(`Initializing SQLite database at: ${dbPath}`);
-const db = new Database(dbPath);
+console.log(chalk.blue('ℹ Setting SQLite mode and running the unified setup script...'));
 
-// Create users table with required schema
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    orange_id TEXT NOT NULL UNIQUE,
-    username TEXT NOT NULL,
-    email TEXT,
-    role TEXT NOT NULL DEFAULT 'user',
-    is_admin INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-`);
-
-console.log("Users table created successfully");
-
-// Create a test admin user if it doesn't exist
-const adminExists = db.prepare('SELECT 1 FROM users WHERE orange_id = ?').get('admin123');
-if (!adminExists) {
-  db.prepare(`
-    INSERT INTO users (orange_id, username, email, role, is_admin) 
-    VALUES (?, ?, ?, ?, ?)
-  `).run('admin123', 'admin', 'admin@example.com', 'admin', 1);
-  console.log("Admin user created");
+// Run the main setup script
+try {
+  execSync('npx tsx scripts/setup.ts', { stdio: 'inherit' });
+} catch (error) {
+  console.error(chalk.red('✗ Failed to run the setup script:'), error);
+  process.exit(1);
 }
-
-// Create sample user
-const testUserExists = db.prepare('SELECT 1 FROM users WHERE orange_id = ?').get('test-sqlite-user');
-if (!testUserExists) {
-  db.prepare(`
-    INSERT INTO users (orange_id, username, email, role, is_admin) 
-    VALUES (?, ?, ?, ?, ?)
-  `).run('test-sqlite-user', 'sqliteuser', 'sqlite@example.com', 'user', 0);
-  console.log("Test user created");
-}
-
-// List all users in the database
-const users = db.prepare('SELECT * FROM users').all();
-console.log("Current users in database:", users);
-
-// Close the database connection
-db.close();
-console.log("SQLite database initialization complete");
