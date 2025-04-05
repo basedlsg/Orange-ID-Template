@@ -6,7 +6,7 @@ This document provides comprehensive guidance for AI assistants to help users bu
 
 The Orange Auth Template is a starter template that provides:
 - Authentication using OrangeID (Bedrock Passport)
-- User management with database storage (PostgreSQL or SQLite)
+- User management with SQLite database storage (PostgreSQL optional)
 - Session-based authentication with secure cookie storage
 - Admin dashboard with user analytics
 - Modern, responsive UI with dark theme and orange accents
@@ -16,7 +16,6 @@ The Orange Auth Template is a starter template that provides:
 Users are encouraged to provide comprehensive prompts that describe their entire application. These may include:
 - The application/game they want to build (e.g., quiz game, task manager)
 - Specific features they want to implement
-- Database preferences (SQLite for free users, PostgreSQL for paid)
 - UI/UX requirements and changes to the default design
 - Admin dashboard extensions or modifications
 
@@ -24,14 +23,14 @@ When handling these comprehensive prompts, you should:
 
 1. **Analyze the full scope of the request** - Understand all components of what they're trying to build
 2. **Develop a step-by-step implementation plan** - Create a clear execution strategy
-3. **Start with database configuration** - Set up SQLite or PostgreSQL as requested
+3. **Start with database initialization** - Run the setup script to initialize SQLite
 4. **Implement features in logical order** - Core functionality first, then additional features
 5. **Verify each component works** - Test and confirm functionality before moving to the next feature
 6. **Maintain the template's design language** - Keep the dark theme with orange accents unless requested otherwise
 
 ## Database Setup Using the Unified Setup Script
 
-The template includes a unified setup script that automatically handles database initialization for both SQLite and PostgreSQL. This is the recommended way to set up the database as it prevents common errors.
+The template includes a unified setup script that automatically handles database initialization. This is the recommended way to set up the database as it prevents common errors.
 
 ### Running the Setup Script
 
@@ -42,47 +41,28 @@ npx tsx scripts/setup.ts
 ```
 
 This script will:
-1. Detect if SQLite or PostgreSQL should be used based on environment variables
+1. Create the SQLite database by default
 2. Create the necessary database tables
 3. Add sample admin and test users
 4. Verify database connectivity
 5. Provide feedback on the setup status
 
-### 1. Setup for Free Replit Users (SQLite)
+### Quick Setup (SQLite)
 
-For free Replit users:
+SQLite is the default and recommended database option:
 
-1. Ensure `USE_SQLITE=true` in the `.env` file (or omit DATABASE_URL entirely)
-2. Run the setup script:
+1. Run the setup script:
    ```bash
    npx tsx scripts/setup.ts
    ```
-3. The script will:
+2. The script will:
    - Create the SQLite database file at `data/orange_auth.db`
    - Create the necessary tables
    - Add sample admin and test users
-4. Start the application with the default workflow
-5. Verify login works with the sample admin credentials (shown in the script output)
+3. Start the application with the default workflow
+4. Verify login works with the sample admin credentials (shown in the script output)
 
-### 2. Setup for Core (Paid) Replit Users (PostgreSQL)
-
-For Core (paid) Replit users:
-
-1. Guide them to create a PostgreSQL database in Replit:
-   - Click on the "Database" tab in Replit
-   - Click "Create a PostgreSQL Database" 
-   - Wait for the database to be created
-2. Ensure `USE_SQLITE=true` is NOT present in `.env`
-3. Run the setup script:
-   ```bash
-   npx tsx scripts/setup.ts
-   ```
-4. The script will:
-   - Connect to the PostgreSQL database
-   - Create the necessary tables
-   - Add sample admin and test users
-5. Start the application with the default workflow
-6. Verify login works with the sample admin credentials (shown in the script output)
+No environment variables or special configuration is required for SQLite to work.
 
 ## Implementing Common Application Types
 
@@ -130,15 +110,16 @@ For web application implementations:
 
 When adding fields to the user schema:
 
-1. Update both PostgreSQL and SQLite schemas in `shared/schema.ts`:
+1. Update the schema in `shared/schema.ts`:
    ```typescript
-   export const pgUsers = pgTable("users", {
+   export const sqliteUsers = sqliteTable("users", {
      // Existing fields
      newField: text("new_field"),
      // Other new fields
    });
    
-   export const sqliteUsers = sqliteTable("users", {
+   // If supporting PostgreSQL is needed, also update:
+   export const pgUsers = pgTable("users", {
      // Existing fields
      newField: text("new_field"),
      // Other new fields
@@ -206,17 +187,12 @@ To extend the admin dashboard:
 
 ## Common Issues and Solutions
 
-1. **SQLite vs PostgreSQL Compatibility**:
-   - Use Drizzle ORM's `sql` template to write database-agnostic queries
-   - Handle date formatting differences between SQLite and PostgreSQL
-   - Use the `shouldUseSqlite()` helper for conditional database logic
-
-2. **Authentication State Management**:
+1. **Authentication State Management**:
    - Authentication state is managed by the OrangeAuthProvider component
    - Use the `useOrangeAuth()` hook to access user state in components
    - Session is stored in cookies and managed by Express
 
-3. **Database Migration Issues**:
+2. **Database Migration Issues**:
    - For schema changes, run the setup script again
    - If data preservation is critical, use Drizzle's migration tools
    - If all else fails, backup your data before dropping and recreating tables
@@ -245,4 +221,31 @@ When implementing features based on user prompts:
   - `index.ts`: Server setup with session management
 - `/shared/schema.ts`: Database schema definitions
 - `/scripts`: Utility scripts
-  - `setup.ts`: Unified database setup script for both SQLite and PostgreSQL
+  - `setup.ts`: Unified database setup script
+
+## Advanced: PostgreSQL Configuration (Optional)
+
+If a user specifically requests PostgreSQL instead of the default SQLite:
+
+### For Replit Core (Paid) Users
+
+1. Guide them to create a PostgreSQL database in Replit:
+   - Click on the "Database" tab in Replit
+   - Click "Create a PostgreSQL Database" 
+   - Wait for the database to be created
+
+2. Run the setup script:
+   ```bash
+   npx tsx scripts/setup.ts
+   ```
+
+### For Users with External PostgreSQL
+
+If a user wants to use an external PostgreSQL database:
+
+1. Help them create a database on a service like Neon, Supabase, or ElephantSQL
+2. Guide them to add the connection string as a `DATABASE_URL` secret in Replit
+3. Run the setup script:
+   ```bash
+   npx tsx scripts/setup.ts
+   ```

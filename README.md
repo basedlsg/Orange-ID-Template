@@ -4,14 +4,12 @@
 
 ## 🚀 Quick Start with AI
 
-Just copy and paste one of these prompts to get started. The AI will handle everything else!
-
-### For Free Users (SQLite)
+Just copy and paste this prompt to get started. The AI will handle everything else!
 
 ```
-I want to set up the Orange Auth Template with SQLite for my project. I'm a free Replit user.
+I want to set up the Orange Auth Template for my project.
 
-First, run the setup script to initialize the database:
+First, run the setup script to initialize the SQLite database:
 npx tsx scripts/setup.ts
 
 Then help me build a [game/app type] with these features:
@@ -23,27 +21,10 @@ Replace the home screen with [your main feature] and keep the admin dashboard as
 Make sure users need to log in before accessing any of the game/app features.
 ```
 
-### For Core Users (PostgreSQL)
-
-```
-I want to set up the Orange Auth Template with PostgreSQL for my project. I'm a Core Replit user.
-
-Help me create a PostgreSQL database in Replit first, then run the setup script:
-npx tsx scripts/setup.ts
-
-I'd like to build a [game/app type] with these features:
-- [Feature 1]
-- [Feature 2]
-- [Feature 3]
-
-Replace the home page with [your main feature]. Keep the admin dashboard, but extend
-it to include [custom admin feature]. Ensure users must log in to access my application.
-```
-
 ### Complete Example Prompt (Game)
 
 ```
-I want to build a multiplayer snake game using the Orange Auth Template. I'm a free Replit user.
+I want to build a multiplayer snake game using the Orange Auth Template.
 
 My game should have:
 - A classic snake game with arrow key controls
@@ -53,7 +34,10 @@ My game should have:
 
 Replace the home screen with the game canvas and menu options.
 Keep the admin dashboard as is and make sure users need to log in before playing.
-Set up the SQLite database and add fields to store user scores and preferences.
+Run the setup script to initialize the SQLite database:
+npx tsx scripts/setup.ts
+
+Then add fields to store user scores and preferences.
 Add a way for admins to reset scores or ban users who use inappropriate names.
 
 Please implement this while maintaining the dark theme with orange accents.
@@ -62,7 +46,7 @@ Please implement this while maintaining the dark theme with orange accents.
 ### Complete Example Prompt (Web App)
 
 ```
-I want to build a to-do list application using the Orange Auth Template. I'm a Core Replit user.
+I want to build a to-do list application using the Orange Auth Template.
 
 My app should have:
 - Task creation with title, description, due date, and priority
@@ -71,7 +55,9 @@ My app should have:
 - Task sharing between users
 - Weekly productivity reports with charts
 
-Help me create a PostgreSQL database in Replit, then set up the application.
+Run the setup script to initialize the SQLite database:
+npx tsx scripts/setup.ts
+
 Replace the home page with the task dashboard and ensure users must log in to see their tasks.
 Extend the admin dashboard to include system-wide statistics about task completion rates.
 Add the necessary database fields for tasks, categories, and sharing permissions.
@@ -89,7 +75,7 @@ A clean, simplified template application with OrangeID authentication and user d
 
 - **OrangeID Authentication**: Simple login/logout system using Orange ID
 - **Session Management**: Secure session-based authentication using express-session
-- **User Database**: Storage for user information (PostgreSQL or SQLite)
+- **User Database**: Storage for user information (SQLite by default)
 - **Clean Interface**: Minimalist UI with dark theme and orange accents
 - **Role-based Authorization**: Support for admin and regular user roles
 - **Admin Dashboard**: User management and analytics for administrators
@@ -99,15 +85,15 @@ A clean, simplified template application with OrangeID authentication and user d
 
 - Frontend: React with TypeScript, Vite, Tailwind CSS, Shadcn UI components
 - Backend: Express.js with session management
-- Database: PostgreSQL or SQLite with Drizzle ORM
+- Database: SQLite with Drizzle ORM (PostgreSQL optional)
 - Authentication: OrangeID (via Bedrock Passport)
-- Sessions: express-session with database storage
+- Sessions: express-session with memory/database storage
 
-## Detailed Setup Guide
+## Setup Guide
 
-### Universal Setup Script
+### Quick Setup with SQLite (Recommended)
 
-This template includes a unified setup script that automatically detects your environment and sets up the appropriate database (SQLite or PostgreSQL):
+This template is pre-configured to work with SQLite, which requires zero configuration and works for all Replit users (free and paid):
 
 1. **Run the Setup Script**:
    ```bash
@@ -115,54 +101,22 @@ This template includes a unified setup script that automatically detects your en
    ```
 
 2. **The script will**:
-   - Detect if SQLite or PostgreSQL should be used based on environment variables
-   - Create the necessary database tables
+   - Create the SQLite database in the `data` directory
+   - Create necessary database tables
    - Add sample admin and test users
    - Verify database connectivity
    - Display the admin credentials for logging in
-
-### For Replit Core (Paid) Users
-
-1. **Database Setup Using Replit PostgreSQL**:
-   - Click on the "Tools" icon in the left sidebar of Replit
-   - Select "Secrets" and confirm that `DATABASE_URL` is not set
-   - Click on "Database" in the left sidebar
-   - Click "Create a PostgreSQL Database" button
-   - Wait for the database to be created (this sets up all required environment variables automatically)
-
-2. **Run the Setup Script**:
-   ```bash
-   npx tsx scripts/setup.ts
-   ```
 
 3. **Start the Application**:
    - The default workflow "Start application" is already configured to run the server
    - Click "Run" in Replit to start the application
    - The application will be accessible at the web view URL
 
-### For Free Users
+### Environment Variables (Optional)
 
-If you're using a free Replit account, the recommended approach is to use SQLite:
+No environment variables are required for the default SQLite setup. However, you can customize:
 
-1. **Activate SQLite Mode**:
-   - Set the environment variable `USE_SQLITE` to `true`:
-     1. Click on the "Tools" icon in the left sidebar of Replit
-     2. Select "Secrets"
-     3. Add a new secret with key `USE_SQLITE` and value `true`
-   - Alternatively, you can omit DATABASE_URL entirely and SQLite will be used by default
-
-2. **Run the Setup Script**:
-   ```bash
-   npx tsx scripts/setup.ts
-   ```
-
-3. **Alternative: External PostgreSQL Services**:
-   - If you prefer PostgreSQL, you can use a free service like:
-     - [Neon](https://neon.tech)
-     - [Supabase](https://supabase.com)
-     - [ElephantSQL](https://www.elephantsql.com/)
-   - Create a database and add the connection string as a `DATABASE_URL` secret in Replit
-   - Make sure `USE_SQLITE` is not set to `true` or remove it if present
+- `SESSION_SECRET`: Secret for signing session cookies (defaults to a placeholder in development)
 
 ## Building Your Application
 
@@ -267,13 +221,48 @@ This template is designed as a starting point. Here are some ways to customize i
   - `index.ts`: Server setup with session management
 - `/shared/schema.ts`: Database schema definitions
 - `/scripts`: Utility scripts
-  - `setup.ts`: Unified database setup script for both SQLite and PostgreSQL
+  - `setup.ts`: Unified database setup script
 
-## Environment Variables
+## Advanced: Using PostgreSQL (Optional)
 
-- `DATABASE_URL`: PostgreSQL connection string (or SQLite path)
-- `USE_SQLITE`: Set to "true" to use SQLite instead of PostgreSQL
-- `SESSION_SECRET`: Secret for signing session cookies (defaults to a placeholder in development)
+If you prefer to use PostgreSQL instead of SQLite, follow these steps:
+
+### For Replit Core (Paid) Users
+
+1. **Database Setup Using Replit PostgreSQL**:
+   - Click on the "Tools" icon in the left sidebar of Replit
+   - Select "Secrets" and confirm that `DATABASE_URL` is not set
+   - Click on "Database" in the left sidebar
+   - Click "Create a PostgreSQL Database" button
+   - Wait for the database to be created (this sets up all required environment variables automatically)
+
+2. **Run the Setup Script**:
+   ```bash
+   npx tsx scripts/setup.ts
+   ```
+
+### For Free Users Who Want PostgreSQL
+
+If you're using a free Replit account but still want to use PostgreSQL:
+
+1. **Use an External PostgreSQL Service**:
+   - Create a database on a free service like:
+     - [Neon](https://neon.tech)
+     - [Supabase](https://supabase.com)
+     - [ElephantSQL](https://www.elephantsql.com/)
+   - Add the connection string as a `DATABASE_URL` secret in Replit:
+     1. Click on the "Tools" icon in the left sidebar
+     2. Select "Secrets"
+     3. Add a new secret with key `DATABASE_URL` and your connection string as the value
+
+2. **Run the Setup Script**:
+   ```bash
+   npx tsx scripts/setup.ts
+   ```
+
+### Environment Variables for PostgreSQL
+
+- `DATABASE_URL`: PostgreSQL connection string
 
 ## License
 
