@@ -148,6 +148,19 @@ try {
         ? new Database(dbPath, { verbose: console.log }) 
         : new Database(dbPath);
       
+      // Create the users table if it doesn't exist
+      sqlite.exec(`
+        CREATE TABLE IF NOT EXISTS users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          orange_id TEXT NOT NULL UNIQUE,
+          username TEXT NOT NULL,
+          email TEXT,
+          role TEXT NOT NULL DEFAULT 'user',
+          is_admin INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT NOT NULL
+        )
+      `);
+      
       // Create the drizzle SQLite client
       db = drizzleSQLite(sqlite, { schema });
       
