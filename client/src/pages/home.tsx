@@ -12,36 +12,7 @@ export default function Home() {
   const { toast } = useToast();
   const [location] = useLocation();
 
-  // Check URL params for database switch notifications
-  useEffect(() => {
-    // Parse the URL query parameters
-    const params = new URLSearchParams(window.location.search);
-    
-    // Check for database switch success
-    if (params.get('db_switched') === 'true') {
-      const type = params.get('type');
-      toast({
-        title: "Database Configuration Updated",
-        description: `Successfully switched to ${type === 'sqlite' ? 'SQLite' : 'PostgreSQL'} database. Restart the application for changes to take effect.`,
-        variant: "default",
-      });
-      
-      // Remove the query parameters without causing a page reload
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-    
-    // Check for database switch error
-    if (params.get('db_error') === 'true') {
-      toast({
-        title: "Database Configuration Error",
-        description: "Failed to switch database type. Please check the server logs for details.",
-        variant: "destructive",
-      });
-      
-      // Remove the query parameters without causing a page reload
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, [location, toast]);
+  // No need for database switch notifications anymore
 
   // Get current database type
   useEffect(() => {
