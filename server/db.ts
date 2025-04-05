@@ -13,11 +13,6 @@ import dotenv from "dotenv";
 // Load environment variables first
 dotenv.config();
 
-// Debug environment variables
-console.log("[db.ts] Environment variables:");
-console.log("[db.ts] - USE_SQLITE:", process.env.USE_SQLITE);
-console.log("[db.ts] - DEBUG_SQLITE:", process.env.DEBUG_SQLITE);
-
 // Import the shouldUseSqlite helper function
 import { shouldUseSqlite } from "@shared/schema";
 
@@ -122,8 +117,6 @@ try {
   const useSqlite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL;
   
   if (useSqlite) {
-    console.log("Using SQLite database");
-    
     // Setup SQLite database
     // Create data directory if it doesn't exist
     const dbDir = path.join(process.cwd(), 'data');
@@ -133,17 +126,9 @@ try {
     
     // Create or open the SQLite database file
     const dbPath = path.join(dbDir, 'orange_auth.db');
-    console.log(`SQLite database path: ${dbPath}`);
     
     try {
-      // Check if database file exists
-      if (fs.existsSync(dbPath)) {
-        console.log("SQLite database file exists");
-      } else {
-        console.log("SQLite database file doesn't exist, will be created");
-      }
-      
-      // Create instance with verbose logging if debugging is enabled
+      // Create instance with verbose logging only if debugging is explicitly enabled
       sqlite = process.env.DEBUG_SQLITE === 'true' 
         ? new Database(dbPath, { verbose: console.log }) 
         : new Database(dbPath);
@@ -196,9 +181,6 @@ try {
             createdAt: new Date().toISOString() // Set timestamp explicitly
           };
           
-          // For debugging
-          console.log("Creating user with data:", userToCreate);
-          
           const [user] = await db.insert(schema.users).values(userToCreate).returning();
           return user;
         } catch (error) {
@@ -207,7 +189,6 @@ try {
           // If Drizzle ORM fails, fall back to raw SQL
           if (sqlite) {
             try {
-              console.log("Falling back to raw SQL insert");
               const countResult = sqlite.prepare("SELECT COUNT(*) as count FROM users").get();
               const isFirstUser = parseInt((countResult as any).count, 10) === 0;
               
