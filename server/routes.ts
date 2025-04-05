@@ -193,8 +193,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           req.session.isAdmin = user.isAdmin;
         }
         
-        console.log(`Admin check for orangeId ${orangeId}: isAdmin=${user.isAdmin}`);
-        return res.json({ isAdmin: user.isAdmin });
+        // In SQLite, isAdmin could be a number (1 or 0) so convert to boolean to ensure consistent API
+        const isAdmin = Boolean(user.isAdmin);
+        console.log(`Admin check for orangeId ${orangeId}: isAdmin=${isAdmin} (raw value=${user.isAdmin})`);
+        return res.json({ isAdmin: isAdmin });
       }
       
       // If no orangeId provided, check session
@@ -258,12 +260,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ error: "User not found" });
         }
         
-        if (!user.isAdmin) {
-          console.log(`User ${orangeId} is not an admin (isAdmin=${user.isAdmin})`);
+        // In SQLite, isAdmin could be a number (1 or 0) so convert to boolean to ensure consistent checks
+        const isAdmin = Boolean(user.isAdmin);
+        if (!isAdmin) {
+          console.log(`User ${orangeId} is not an admin (isAdmin=${user.isAdmin}, converted=${isAdmin})`);
           return res.status(403).json({ error: "Unauthorized access" });
         }
         
-        console.log(`Confirmed user ${orangeId} is an admin (isAdmin=${user.isAdmin})`);
+        console.log(`Confirmed user ${orangeId} is an admin (isAdmin=${user.isAdmin}, converted=${isAdmin})`);
         
         // Store admin status in session for future requests
         if (req.session) {
