@@ -51,6 +51,8 @@ async function storeUserInDB(user: any) {
       email: user.email || "",
     };
 
+    console.log("Storing user in database:", userData);
+
     const response = await fetch("/api/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -58,8 +60,9 @@ async function storeUserInDB(user: any) {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to store user data");
+      const errorData = await response.json();
+      console.error("Server error response:", errorData);
+      throw new Error(errorData.error || "Failed to store user data");
     }
 
     return response.json();

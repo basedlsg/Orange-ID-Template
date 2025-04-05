@@ -7,6 +7,7 @@ import Database from "better-sqlite3";
 import fs from 'fs';
 import path from 'path';
 import { sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import dotenv from "dotenv";
 
 // Load environment variables first
@@ -94,14 +95,14 @@ let db: any;
 let pool: any = null;
 
 try {
-  // Force SQLite mode with environment variable
-  const useSqlite = process.env.USE_SQLITE === 'true';
+  // Determine if we should use SQLite
+  const useSqlite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL;
   
   if (useSqlite) {
     console.log("Using SQLite database");
     
     // Setup SQLite database
-    // Create uploads directory if it doesn't exist
+    // Create data directory if it doesn't exist
     const dbDir = path.join(process.cwd(), 'data');
     if (!fs.existsSync(dbDir)) {
       fs.mkdirSync(dbDir, { recursive: true });
@@ -109,29 +110,84 @@ try {
     
     // Create or open the SQLite database file
     const dbPath = path.join(dbDir, 'orange_auth.db');
-    const sqlite = new Database(dbPath);
+    console.log(`SQLite database path: ${dbPath}`);
     
-    // Create the drizzle SQLite client
-    db = drizzleSQLite(sqlite, { schema });
-    
-    // Handle user creation date stats query for SQLite
-    // This is needed because SQLite date functions differ from PostgreSQL
-    db.getUsersCreatedByDay = async () => {
-      // SQLite version of the date grouping query
-      const results = await sqlite.prepare(`
-        SELECT 
-          DATE(created_at) as date,
-          COUNT(*) as count
-        FROM users
-        GROUP BY DATE(created_at)
-        ORDER BY date
-      `).all();
+    try {
+      // Check if database file exists
+      if (fs.existsSync(dbPath)) {
+        console.log("SQLite database file exists");
+      } else {
+        console.log("SQLite database file doesn't exist, will be created");
+      }
       
-      return results.map((row: any) => ({
-        date: row.date,
-        count: row.count
-      }));
-    };
+      // Create instance with verbose logging if debugging is enabled
+      const sqlite = process.env.DEBUG_SQLITE === 'true' 
+        ? new Database(dbPath, { verbose: console.log }) 
+        : new Database(dbPath);
+      
+      // Create the drizzle SQLite client
+      db = drizzleSQLite(sqlite, { schema });
+      
+      // Add additional methods to the db object to match the IStorage interface
+      // This allows db to be used directly when needed
+      db.getUser = async (id: number) => {
+        const [user] = await db.select().from(schema.users).where(eq(schema.users.id, id));
+        return user;
+      };
+      
+      db.getUserByOrangeId = async (orangeId: string) => {
+        const [user] = await db.select().from(schema.users).where(eq(schema.users.orangeId, orangeId));
+        return user;
+      };
+      
+      db.getUserByUsername = async (username: string) => {
+        const [user] = await db.select().from(schema.users).where(eq(schema.users.username, username));
+        return user;
+      };
+      
+      db.createUser = async (insertUser: any) => {
+        // Check if this is the first user by counting existing users
+        const userCount = await db.select({ count: sql`count(*)` }).from(schema.users);
+        const isFirstUser = parseInt(userCount[0]?.count?.toString() || '0', 10) === 0;
+        
+        // If this is the first user, make them an admin
+        const userToCreate = {
+          ...insertUser,
+          isAdmin: isFirstUser ? true : (insertUser.isAdmin || false)
+        };
+        
+        const [user] = await db.insert(schema.users).values(userToCreate).returning();
+        return user;
+      };
+      
+      db.getAllUsers = async () => {
+        return await db.select().from(schema.users).orderBy(schema.users.createdAt);
+      };
+      
+      // Handle user creation date stats query for SQLite
+      db.getUsersCreatedByDay = async () => {
+        // SQLite version of the date grouping query
+        const results = await sqlite.prepare(`
+          SELECT 
+            DATE(created_at) as date,
+            COUNT(*) as count
+          FROM users
+          GROUP BY DATE(created_at)
+          ORDER BY date
+        `).all();
+        
+        return results.map((row: any) => ({
+          date: row.date,
+          count: row.count
+        }));
+      };
+      
+      console.log("Successfully configured SQLite database with all required methods");
+    } catch (sqliteError) {
+      console.error("Error setting up SQLite database:", sqliteError);
+      console.log("Falling back to in-memory mock database");
+      db = mockDb;
+    }
   } else {
     // PostgreSQL setup
     console.log("Using PostgreSQL database");
@@ -140,10 +196,54 @@ try {
       console.log("No DATABASE_URL found. Using in-memory mock database instead.");
       db = mockDb;
     } else {
-      // Setup PostgreSQL client
-      const connectionString = process.env.DATABASE_URL || '';
-      pool = postgres(connectionString, { max: 10 });
-      db = drizzle(pool, { schema });
+      try {
+        // Setup PostgreSQL client
+        const connectionString = process.env.DATABASE_URL || '';
+        pool = postgres(connectionString, { max: 10 });
+        db = drizzle(pool, { schema });
+        
+        // Add methods to match the IStorage interface
+        // This allows db to be used directly when needed
+        db.getUser = async (id: number) => {
+          const [user] = await db.select().from(schema.users).where(eq(schema.users.id, id));
+          return user;
+        };
+        
+        db.getUserByOrangeId = async (orangeId: string) => {
+          const [user] = await db.select().from(schema.users).where(eq(schema.users.orangeId, orangeId));
+          return user;
+        };
+        
+        db.getUserByUsername = async (username: string) => {
+          const [user] = await db.select().from(schema.users).where(eq(schema.users.username, username));
+          return user;
+        };
+        
+        db.createUser = async (insertUser: any) => {
+          // Check if this is the first user by counting existing users
+          const userCount = await db.select({ count: sql`count(*)` }).from(schema.users);
+          const isFirstUser = parseInt(userCount[0]?.count?.toString() || '0', 10) === 0;
+          
+          // If this is the first user, make them an admin
+          const userToCreate = {
+            ...insertUser,
+            isAdmin: isFirstUser ? true : (insertUser.isAdmin || false)
+          };
+          
+          const [user] = await db.insert(schema.users).values(userToCreate).returning();
+          return user;
+        };
+        
+        db.getAllUsers = async () => {
+          return await db.select().from(schema.users).orderBy(schema.users.createdAt);
+        };
+        
+        console.log("Successfully configured PostgreSQL database with all required methods");
+      } catch (pgError) {
+        console.error("Error setting up PostgreSQL:", pgError);
+        console.log("Falling back to in-memory mock database");
+        db = mockDb;
+      }
     }
   }
 } catch (error) {
