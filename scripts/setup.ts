@@ -10,9 +10,9 @@
  * Features:
  *   - Detects environment configuration (SQLite vs PostgreSQL)
  *   - Creates database tables
- *   - Adds sample admin and test users
  *   - Validates database connectivity
  *   - Provides clear success/error feedback
+ *   - The first user to log in will automatically become admin
  */
 
 import fs from 'fs';
@@ -20,27 +20,13 @@ import path from 'path';
 import { config } from 'dotenv';
 import Database from 'better-sqlite3';
 import postgres from 'postgres';
-import chalk from 'chalk'; // We'll need to add this dependency
+import chalk from 'chalk';
 
 // Load environment variables
 config();
 
 // Constants
 const SQLITE_DB_PATH = path.join(process.cwd(), 'data', 'orange_auth.db');
-const DEFAULT_ADMIN = {
-  orangeId: 'admin123',
-  username: 'admin',
-  email: 'admin@example.com',
-  role: 'admin',
-  isAdmin: true
-};
-const DEFAULT_USER = {
-  orangeId: 'user456',
-  username: 'testuser',
-  email: 'user@example.com',
-  role: 'user',
-  isAdmin: false
-};
 
 // Determine database type
 const shouldUseSqlite = (): boolean => {
@@ -100,60 +86,29 @@ async function setupSqlite() {
       )
     `);
     
-    // Add admin user if not exists
-    log.info('Creating default admin user if not exists...');
-    const adminExists = db.prepare('SELECT 1 FROM users WHERE orange_id = ?').get(DEFAULT_ADMIN.orangeId);
+    // Check if there are any users
+    const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
+    log.info(`Found ${userCount.count} existing users in the database`);
     
-    if (!adminExists) {
-      db.prepare(`
-        INSERT INTO users (orange_id, username, email, role, is_admin)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(
-        DEFAULT_ADMIN.orangeId,
-        DEFAULT_ADMIN.username,
-        DEFAULT_ADMIN.email,
-        DEFAULT_ADMIN.role,
-        DEFAULT_ADMIN.isAdmin ? 1 : 0
-      );
-      log.success('Admin user created successfully');
-    } else {
-      log.info('Admin user already exists, skipping creation');
-    }
-    
-    // Add test user if not exists
-    log.info('Creating default test user if not exists...');
-    const userExists = db.prepare('SELECT 1 FROM users WHERE orange_id = ?').get(DEFAULT_USER.orangeId);
-    
-    if (!userExists) {
-      db.prepare(`
-        INSERT INTO users (orange_id, username, email, role, is_admin)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(
-        DEFAULT_USER.orangeId,
-        DEFAULT_USER.username,
-        DEFAULT_USER.email,
-        DEFAULT_USER.role,
-        DEFAULT_USER.isAdmin ? 1 : 0
-      );
-      log.success('Test user created successfully');
-    } else {
-      log.info('Test user already exists, skipping creation');
-    }
+    // No sample users are created - the first user to log in will be the admin
+    log.info('The first user to log in will automatically become the admin');
+    log.info('Additional users will be regular users with non-admin privileges');
     
     // Verify data
     const users = db.prepare('SELECT * FROM users').all();
     log.success(`Database setup complete. ${users.length} users in database.`);
     
-    // Display admin credentials
-    log.info('\nAdmin login credentials:');
-    console.log(`  OrangeID: ${DEFAULT_ADMIN.orangeId}`);
-    console.log(`  Username: ${DEFAULT_ADMIN.username}`);
-    console.log(`  Email: ${DEFAULT_ADMIN.email}`);
+    // Display login instructions
+    log.info('\nLogin instructions:');
+    log.info('1. Start the application using the "Start application" workflow');
+    log.info('2. Click the Login button in the top right corner');
+    log.info('3. Log in with your Orange ID credentials');
+    log.info('4. The first user to log in will automatically become the admin');
     
     // Close connection
     db.close();
     return true;
-  } catch (error) {
+  } catch (error: any) {
     log.error(`SQLite setup failed: ${error.message}`);
     console.error(error);
     return false;
@@ -192,64 +147,29 @@ async function setupPostgres() {
       )
     `;
     
-    // Add admin user if not exists
-    log.info('Creating default admin user if not exists...');
-    const [adminExists] = await sql`
-      SELECT 1 FROM users WHERE orange_id = ${DEFAULT_ADMIN.orangeId}
-    `;
+    // Check number of users
+    const userCount = await sql`SELECT COUNT(*) as count FROM users`;
+    log.info(`Found ${userCount[0].count} existing users in the database`);
     
-    if (!adminExists) {
-      await sql`
-        INSERT INTO users (orange_id, username, email, role, is_admin)
-        VALUES (
-          ${DEFAULT_ADMIN.orangeId},
-          ${DEFAULT_ADMIN.username},
-          ${DEFAULT_ADMIN.email},
-          ${DEFAULT_ADMIN.role},
-          ${DEFAULT_ADMIN.isAdmin}
-        )
-      `;
-      log.success('Admin user created successfully');
-    } else {
-      log.info('Admin user already exists, skipping creation');
-    }
-    
-    // Add test user if not exists
-    log.info('Creating default test user if not exists...');
-    const [userExists] = await sql`
-      SELECT 1 FROM users WHERE orange_id = ${DEFAULT_USER.orangeId}
-    `;
-    
-    if (!userExists) {
-      await sql`
-        INSERT INTO users (orange_id, username, email, role, is_admin)
-        VALUES (
-          ${DEFAULT_USER.orangeId},
-          ${DEFAULT_USER.username},
-          ${DEFAULT_USER.email},
-          ${DEFAULT_USER.role},
-          ${DEFAULT_USER.isAdmin}
-        )
-      `;
-      log.success('Test user created successfully');
-    } else {
-      log.info('Test user already exists, skipping creation');
-    }
+    // No sample users are created - the first user to log in will be the admin
+    log.info('The first user to log in will automatically become the admin');
+    log.info('Additional users will be regular users with non-admin privileges');
     
     // Verify data
     const users = await sql`SELECT * FROM users`;
     log.success(`Database setup complete. ${users.length} users in database.`);
     
-    // Display admin credentials
-    log.info('\nAdmin login credentials:');
-    console.log(`  OrangeID: ${DEFAULT_ADMIN.orangeId}`);
-    console.log(`  Username: ${DEFAULT_ADMIN.username}`);
-    console.log(`  Email: ${DEFAULT_ADMIN.email}`);
+    // Display login instructions
+    log.info('\nLogin instructions:');
+    log.info('1. Start the application using the "Start application" workflow');
+    log.info('2. Click the Login button in the top right corner');
+    log.info('3. Log in with your Orange ID credentials');
+    log.info('4. The first user to log in will automatically become the admin');
     
     // Close connection
     await sql.end();
     return true;
-  } catch (error) {
+  } catch (error: any) {
     log.error(`PostgreSQL setup failed: ${error.message}`);
     console.error(error);
     return false;
@@ -281,7 +201,7 @@ setup().then(success => {
     log.info('Next steps:');
     log.info('1. Run the application with the "Start application" workflow');
     log.info('2. Log in using the OrangeID authentication');
-    log.info('3. For admin access, use the admin credentials shown above');
+    log.info('3. The first user to log in will automatically become the admin');
   } else {
     log.title('Setup Failed');
     log.error('The setup process encountered errors.');
