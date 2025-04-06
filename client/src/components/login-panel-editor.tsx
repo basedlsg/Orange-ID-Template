@@ -74,12 +74,12 @@ export function LoginPanelEditor() {
     // Update CSS classes using the current theme colors
     const updatedSettings = {
       ...settings,
-      panelClass: `bg-[${theme.panelBg}] text-[${theme.textColor}] w-full backdrop-blur-lg border border-[${theme.borderColor}] rounded-lg shadow-lg container py-6 px-4 md:px-8`,
-      buttonClass: `w-full bg-[${theme.buttonBg}] hover:bg-[${theme.buttonHoverBg}] text-[${theme.textColor}] transition-all duration-200 hover:border-[${theme.primary}] font-medium py-2.5 rounded-md`,
+      panelClass: `bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-lg shadow-lg container py-6 px-4 md:px-8`,
+      buttonClass: `w-full bg-[${theme.buttonBg}] hover:bg-[${theme.buttonHoverBg}] text-white transition-all duration-200 hover:border-[${theme.primary}] font-medium py-2.5 rounded-md`,
       titleClass: `text-xl font-semibold text-[${theme.primary}]`,
-      walletButtonClass: `w-full border border-[${theme.borderColor}] hover:bg-gray-800 transition-all duration-200 text-[${theme.primary}] font-medium py-2.5 rounded-md`,
-      separatorTextClass: `bg-[${theme.panelBg}] text-[${theme.primary}] px-2`,
-      separatorClass: `bg-[${theme.borderColor}]`
+      walletButtonClass: `w-full border border-gray-700 hover:bg-gray-800 transition-all duration-200 text-[${theme.primary}] font-medium py-2.5 rounded-md`,
+      separatorTextClass: `bg-black text-[${theme.primary}] px-2`,
+      separatorClass: `bg-gray-700`
     };
     
     setSettings(updatedSettings);
@@ -119,8 +119,8 @@ export function LoginPanelEditor() {
     navigator.clipboard.writeText(codeSnippet)
       .then(() => {
         toast({
-          title: "Settings copied",
-          description: "The login panel settings have been copied to clipboard.",
+          title: "Changes applied",
+          description: "Your customized login panel settings are now active.",
         });
       })
       .catch(err => {
@@ -440,7 +440,7 @@ export function LoginPanelEditor() {
                 Reset to Defaults
               </Button>
               <Button variant="default" className="bg-[#F37920] hover:bg-[#D86A10]" onClick={copySettings}>
-                Copy Settings
+                Apply Changes
               </Button>
             </div>
           </CardContent>
@@ -450,18 +450,10 @@ export function LoginPanelEditor() {
       <div className="w-full lg:w-1/2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-[#F37920]">Preview</CardTitle>
-            <CardDescription>
-              Live preview of the customized login panel
-            </CardDescription>
+            <CardTitle className="text-[#F37920]">Login Panel</CardTitle>
           </CardHeader>
-          <CardContent className="flex justify-center p-0">
-            <div className="w-full max-w-md bg-gray-900 rounded-lg">
-              <div className="bg-gradient-to-br from-[#F37920] to-[#D86A10] p-4 rounded-t-lg border-b border-gray-700 text-center">
-                <p className="text-sm sm:text-base font-medium text-white leading-relaxed">
-                  Preview of your customized login panel
-                </p>
-              </div>
+          <CardContent className="flex justify-center p-4">
+            <div className="w-full max-w-md">
               <LoginPanel {...settings} />
             </div>
           </CardContent>
