@@ -1,5 +1,5 @@
-
 import { BedrockPassportProvider } from "@bedrock_org/passport";
+import "@bedrock_org/passport/dist/style.css";
 
 export function OrangeAuthProvider({
   children,
