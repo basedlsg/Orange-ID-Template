@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -6,6 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginPanel } from "@bedrock_org/passport";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { Slider } from "@/components/ui/slider";
+
+// Color theme interface to manage colors separately
+interface ColorTheme {
+  primary: string;
+  buttonBg: string;
+  buttonHoverBg: string;
+  panelBg: string;
+  textColor: string;
+  borderColor: string;
+}
 
 interface LoginPanelSettings {
   panelClass: string;
@@ -24,9 +36,19 @@ interface LoginPanelSettings {
   separatorClass: string;
 }
 
+// Default color theme
+const defaultTheme: ColorTheme = {
+  primary: "#F37920",
+  buttonBg: "#F37920",
+  buttonHoverBg: "#D86A10",
+  panelBg: "#000000",
+  textColor: "#FFFFFF",
+  borderColor: "#374151"
+};
+
 const defaultSettings: LoginPanelSettings = {
-  panelClass: "bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-lg shadow-lg container p-2 md:p-8",
-  buttonClass: "w-full bg-[#F37920] hover:bg-[#D86A10] text-white transition-all duration-200 hover:border-[#F37920]",
+  panelClass: "bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-lg shadow-lg container py-6 px-4 md:px-8",
+  buttonClass: "w-full bg-[#F37920] hover:bg-[#D86A10] text-white transition-all duration-200 hover:border-[#F37920] font-medium py-2.5 rounded-md",
   headerClass: "justify-center pb-6",
   logo: "/images/orangelogo.svg",
   title: "Sign in to",
@@ -35,7 +57,7 @@ const defaultSettings: LoginPanelSettings = {
   logoClass: "ml-2 h-8",
   showConnectWallet: true,
   walletButtonText: "Connect Wallet",
-  walletButtonClass: "w-full border border-gray-700 hover:bg-gray-800 transition-all duration-200 text-[#F37920]",
+  walletButtonClass: "w-full border border-gray-700 hover:bg-gray-800 transition-all duration-200 text-[#F37920] font-medium py-2.5 rounded-md",
   separatorText: "OR",
   separatorTextClass: "bg-black text-[#F37920] px-2",
   separatorClass: "bg-gray-700"
@@ -43,13 +65,36 @@ const defaultSettings: LoginPanelSettings = {
 
 export function LoginPanelEditor() {
   const [settings, setSettings] = useState<LoginPanelSettings>(defaultSettings);
+  const [theme, setTheme] = useState<ColorTheme>(defaultTheme);
   const [activeTab, setActiveTab] = useState("appearance");
+  const { toast } = useToast();
 
-  const handleChange = (key: keyof LoginPanelSettings, value: string | boolean) => {
+  // Apply theme changes to settings whenever theme changes
+  useEffect(() => {
+    // Update CSS classes using the current theme colors
+    const updatedSettings = {
+      ...settings,
+      panelClass: `bg-[${theme.panelBg}] text-[${theme.textColor}] w-full backdrop-blur-lg border border-[${theme.borderColor}] rounded-lg shadow-lg container py-6 px-4 md:px-8`,
+      buttonClass: `w-full bg-[${theme.buttonBg}] hover:bg-[${theme.buttonHoverBg}] text-[${theme.textColor}] transition-all duration-200 hover:border-[${theme.primary}] font-medium py-2.5 rounded-md`,
+      titleClass: `text-xl font-semibold text-[${theme.primary}]`,
+      walletButtonClass: `w-full border border-[${theme.borderColor}] hover:bg-gray-800 transition-all duration-200 text-[${theme.primary}] font-medium py-2.5 rounded-md`,
+      separatorTextClass: `bg-[${theme.panelBg}] text-[${theme.primary}] px-2`,
+      separatorClass: `bg-[${theme.borderColor}]`
+    };
+    
+    setSettings(updatedSettings);
+  }, [theme]);
+
+  const handleSettingChange = (key: keyof LoginPanelSettings, value: string | boolean) => {
     setSettings({ ...settings, [key]: value });
   };
 
+  const handleThemeChange = (key: keyof ColorTheme, value: string) => {
+    setTheme({ ...theme, [key]: value });
+  };
+
   const resetToDefaults = () => {
+    setTheme(defaultTheme);
     setSettings(defaultSettings);
   };
 
@@ -58,10 +103,13 @@ export function LoginPanelEditor() {
       .map(([key, value]) => {
         if (typeof value === 'boolean') {
           return `${key}={${value}}`;
+        } else if (value === undefined) {
+          return '';
         } else {
           return `${key}="${value}"`;
         }
       })
+      .filter(Boolean)
       .join("\n            ");
     
     const codeSnippet = `<LoginPanel
@@ -70,11 +118,18 @@ export function LoginPanelEditor() {
           
     navigator.clipboard.writeText(codeSnippet)
       .then(() => {
-        alert("Settings copied to clipboard!");
+        toast({
+          title: "Settings copied",
+          description: "The login panel settings have been copied to clipboard.",
+        });
       })
       .catch(err => {
         console.error("Failed to copy: ", err);
-        alert("Failed to copy settings. See console for details.");
+        toast({
+          title: "Error",
+          description: "Failed to copy settings. Check console for details.",
+          variant: "destructive"
+        });
       });
   };
 
@@ -91,10 +146,159 @@ export function LoginPanelEditor() {
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="w-full mb-4">
-                <TabsTrigger value="appearance" className="flex-1">Appearance</TabsTrigger>
+                <TabsTrigger value="colors" className="flex-1">Colors</TabsTrigger>
+                <TabsTrigger value="appearance" className="flex-1">Advanced CSS</TabsTrigger>
                 <TabsTrigger value="content" className="flex-1">Content</TabsTrigger>
                 <TabsTrigger value="wallet" className="flex-1">Wallet</TabsTrigger>
               </TabsList>
+              
+              <TabsContent value="colors" className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Primary Colors</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="primaryColor" className="flex justify-between">
+                        Primary Color
+                        <span className="text-xs text-gray-400">{theme.primary}</span>
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="color" 
+                          id="primaryColor" 
+                          value={theme.primary}
+                          onChange={(e) => handleThemeChange('primary', e.target.value)}
+                          className="h-10 w-10 rounded cursor-pointer"
+                        />
+                        <Input 
+                          value={theme.primary}
+                          onChange={(e) => handleThemeChange('primary', e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="textColor" className="flex justify-between">
+                        Text Color
+                        <span className="text-xs text-gray-400">{theme.textColor}</span>
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="color" 
+                          id="textColor" 
+                          value={theme.textColor}
+                          onChange={(e) => handleThemeChange('textColor', e.target.value)}
+                          className="h-10 w-10 rounded cursor-pointer"
+                        />
+                        <Input 
+                          value={theme.textColor}
+                          onChange={(e) => handleThemeChange('textColor', e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Panel Colors</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="panelBg" className="flex justify-between">
+                        Panel Background
+                        <span className="text-xs text-gray-400">{theme.panelBg}</span>
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="color" 
+                          id="panelBg" 
+                          value={theme.panelBg}
+                          onChange={(e) => handleThemeChange('panelBg', e.target.value)}
+                          className="h-10 w-10 rounded cursor-pointer"
+                        />
+                        <Input 
+                          value={theme.panelBg}
+                          onChange={(e) => handleThemeChange('panelBg', e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="borderColor" className="flex justify-between">
+                        Border Color
+                        <span className="text-xs text-gray-400">{theme.borderColor}</span>
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="color" 
+                          id="borderColor" 
+                          value={theme.borderColor}
+                          onChange={(e) => handleThemeChange('borderColor', e.target.value)}
+                          className="h-10 w-10 rounded cursor-pointer"
+                        />
+                        <Input 
+                          value={theme.borderColor}
+                          onChange={(e) => handleThemeChange('borderColor', e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Button Colors</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="buttonBg" className="flex justify-between">
+                        Button Background
+                        <span className="text-xs text-gray-400">{theme.buttonBg}</span>
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="color" 
+                          id="buttonBg" 
+                          value={theme.buttonBg}
+                          onChange={(e) => handleThemeChange('buttonBg', e.target.value)}
+                          className="h-10 w-10 rounded cursor-pointer"
+                        />
+                        <Input 
+                          value={theme.buttonBg}
+                          onChange={(e) => handleThemeChange('buttonBg', e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="buttonHoverBg" className="flex justify-between">
+                        Button Hover
+                        <span className="text-xs text-gray-400">{theme.buttonHoverBg}</span>
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <input 
+                          type="color" 
+                          id="buttonHoverBg" 
+                          value={theme.buttonHoverBg}
+                          onChange={(e) => handleThemeChange('buttonHoverBg', e.target.value)}
+                          className="h-10 w-10 rounded cursor-pointer"
+                        />
+                        <Input 
+                          value={theme.buttonHoverBg}
+                          onChange={(e) => handleThemeChange('buttonHoverBg', e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+              </TabsContent>
               
               <TabsContent value="appearance" className="space-y-4">
                 <div className="space-y-2">
@@ -102,7 +306,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="panelClass" 
                     value={settings.panelClass} 
-                    onChange={(e) => handleChange('panelClass', e.target.value)} 
+                    onChange={(e) => handleSettingChange('panelClass', e.target.value)} 
                   />
                 </div>
                 
@@ -111,7 +315,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="buttonClass" 
                     value={settings.buttonClass} 
-                    onChange={(e) => handleChange('buttonClass', e.target.value)} 
+                    onChange={(e) => handleSettingChange('buttonClass', e.target.value)} 
                   />
                 </div>
                 
@@ -120,7 +324,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="headerClass" 
                     value={settings.headerClass} 
-                    onChange={(e) => handleChange('headerClass', e.target.value)} 
+                    onChange={(e) => handleSettingChange('headerClass', e.target.value)} 
                   />
                 </div>
                 
@@ -129,7 +333,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="titleClass" 
                     value={settings.titleClass} 
-                    onChange={(e) => handleChange('titleClass', e.target.value)} 
+                    onChange={(e) => handleSettingChange('titleClass', e.target.value)} 
                   />
                 </div>
                 
@@ -138,7 +342,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="logoClass" 
                     value={settings.logoClass} 
-                    onChange={(e) => handleChange('logoClass', e.target.value)} 
+                    onChange={(e) => handleSettingChange('logoClass', e.target.value)} 
                   />
                 </div>
               </TabsContent>
@@ -149,7 +353,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="title" 
                     value={settings.title} 
-                    onChange={(e) => handleChange('title', e.target.value)} 
+                    onChange={(e) => handleSettingChange('title', e.target.value)} 
                   />
                 </div>
                 
@@ -158,7 +362,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="logo" 
                     value={settings.logo} 
-                    onChange={(e) => handleChange('logo', e.target.value)} 
+                    onChange={(e) => handleSettingChange('logo', e.target.value)} 
                   />
                 </div>
                 
@@ -167,7 +371,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="logoAlt" 
                     value={settings.logoAlt} 
-                    onChange={(e) => handleChange('logoAlt', e.target.value)} 
+                    onChange={(e) => handleSettingChange('logoAlt', e.target.value)} 
                   />
                 </div>
                 
@@ -176,7 +380,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="separatorText" 
                     value={settings.separatorText} 
-                    onChange={(e) => handleChange('separatorText', e.target.value)} 
+                    onChange={(e) => handleSettingChange('separatorText', e.target.value)} 
                   />
                 </div>
                 
@@ -185,7 +389,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="separatorTextClass" 
                     value={settings.separatorTextClass} 
-                    onChange={(e) => handleChange('separatorTextClass', e.target.value)} 
+                    onChange={(e) => handleSettingChange('separatorTextClass', e.target.value)} 
                   />
                 </div>
                 
@@ -194,7 +398,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="separatorClass" 
                     value={settings.separatorClass} 
-                    onChange={(e) => handleChange('separatorClass', e.target.value)} 
+                    onChange={(e) => handleSettingChange('separatorClass', e.target.value)} 
                   />
                 </div>
               </TabsContent>
@@ -204,7 +408,7 @@ export function LoginPanelEditor() {
                   <Checkbox 
                     id="showConnectWallet" 
                     checked={settings.showConnectWallet} 
-                    onCheckedChange={(checked) => handleChange('showConnectWallet', checked === true)} 
+                    onCheckedChange={(checked) => handleSettingChange('showConnectWallet', checked === true)} 
                   />
                   <Label htmlFor="showConnectWallet">Show Connect Wallet</Label>
                 </div>
@@ -214,7 +418,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="walletButtonText" 
                     value={settings.walletButtonText} 
-                    onChange={(e) => handleChange('walletButtonText', e.target.value)} 
+                    onChange={(e) => handleSettingChange('walletButtonText', e.target.value)} 
                     disabled={!settings.showConnectWallet}
                   />
                 </div>
@@ -224,7 +428,7 @@ export function LoginPanelEditor() {
                   <Input 
                     id="walletButtonClass" 
                     value={settings.walletButtonClass} 
-                    onChange={(e) => handleChange('walletButtonClass', e.target.value)} 
+                    onChange={(e) => handleSettingChange('walletButtonClass', e.target.value)} 
                     disabled={!settings.showConnectWallet}
                   />
                 </div>
