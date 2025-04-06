@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CustomLoginPanel } from "./CustomLoginPanel";
+import { LoginPanel } from "@bedrock_org/passport";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Slider } from "@/components/ui/slider";
@@ -338,16 +338,6 @@ export function LoginPanelEditor() {
                   <Label htmlFor="showConnectWallet">Show Connect Wallet</Label>
                 </div>
                 
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="requireWalletSignature" 
-                    checked={settings.requireWalletSignature} 
-                    onCheckedChange={(checked) => handleSettingChange('requireWalletSignature', checked === true)} 
-                    disabled={!settings.showConnectWallet}
-                  />
-                  <Label htmlFor="requireWalletSignature">Require Wallet Signature</Label>
-                </div>
-                
                 <div className="space-y-2">
                   <Label htmlFor="walletButtonText">Wallet Button Text</Label>
                   <Input 
@@ -419,7 +409,6 @@ export function LoginPanelEditor() {
   separatorText="${settings.separatorText}"
   separatorTextClass="${settings.separatorTextClass}"
   separatorClass="${settings.separatorClass}"
-  requireWalletSignature={${settings.requireWalletSignature}}
 />`}
               </code>
             </pre>
