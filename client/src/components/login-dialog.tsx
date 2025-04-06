@@ -25,13 +25,9 @@ export function LoginDialog({
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </button>
-          <div className="bg-gradient-to-br from-[#F37920] to-[#D86A10] p-4 rounded-t-lg border-b border-gray-700 text-center">
-            <p className="text-sm sm:text-base font-medium text-white leading-relaxed">
-              {message}
-            </p>
-          </div>
+
           <LoginPanel
-            panelClass="bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-b-lg shadow-lg container py-6 px-4 md:px-8"
+            panelClass="bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-lg shadow-lg container py-6 px-4 md:px-8"
             buttonClass="w-full bg-[#F37920] hover:bg-[#D86A10] text-white transition-all duration-200 hover:border-[#F37920] font-medium py-2.5 rounded-md"
             headerClass="justify-center pb-6"
             logo="/images/orangelogo.svg"
