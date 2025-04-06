@@ -31,20 +31,20 @@ export function LoginDialog({
             </p>
           </div>
           <LoginPanel
-            panelClass="bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-b-lg shadow-lg"
-            buttonClass="w-full bg-[#F37920] hover:bg-[#D86A10] text-white transition-all duration-200"
+            panelClass="bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-b-lg shadow-lg container p-2 md:p-8"
+            buttonClass="w-full bg-[#F37920] hover:bg-[#D86A10] text-white transition-all duration-200 hover:border-[#F37920]"
             headerClass="justify-center pb-6"
             logo="/images/orangelogo.svg"
-            title=""
+            title="Sign in to"
             titleClass="text-xl font-semibold text-[#F37920]"
             logoAlt="Orange Auth"
             logoClass="ml-2 h-8"
-            showConnectWallet={false}
-            walletButtonClass="w-full border border-gray-700 hover:bg-gray-800 transition-all duration-200 text-[#F37920]"
+            showConnectWallet={true}
             walletButtonText="Connect Wallet"
+            walletButtonClass="w-full border border-gray-700 hover:bg-gray-800 transition-all duration-200 text-[#F37920]"
+            separatorText="OR"
             separatorTextClass="bg-black text-[#F37920] px-2"
             separatorClass="bg-gray-700"
-            separatorText="or"
           />
         </div>
       </DialogContent>
