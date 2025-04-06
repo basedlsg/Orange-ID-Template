@@ -10,8 +10,8 @@ import dotenv from "dotenv";
 // Load environment variables
 dotenv.config();
 
-// Determine if we should use SQLite or PostgreSQL
-const useSqlite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL;
+// Always use SQLite for this template
+const useSqlite = true;
 
 // Setup express
 const app = express();

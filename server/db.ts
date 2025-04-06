@@ -13,8 +13,7 @@ import dotenv from "dotenv";
 // Load environment variables first
 dotenv.config();
 
-// Import the shouldUseSqlite helper function
-import { shouldUseSqlite } from "@shared/schema";
+// SQLite is the only database type supported now
 
 // Create a simple in-memory database for debugging or when no database is available
 const mockDb = {
@@ -113,10 +112,10 @@ const formatUserDates = (user: any) => {
 };
 
 try {
-  // Determine if we should use SQLite
-  const useSqlite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL;
+  // Always use SQLite for this template
+  const useSqlite = true;
   
-  if (useSqlite) {
+  if (true) { // Always enter SQLite setup block
     // Setup SQLite database
     // Create data directory if it doesn't exist
     const dbDir = path.join(process.cwd(), 'data');
@@ -169,15 +168,10 @@ try {
       
       db.createUser = async (insertUser: any) => {
         try {
-          // Check if this is the first user by counting existing users
-          const userCount = await db.select({ count: sql`count(*)` }).from(schema.users);
-          const isFirstUser = parseInt(userCount[0]?.count?.toString() || '0', 10) === 0;
-          
-          // If this is the first user, make them an admin
           // Add the timestamp explicitly to avoid SQLite issues
           const userToCreate = {
             ...insertUser,
-            isAdmin: isFirstUser ? true : (insertUser.isAdmin || false),
+            isAdmin: false, // No automatic admin - will check for first user later using raw SQL
             createdAt: new Date().toISOString() // Set timestamp explicitly
           };
           

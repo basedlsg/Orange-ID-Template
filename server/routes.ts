@@ -4,8 +4,7 @@ import { storage } from "./storage";
 import {
   insertUserSchema,
   type User,
-  type InsertUser,
-  shouldUseSqlite
+  type InsertUser
 } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import 'express-session';
@@ -51,12 +50,10 @@ async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId:
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // API Route to get current database type
+  // API Route to get current database type - we're always using SQLite now
   app.get("/api/database-type", async (req, res) => {
-    // Use the environment variable directly
-    const useSqlite = process.env.USE_SQLITE === 'true';
-    
-    res.json({ type: useSqlite ? 'sqlite' : 'postgres' });
+    // Hardcoded as SQLite - we no longer support multiple database types
+    res.json({ type: 'sqlite' });
   });
 
   // API Route to switch database type

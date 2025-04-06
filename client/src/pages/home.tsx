@@ -14,36 +14,10 @@ export default function Home() {
 
   // No need for database switch notifications anymore
 
-  // Get current database type only once when component mounts
+  // No need to check database type anymore - we're always using SQLite
   useEffect(() => {
-    let isMounted = true;
-    const cachedDbType = sessionStorage.getItem('dbType');
-    
-    if (cachedDbType) {
-      setDbType(cachedDbType);
-      setIsLoadingDbType(false);
-    } else {
-      fetch('/api/database-type')
-        .then(response => response.json())
-        .then(data => {
-          if (isMounted) {
-            setDbType(data.type);
-            // Cache the result in session storage
-            sessionStorage.setItem('dbType', data.type);
-            setIsLoadingDbType(false);
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching database type:", error);
-          if (isMounted) {
-            setIsLoadingDbType(false);
-          }
-        });
-    }
-    
-    return () => {
-      isMounted = false;
-    };
+    setDbType('sqlite'); // Always set to SQLite
+    setIsLoadingDbType(false);
   }, []);
 
   // Check if the user is an admin with caching
