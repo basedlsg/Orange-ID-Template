@@ -74,38 +74,68 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    return this.safeDbOperation(
-      async () => {
-        // Check if this is the first user being created
-        const allUsers = await this.getAllUsers();
-        const isFirstUser = allUsers.length === 0;
+    console.log("Received user data:", insertUser);
+    
+    // First check if user already exists
+    const existingUser = await this.getUserByOrangeId(insertUser.orangeId);
+    if (existingUser) {
+      console.log("User already exists, returning existing user:", existingUser);
+      return existingUser;
+    }
+    
+    // Validate user data
+    const userToCreate = {
+      ...insertUser,
+      // Default non-admins - we'll update based on count after
+      isAdmin: false,
+      createdAt: new Date().toISOString()
+    };
+    
+    console.log("Validated user data:", userToCreate);
+    
+    try {
+      let user: User;
+      
+      // Get current user count first
+      const allUsers = await this.getAllUsers();
+      const isFirstUser = allUsers.length === 0;
+      
+      if (this.isUsingMockDb()) {
+        userToCreate.isAdmin = isFirstUser;
+        user = await (db as any).createUser(userToCreate);
+      } else {
+        // Use Drizzle transaction to ensure correct count
+        if (isFirstUser) {
+          // If this is the first user, make them admin
+          userToCreate.isAdmin = true;
+        }
         
-        // If this is the first user, make them an admin
-        const userToCreate = {
-          ...insertUser,
-          isAdmin: isFirstUser ? true : false
-          // Let the database handle createdAt with its default value
-        };
-        
-        // Call the createUser method on the mock DB
-        return (db as any).createUser(userToCreate);
-      },
-      async () => {
-        // Check if this is the first user by counting existing users
-        const userCount = await db.select({ count: sql`count(*)` }).from(users);
-        const isFirstUser = parseInt(userCount[0]?.count?.toString() || '0', 10) === 0;
-        
-        // If this is the first user, make them an admin
-        const userToCreate = {
-          ...insertUser,
-          isAdmin: isFirstUser ? true : false,
-          createdAt: new Date().toISOString()
-        };
-        
-        const [user] = await db.insert(users).values(userToCreate).returning();
-        return user;
+        const [createdUser] = await db.insert(users).values(userToCreate).returning();
+        user = createdUser;
       }
-    );
+      
+      console.log("Created user:", user);
+      return user;
+    } catch (error) {
+      console.error("Error in db.createUser:", error);
+      
+      // Try fallback approach with raw SQL for SQLite
+      if (typeof (db as any).execute === 'function') {
+        try {
+          const countResult = await db.execute(sql`SELECT COUNT(*) as count FROM users`);
+          const isFirstUser = parseInt(countResult[0]?.count?.toString() || '0', 10) === 0;
+          
+          userToCreate.isAdmin = isFirstUser;
+          const [user] = await db.insert(users).values(userToCreate).returning();
+          return user;
+        } catch (fallbackError) {
+          console.error("Fallback creation attempt also failed:", fallbackError);
+          throw error; // Rethrow original error
+        }
+      }
+      
+      throw error;
+    }
   }
   
   async getAllUsers(): Promise<User[]> {

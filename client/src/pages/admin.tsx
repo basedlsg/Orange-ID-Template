@@ -30,6 +30,8 @@ import { Button } from '@/components/ui/button';
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LoginPanelEditor } from "@/components/login-panel-editor";
 
 interface User {
   id: number;
@@ -205,84 +207,116 @@ export default function AdminPage() {
     <div className="container mx-auto py-8 bg-black text-white">
       <h1 className="text-3xl font-bold mb-6 text-[#F37920]">Admin Dashboard</h1>
       
-      {/* User Growth Chart */}
-      <Card className="mb-8 bg-gray-900 border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-[#F37920]">User Growth</CardTitle>
-          <CardDescription className="text-gray-400">New user signups per day</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={growthStats}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                <XAxis dataKey="date" stroke="#999" />
-                <YAxis stroke="#999" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#333', 
-                    border: '1px solid #555',
-                    color: 'white' 
-                  }} 
-                />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="count" 
-                  name="Users" 
-                  stroke="#F37920" 
-                  activeDot={{ r: 8, fill: "#F37920" }} 
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Users Table */}
-      <Card className="bg-gray-900 border-gray-800">
-        <CardHeader>
-          <CardTitle className="text-[#F37920]">All Users</CardTitle>
-          <CardDescription className="text-gray-400">List of all registered users</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableCaption className="text-gray-400">A list of all registered users in the system.</TableCaption>
-            <TableHeader>
-              <TableRow className="border-gray-700">
-                <TableHead className="text-gray-300">ID</TableHead>
-                <TableHead className="text-gray-300">Username</TableHead>
-                <TableHead className="text-gray-300">Email</TableHead>
-                <TableHead className="text-gray-300">Role</TableHead>
-                <TableHead className="text-gray-300">Admin</TableHead>
-                <TableHead className="text-gray-300">Date Joined</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users && users.length > 0 ? (
-                users.map((user) => (
-                  <TableRow key={user.id} className="border-gray-800 hover:bg-gray-800">
-                    <TableCell className="text-gray-300">{user.id}</TableCell>
-                    <TableCell className="text-gray-300">{user.username}</TableCell>
-                    <TableCell className="text-gray-300">{user.email}</TableCell>
-                    <TableCell className="text-gray-300">{user.role}</TableCell>
-                    <TableCell className="text-gray-300">{user.isAdmin ? 
-                      <span className="text-[#F37920]">Yes</span> : 'No'}</TableCell>
-                    <TableCell className="text-gray-300">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+      <Tabs defaultValue="analytics" className="mb-8">
+        <TabsList className="mb-6 bg-gray-900 border-gray-800">
+          <TabsTrigger value="analytics" className="data-[state=active]:bg-[#F37920] data-[state=active]:text-white">
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="users" className="data-[state=active]:bg-[#F37920] data-[state=active]:text-white">
+            User Management
+          </TabsTrigger>
+          <TabsTrigger value="customization" className="data-[state=active]:bg-[#F37920] data-[state=active]:text-white">
+            Login Customization
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="analytics">
+          {/* User Growth Chart */}
+          <Card className="mb-8 bg-gray-900 border-gray-800">
+            <CardHeader>
+              <CardTitle className="text-[#F37920]">User Growth</CardTitle>
+              <CardDescription className="text-gray-400">New user signups per day</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={growthStats}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#444" />
+                    <XAxis dataKey="date" stroke="#999" />
+                    <YAxis stroke="#999" />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: '#333', 
+                        border: '1px solid #555',
+                        color: 'white' 
+                      }} 
+                    />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey="count" 
+                      name="Users" 
+                      stroke="#F37920" 
+                      activeDot={{ r: 8, fill: "#F37920" }} 
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="users">
+          {/* Users Table */}
+          <Card className="bg-gray-900 border-gray-800">
+            <CardHeader>
+              <CardTitle className="text-[#F37920]">All Users</CardTitle>
+              <CardDescription className="text-gray-400">List of all registered users</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableCaption className="text-gray-400">A list of all registered users in the system.</TableCaption>
+                <TableHeader>
+                  <TableRow className="border-gray-700">
+                    <TableHead className="text-gray-300">ID</TableHead>
+                    <TableHead className="text-gray-300">Username</TableHead>
+                    <TableHead className="text-gray-300">Email</TableHead>
+                    <TableHead className="text-gray-300">Role</TableHead>
+                    <TableHead className="text-gray-300">Admin</TableHead>
+                    <TableHead className="text-gray-300">Date Joined</TableHead>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow className="border-gray-800">
-                  <TableCell colSpan={6} className="text-center text-gray-400">No users found.</TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {users && users.length > 0 ? (
+                    users.map((user) => (
+                      <TableRow key={user.id} className="border-gray-800 hover:bg-gray-800">
+                        <TableCell className="text-gray-300">{user.id}</TableCell>
+                        <TableCell className="text-gray-300">{user.username}</TableCell>
+                        <TableCell className="text-gray-300">{user.email}</TableCell>
+                        <TableCell className="text-gray-300">{user.role}</TableCell>
+                        <TableCell className="text-gray-300">{user.isAdmin ? 
+                          <span className="text-[#F37920]">Yes</span> : 'No'}</TableCell>
+                        <TableCell className="text-gray-300">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow className="border-gray-800">
+                      <TableCell colSpan={6} className="text-center text-gray-400">No users found.</TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="customization">
+          <Card className="bg-gray-900 border-gray-800">
+            <CardHeader>
+              <CardTitle className="text-[#F37920]">Login Panel Editor</CardTitle>
+              <CardDescription className="text-gray-400">
+                Customize the appearance of your Bedrock Passport login panel
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LoginPanelEditor />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
