@@ -8,6 +8,7 @@ import { useBedrockPassport } from "@bedrock_org/passport";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { User as UserIcon } from "lucide-react";
+import { LoginPanelProvider, useLoginPanel } from "@/contexts/LoginPanelContext";
 
 // Define a type for the Bedrock user
 interface BedrockUser {
@@ -96,6 +97,7 @@ function StoreUserData() {
 function LoginButton() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [location] = useLocation();
+  const { theme } = useLoginPanel();
 
   const handleOpenLogin = () => {
     sessionStorage.setItem("returnPath", location);
@@ -109,7 +111,7 @@ function LoginButton() {
       </span>
       <Button
         onClick={handleOpenLogin}
-        className="text-sm font-medium bg-[#F37920] text-white hover:bg-[#D86A10] border-none"
+        className={`text-sm font-medium bg-[${theme.buttonBg}] text-white hover:bg-[${theme.buttonHoverBg}] border-none`}
       >
         <UserIcon className="h-4 w-4 mr-2" />
         Login
@@ -371,54 +373,56 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <OrangeAuthProvider>
-        <Helmet>
-          <title>Orange Auth Template</title>
-          <meta
-            name="description"
-            content="A clean, ready-to-use authentication system with Orange ID integration."
-          />
+        <LoginPanelProvider>
+          <Helmet>
+            <title>Orange Auth Template</title>
+            <meta
+              name="description"
+              content="A clean, ready-to-use authentication system with Orange ID integration."
+            />
 
-          {/* OpenGraph Meta Tags */}
-          <meta property="og:title" content="Orange Auth Template" />
-          <meta
-            property="og:description"
-            content="A clean, ready-to-use authentication system with Orange ID integration."
-          />
-          <meta
-            property="og:image"
-            content={`${window.location.origin}/og-image.png`}
-          />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="630" />
-          <meta property="og:url" content={window.location.origin} />
-          <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="Orange Auth Template" />
+            {/* OpenGraph Meta Tags */}
+            <meta property="og:title" content="Orange Auth Template" />
+            <meta
+              property="og:description"
+              content="A clean, ready-to-use authentication system with Orange ID integration."
+            />
+            <meta
+              property="og:image"
+              content={`${window.location.origin}/og-image.png`}
+            />
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:url" content={window.location.origin} />
+            <meta property="og:type" content="website" />
+            <meta property="og:site_name" content="Orange Auth Template" />
 
-          {/* Twitter Card Meta Tags */}
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content="Orange Auth Template" />
-          <meta
-            name="twitter:description"
-            content="A clean, ready-to-use authentication system with Orange ID integration."
-          />
-          <meta
-            name="twitter:image"
-            content={`${window.location.origin}/twitter-card.png`}
-          />
-          <meta name="twitter:image:alt" content="Orange Auth Template" />
+            {/* Twitter Card Meta Tags */}
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:title" content="Orange Auth Template" />
+            <meta
+              name="twitter:description"
+              content="A clean, ready-to-use authentication system with Orange ID integration."
+            />
+            <meta
+              name="twitter:image"
+              content={`${window.location.origin}/twitter-card.png`}
+            />
+            <meta name="twitter:image:alt" content="Orange Auth Template" />
 
-          {/* Additional SEO Meta Tags */}
-          <meta name="robots" content="index, follow" />
-          <meta name="author" content="Orange Auth Template" />
-          <meta
-            name="keywords"
-            content="authentication, template, Orange ID, user management, session-based"
-          />
-        </Helmet>
-        <Navigation />
-        <Router />
-        <Toaster />
-        <StoreUserData />
+            {/* Additional SEO Meta Tags */}
+            <meta name="robots" content="index, follow" />
+            <meta name="author" content="Orange Auth Template" />
+            <meta
+              name="keywords"
+              content="authentication, template, Orange ID, user management, session-based"
+            />
+          </Helmet>
+          <Navigation />
+          <Router />
+          <Toaster />
+          <StoreUserData />
+        </LoginPanelProvider>
       </OrangeAuthProvider>
     </QueryClientProvider>
   );

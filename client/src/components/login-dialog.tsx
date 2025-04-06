@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { LoginPanel } from "@bedrock_org/passport";
 import { X } from "lucide-react";
+import { useLoginPanel } from "@/contexts/LoginPanelContext";
 
 interface LoginDialogProps {
   open: boolean;
@@ -14,6 +15,8 @@ export function LoginDialog({
   onOpenChange,
   message = "Please log in to continue",
 }: LoginDialogProps) {
+  const { settings } = useLoginPanel();
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="p-0 border-none bg-transparent shadow-2xl mx-auto max-w-[90vw] sm:max-w-none">
@@ -26,22 +29,7 @@ export function LoginDialog({
             <span className="sr-only">Close</span>
           </button>
 
-          <LoginPanel
-            panelClass="bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-lg shadow-lg container py-6 px-4 md:px-8"
-            buttonClass="w-full bg-[#F37920] hover:bg-[#D86A10] text-white transition-all duration-200 hover:border-[#F37920] font-medium py-2.5 rounded-md"
-            headerClass="justify-center pb-6"
-            logo="/images/orangelogo.svg"
-            title="Sign in to"
-            titleClass="text-xl font-semibold text-[#F37920]"
-            logoAlt="Orange Auth"
-            logoClass="ml-2 h-8"
-            showConnectWallet={true}
-            walletButtonText="Connect Wallet"
-            walletButtonClass="w-full border border-gray-700 hover:bg-gray-800 transition-all duration-200 text-[#F37920] font-medium py-2.5 rounded-md"
-            separatorText="OR"
-            separatorTextClass="bg-black text-[#F37920] px-2"
-            separatorClass="bg-gray-700"
-          />
+          <LoginPanel {...settings} />
         </div>
       </DialogContent>
     </Dialog>
