@@ -31,8 +31,8 @@ export function LoginDialog({
             </p>
           </div>
           <LoginPanel
-            panelClass="bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-b-lg shadow-lg container p-2 md:p-8"
-            buttonClass="w-full bg-[#F37920] hover:bg-[#D86A10] text-white transition-all duration-200 hover:border-[#F37920]"
+            panelClass="bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-b-lg shadow-lg container py-6 px-4 md:px-8"
+            buttonClass="w-full bg-[#F37920] hover:bg-[#D86A10] text-white transition-all duration-200 hover:border-[#F37920] font-medium py-2.5 rounded-md"
             headerClass="justify-center pb-6"
             logo="/images/orangelogo.svg"
             title="Sign in to"
@@ -41,7 +41,7 @@ export function LoginDialog({
             logoClass="ml-2 h-8"
             showConnectWallet={true}
             walletButtonText="Connect Wallet"
-            walletButtonClass="w-full border border-gray-700 hover:bg-gray-800 transition-all duration-200 text-[#F37920]"
+            walletButtonClass="w-full border border-gray-700 hover:bg-gray-800 transition-all duration-200 text-[#F37920] font-medium py-2.5 rounded-md"
             separatorText="OR"
             separatorTextClass="bg-black text-[#F37920] px-2"
             separatorClass="bg-gray-700"
