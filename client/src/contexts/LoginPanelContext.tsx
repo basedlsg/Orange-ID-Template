@@ -25,6 +25,7 @@ export interface LoginPanelSettings {
   separatorText: string;
   separatorTextClass: string;
   separatorClass: string;
+  requireWalletSignature?: boolean;
 }
 
 // Default color theme
@@ -51,7 +52,8 @@ export const defaultSettings: LoginPanelSettings = {
   walletButtonClass: "w-full border border-gray-700 hover:bg-gray-800 transition-all duration-200 text-[#F37920] font-medium py-2.5 rounded-md",
   separatorText: "OR",
   separatorTextClass: "bg-black text-[#F37920] px-2",
-  separatorClass: "bg-gray-700"
+  separatorClass: "bg-gray-700",
+  requireWalletSignature: true
 };
 
 type LoginPanelContextType = {
@@ -80,7 +82,8 @@ export function LoginPanelProvider({ children }: { children: ReactNode }) {
       titleClass: `text-xl font-semibold text-[${theme.primary}]`,
       walletButtonClass: `w-full border border-[${theme.borderColor}] hover:bg-gray-800 transition-all duration-200 text-[${theme.primary}] font-medium py-2.5 rounded-md`,
       separatorTextClass: `bg-[${theme.panelBg}] text-[${theme.primary}] px-2`,
-      separatorClass: `bg-[${theme.borderColor}]`
+      separatorClass: `bg-[${theme.borderColor}]`,
+      requireWalletSignature: true
     };
     
     setSettings(updatedSettings);
