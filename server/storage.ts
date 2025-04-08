@@ -12,6 +12,10 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
   getUsersCreatedByDay(): Promise<{ date: string; count: number }[]>;
+  
+  // Admin management operations
+  toggleUserAdminStatus(userId: number, makeAdmin: boolean): Promise<User | undefined>;
+  clearAllUsers(): Promise<void>; // For cleaning the database
 }
 
 export class DatabaseStorage implements IStorage {
@@ -202,6 +206,76 @@ export class DatabaseStorage implements IStorage {
       
       return [];
     }
+  }
+
+  async toggleUserAdminStatus(userId: number, makeAdmin: boolean): Promise<User | undefined> {
+    console.log(`Toggling admin status for user ${userId} to ${makeAdmin ? 'admin' : 'non-admin'}`);
+    
+    return this.safeDbOperation(
+      // For mock DB implementation
+      async () => {
+        if (typeof (db as any).toggleUserAdminStatus === 'function') {
+          return await (db as any).toggleUserAdminStatus(userId, makeAdmin);
+        } else {
+          // Fallback for mock DB without the method
+          const user = await (db as any).getUser(userId);
+          if (!user) return undefined;
+          
+          user.isAdmin = makeAdmin;
+          return user;
+        }
+      },
+      // For Drizzle implementation
+      async () => {
+        try {
+          // First verify user exists
+          const user = await this.getUser(userId);
+          if (!user) {
+            console.log(`User with ID ${userId} not found`);
+            return undefined;
+          }
+          
+          // Update the user's admin status
+          const [updatedUser] = await db
+            .update(users)
+            .set({ isAdmin: makeAdmin })
+            .where(eq(users.id, userId))
+            .returning();
+          
+          console.log(`Updated user admin status:`, updatedUser);
+          return updatedUser;
+        } catch (error) {
+          console.error(`Error toggling admin status for user ${userId}:`, error);
+          throw error;
+        }
+      }
+    );
+  }
+
+  async clearAllUsers(): Promise<void> {
+    console.log("Clearing all users from the database");
+    
+    return this.safeDbOperation(
+      // For mock DB implementation
+      async () => {
+        if (typeof (db as any).clearAllUsers === 'function') {
+          await (db as any).clearAllUsers();
+        } else {
+          // Basic mock DB implementation if not available
+          (db as any).users = [];
+        }
+      },
+      // For Drizzle implementation
+      async () => {
+        try {
+          await db.delete(users);
+          console.log("All users deleted successfully");
+        } catch (error) {
+          console.error("Error clearing users:", error);
+          throw error;
+        }
+      }
+    );
   }
 }
 
