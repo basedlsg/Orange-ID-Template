@@ -368,16 +368,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Clear all users (admin only, development use only)
+  // Clear all users (admin only)
   app.post("/api/admin/clear-users", checkAdmin, async (req, res) => {
-    // This is a destructive operation, only allow in development
-    if (process.env.NODE_ENV === 'production') {
-      return res.status(403).json({ error: "This operation is not allowed in production" });
-    }
-    
     try {
       console.log("Admin API: Clearing all users");
+      
+      // Clear all user data
       await storage.clearAllUsers();
+      
+      // Clear session data to force re-login
+      if (req.session) {
+        req.session.destroy((err) => {
+          if (err) {
+            console.error("Error destroying session:", err);
+          }
+          console.log("Session destroyed");
+        });
+      }
+      
+      console.log("All users cleared successfully");
       res.json({ success: true, message: "All users cleared successfully" });
     } catch (error) {
       console.error("Error clearing users:", error);

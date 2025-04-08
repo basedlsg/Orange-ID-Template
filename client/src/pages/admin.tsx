@@ -34,6 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginPanelEditor } from "@/components/login-panel-editor";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { ClearUsersButton } from "@/components/clear-users-button";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -349,9 +350,15 @@ export default function AdminPage() {
         <TabsContent value="users">
           {/* Users Table */}
           <Card className="bg-gray-900 border-gray-800">
-            <CardHeader>
-              <CardTitle className="text-[#F37920]">All Users</CardTitle>
-              <CardDescription className="text-gray-400">List of all registered users</CardDescription>
+            <CardHeader className="flex flex-row justify-between items-start">
+              <div>
+                <CardTitle className="text-[#F37920]">All Users</CardTitle>
+                <CardDescription className="text-gray-400">List of all registered users</CardDescription>
+              </div>
+              <div className="flex items-center">
+                {/* Import the ClearUsersButton component below in the imports section */}
+                <ClearUsersButton />
+              </div>
             </CardHeader>
             <CardContent>
               <Table>
