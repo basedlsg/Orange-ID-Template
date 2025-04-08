@@ -32,6 +32,18 @@ import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginPanelEditor } from "@/components/login-panel-editor";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface User {
   id: number;
@@ -67,6 +79,13 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [, setLocation] = useLocation();
   
+  // States for admin toggle feature
+  const [togglingUser, setTogglingUser] = useState<User | null>(null);
+  const [isTogglingAdmin, setIsTogglingAdmin] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmDialogAction, setConfirmDialogAction] = useState<'promote' | 'demote' | null>(null);
+  const [currentUserOrangeId, setCurrentUserOrangeId] = useState<string>("");
+  
   // All data fetching in one useEffect with caching
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -84,6 +103,9 @@ export default function AdminPage() {
           setLocation('/');
           return;
         }
+        
+        // Save current user's orangeId for admin operations
+        setCurrentUserOrangeId(orangeId);
         
         // Check for cached admin status
         const cachedAdminStatus = sessionStorage.getItem(`adminStatus-${orangeId}`);
@@ -193,6 +215,71 @@ export default function AdminPage() {
     );
   }
 
+  // Function to initiate the admin toggle process with confirmation
+  const handleToggleAdmin = (user: User) => {
+    setTogglingUser(user);
+    setConfirmDialogAction(user.isAdmin ? 'demote' : 'promote');
+    setShowConfirmDialog(true);
+  };
+  
+  // Function to actually perform the admin toggle
+  const performAdminToggle = async () => {
+    if (!togglingUser) return;
+    
+    try {
+      setIsTogglingAdmin(true);
+      
+      const response = await fetch('/api/admin/toggle-admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: togglingUser.id,
+          makeAdmin: !togglingUser.isAdmin,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to toggle admin status: ${response.statusText}`);
+      }
+      
+      const updatedUser = await response.json();
+      
+      // Update the users list with the updated user
+      setUsers(prevUsers => 
+        prevUsers.map(user => 
+          user.id === updatedUser.id ? updatedUser : user
+        )
+      );
+      
+      // Clear cached user data to force refresh on next load
+      sessionStorage.removeItem('admin-users-data');
+      
+      toast({
+        title: 'Success',
+        description: `User ${updatedUser.username} is now ${updatedUser.isAdmin ? 'an admin' : 'a regular user'}.`,
+        variant: 'default',
+      });
+      
+      // If the current user changed their own status, update the session
+      if (updatedUser.orangeId === currentUserOrangeId) {
+        sessionStorage.setItem(`adminStatus-${currentUserOrangeId}`, updatedUser.isAdmin.toString());
+      }
+    } catch (err) {
+      console.error('Error toggling admin status:', err);
+      toast({
+        title: 'Error',
+        description: err instanceof Error ? err.message : 'Failed to update admin status.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsTogglingAdmin(false);
+      setShowConfirmDialog(false);
+      setTogglingUser(null);
+    }
+  };
+
   // Error state
   if (error) {
     return (
@@ -207,7 +294,7 @@ export default function AdminPage() {
     <div className="container mx-auto py-8 bg-black text-white">
       <h1 className="text-3xl font-bold mb-6 text-[#F37920]">Admin Dashboard</h1>
       
-      <Tabs defaultValue="analytics" className="mb-8">
+      <Tabs defaultValue="users" className="mb-8">
         <TabsList className="mb-6 bg-gray-900 border-gray-800">
           <TabsTrigger value="analytics" className="data-[state=active]:bg-[#F37920] data-[state=active]:text-white">
             Analytics
@@ -275,8 +362,9 @@ export default function AdminPage() {
                     <TableHead className="text-gray-300">Username</TableHead>
                     <TableHead className="text-gray-300">Email</TableHead>
                     <TableHead className="text-gray-300">Role</TableHead>
-                    <TableHead className="text-gray-300">Admin</TableHead>
+                    <TableHead className="text-gray-300">Admin Status</TableHead>
                     <TableHead className="text-gray-300">Date Joined</TableHead>
+                    <TableHead className="text-gray-300">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -285,20 +373,79 @@ export default function AdminPage() {
                       <TableRow key={user.id} className="border-gray-800 hover:bg-gray-800">
                         <TableCell className="text-gray-300">{user.id}</TableCell>
                         <TableCell className="text-gray-300">{user.username}</TableCell>
-                        <TableCell className="text-gray-300">{user.email}</TableCell>
-                        <TableCell className="text-gray-300">{user.role}</TableCell>
-                        <TableCell className="text-gray-300">{user.isAdmin ? 
-                          <span className="text-[#F37920]">Yes</span> : 'No'}</TableCell>
-                        <TableCell className="text-gray-300">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-gray-300">{user.email || 'N/A'}</TableCell>
+                        <TableCell className="text-gray-300">{user.role || 'User'}</TableCell>
+                        <TableCell className="text-gray-300">
+                          {user.isAdmin ? 
+                            <Badge variant="default" className="bg-[#F37920] hover:bg-[#F37920]">
+                              Admin
+                            </Badge> : 
+                            <Badge variant="outline" className="text-gray-400 border-gray-600">
+                              Regular User
+                            </Badge>
+                          }
+                        </TableCell>
+                        <TableCell className="text-gray-300">
+                          {new Date(user.createdAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            {/* Only show toggle if not changing the current user */}
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleToggleAdmin(user)}
+                              className="border-gray-700 text-[#F37920] hover:text-white hover:bg-[#F37920] hover:border-[#F37920]"
+                              disabled={isTogglingAdmin}
+                            >
+                              {user.isAdmin ? 'Remove Admin' : 'Make Admin'}
+                            </Button>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow className="border-gray-800">
-                      <TableCell colSpan={6} className="text-center text-gray-400">No users found.</TableCell>
+                      <TableCell colSpan={7} className="text-center text-gray-400">No users found.</TableCell>
                     </TableRow>
                   )}
                 </TableBody>
               </Table>
+              
+              {/* Confirmation Dialog for Admin Toggle */}
+              <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                <AlertDialogContent className="bg-gray-900 border-gray-700 text-white">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-[#F37920]">
+                      {confirmDialogAction === 'promote' ? 'Promote to Admin' : 'Remove Admin Rights'}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-300">
+                      {confirmDialogAction === 'promote' 
+                        ? `Are you sure you want to give ${togglingUser?.username} admin privileges?` 
+                        : `Are you sure you want to remove admin privileges from ${togglingUser?.username}?`}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel 
+                      className="bg-gray-800 text-white border-gray-700 hover:bg-gray-700"
+                      onClick={() => {
+                        setShowConfirmDialog(false);
+                        setTogglingUser(null);
+                      }}
+                      disabled={isTogglingAdmin}
+                    >
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-[#F37920] hover:bg-[#E26910] text-white"
+                      onClick={performAdminToggle}
+                      disabled={isTogglingAdmin}
+                    >
+                      {isTogglingAdmin ? 'Processing...' : 'Confirm'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardContent>
           </Card>
         </TabsContent>

@@ -329,6 +329,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to fetch user growth statistics" });
     }
   });
+
+  // Toggle user admin status (admin only)
+  app.post("/api/admin/toggle-admin", checkAdmin, async (req, res) => {
+    try {
+      console.log("Admin API: Toggling user admin status");
+      const { userId, makeAdmin } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+      
+      // Convert to correct types
+      const userIdNum = parseInt(userId, 10);
+      const makeAdminBool = Boolean(makeAdmin);
+      
+      if (isNaN(userIdNum)) {
+        return res.status(400).json({ error: "Invalid user ID format" });
+      }
+      
+      console.log(`Toggling admin status for user ${userIdNum} to ${makeAdminBool ? 'admin' : 'non-admin'}`);
+      
+      const updatedUser = await storage.toggleUserAdminStatus(userIdNum, makeAdminBool);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Update session if the user toggled their own status
+      if (req.session && req.session.userId === userIdNum) {
+        req.session.isAdmin = updatedUser.isAdmin;
+      }
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error toggling user admin status:", error);
+      res.status(500).json({ error: "Failed to update user admin status" });
+    }
+  });
+  
+  // Clear all users (admin only, development use only)
+  app.post("/api/admin/clear-users", checkAdmin, async (req, res) => {
+    // This is a destructive operation, only allow in development
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({ error: "This operation is not allowed in production" });
+    }
+    
+    try {
+      console.log("Admin API: Clearing all users");
+      await storage.clearAllUsers();
+      res.json({ success: true, message: "All users cleared successfully" });
+    } catch (error) {
+      console.error("Error clearing users:", error);
+      res.status(500).json({ error: "Failed to clear users" });
+    }
+  });
   
   const httpServer = createServer(app);
   return httpServer;
