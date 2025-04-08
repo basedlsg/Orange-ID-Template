@@ -4,12 +4,15 @@
 
 Just click "Run" in Replit to start the application. No setup required!
 
+> **Important**: You must whitelist your application's URLs in the OrangeID Dashboard. Visit https://vibecodinglist.com/orange-id-integration to whitelist both your development URL and production URL to make the authentication widget work properly.
+
 ### Features at a Glance
 
 - **Zero Configuration**: Pre-configured SQLite database ready to use
-- **Authentication**: Login/logout with Orange ID
+- **Authentication**: Login/logout with OrangeID (Bedrock Passport)
 - **Admin Dashboard**: User management and analytics
 - **Auto-Admin**: First user to login becomes admin automatically
+- **Modern UI**: Dark theme with orange accents
 
 ## How to Use This Template
 
@@ -31,9 +34,13 @@ Extend the user model in `shared/schema.ts` if needed.
 
 Add pages in `client/src/pages` and register them in `client/src/App.tsx`.
 
+### Customize Login Panel
+
+Use the Login Panel Editor in the admin dashboard to customize the appearance of the login dialog.
+
 ## Technical Stack
 
-- **Frontend**: React (TypeScript), Vite, Tailwind CSS
+- **Frontend**: React (TypeScript), Vite, Tailwind CSS, shadcn/ui
 - **Backend**: Express.js with session management
 - **Database**: SQLite with Drizzle ORM
 - **Auth**: OrangeID (via Bedrock Passport)
@@ -42,7 +49,7 @@ Add pages in `client/src/pages` and register them in `client/src/App.tsx`.
 
 Basic user model with:
 - ID (auto-generated)
-- Orange ID
+- Orange ID (unique identifier from Bedrock Passport)
 - Username
 - Email (optional)
 - Role
@@ -55,13 +62,22 @@ Basic user model with:
 - `GET /api/users/check-admin`: Check admin status
 - `GET /api/admin/users`: Get all users (admin only)
 - `GET /api/admin/stats/user-growth`: User growth stats (admin only)
+- `PATCH /api/admin/users/:id/toggle-admin`: Toggle admin status (admin only)
 
 ## File Structure
 
 - `/client/src`: React frontend
+  - `/components`: UI components including login dialog
+  - `/pages`: Page components (home, admin, etc.)
+  - `/contexts`: React context providers
+  - `/hooks`: Custom React hooks
 - `/server`: Express backend
-- `/shared`: Shared code (database schema)
-- `/data`: Pre-configured SQLite database
+  - `/routes.ts`: API endpoints
+  - `/storage.ts`: Database access layer
+  - `/db.ts`: SQLite database connection
+- `/shared`: Shared code between frontend and backend
+  - `/schema.ts`: Database schema
+- `/data`: SQLite database file
 
 ## Example: Building a Quiz Game
 
