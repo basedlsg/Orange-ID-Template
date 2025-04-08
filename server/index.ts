@@ -2,7 +2,6 @@ import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { pool } from "./db";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
@@ -10,15 +9,12 @@ import dotenv from "dotenv";
 // Load environment variables
 dotenv.config();
 
-// Always use SQLite for this template
-const useSqlite = true;
-
 // Setup express
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Session configuration - changes based on database type
+// Session configuration
 const sessionConfig: session.SessionOptions = {
   secret: process.env.SESSION_SECRET || 'orange-vibe-session-secret',
   resave: false,
@@ -31,11 +27,9 @@ const sessionConfig: session.SessionOptions = {
 };
 
 // Ensure data directory exists for SQLite
-if (useSqlite) {
-  const dataDir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
+const dataDir = path.join(process.cwd(), 'data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
 }
 
 // Use simple in-memory session store for development
