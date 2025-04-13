@@ -6,6 +6,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
+import Database from "better-sqlite3";
 
 // Load environment variables
 dotenv.config();
@@ -15,8 +16,45 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Setup memory store for session
-const MemoryStoreSession = MemoryStore(session);
+// Ensure data directory exists for SQLite
+const dataDir = path.join(process.cwd(), 'data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+// Create session store with SQLite for production or memory for development
+let sessionStore;
+if (process.env.NODE_ENV === 'production') {
+  // In production: Use SQLite-based session store
+  try {
+    const SqliteStore = require('better-sqlite3-session-store')(session);
+    const sessionsDb = new Database(path.join(dataDir, 'sessions.db'));
+    sessionStore = new SqliteStore({
+      client: sessionsDb,
+      expired: {
+        clear: true,
+        intervalMs: 24 * 60 * 60 * 1000 // ms = 24h
+      }
+    });
+    console.log("Using SQLite session store for production");
+  } catch (error) {
+    console.warn("Could not initialize SQLite session store:", error);
+    console.warn("Falling back to memory store (not recommended for production)");
+    
+    // Fallback to memory store if SQLite store fails
+    const MemoryStoreSession = MemoryStore(session);
+    sessionStore = new MemoryStoreSession({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    });
+  }
+} else {
+  // In development: Use memory store
+  const MemoryStoreSession = MemoryStore(session);
+  sessionStore = new MemoryStoreSession({
+    checkPeriod: 86400000 // prune expired entries every 24h
+  });
+  console.log("Using in-memory session store for development");
+}
 
 // Session configuration
 const sessionConfig: session.SessionOptions = {
@@ -28,18 +66,8 @@ const sessionConfig: session.SessionOptions = {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
   },
-  store: new MemoryStoreSession({
-    checkPeriod: 86400000 // prune expired entries every 24h
-  })
+  store: sessionStore
 };
-
-// Ensure data directory exists for SQLite
-const dataDir = path.join(process.cwd(), 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
-
-console.log("Using in-memory session store for development");
 
 // Apply session middleware
 app.use(session(sessionConfig));

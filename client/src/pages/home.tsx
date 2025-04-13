@@ -174,7 +174,7 @@ export default function Home() {
                 <li className="flex items-start">
                   <span className="text-[#F37920] mr-2">✓</span>
                   <span className="text-gray-300">
-                    SQLite database integration with Drizzle ORM
+                    SQLite database integration with session persistence
                   </span>
                 </li>
                 <li className="flex items-start">
@@ -230,8 +230,8 @@ export default function Home() {
               Database Configuration
             </h3>
             <p className="text-gray-300 mb-4">
-              This template uses SQLite by default, which requires zero configuration and works for all Replit users.
-              The database will be automatically created in the <code className="bg-gray-800 px-1 mx-1 rounded text-gray-200">data</code> directory.
+              This template uses SQLite for all data storage, which requires zero configuration and works for all Replit users.
+              Everything is automatically created in the <code className="bg-gray-800 px-1 mx-1 rounded text-gray-200">data</code> directory.
             </p>
             
             <div className="space-y-4">
@@ -239,11 +239,15 @@ export default function Home() {
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                   <span className="text-gray-300">
-                    Currently using: <span className="font-semibold text-[#F37920]">
+                    <span className="font-semibold text-[#F37920]">
                       SQLite Database
-                    </span>
+                    </span> for both user data and session storage
                   </span>
                 </div>
+              </div>
+              <div className="p-3 bg-gray-800 rounded-md text-xs text-gray-300">
+                <span className="font-semibold text-[#F37920]">Production Ready:</span> Sessions are stored in SQLite when deployed, 
+                ensuring persistence across server restarts and better security.
               </div>
             </div>
           </div>
