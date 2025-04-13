@@ -36,7 +36,7 @@ Add pages in `client/src/pages` and register them in `client/src/App.tsx`.
 
 ### Customize Login Panel
 
-Use the Login Panel Editor in the admin dashboard to customize the appearance of the login dialog.
+Edit the `defaultSettings` object in `client/src/components/login-dialog.tsx` to customize the login panel appearance.
 
 ## Technical Stack
 
@@ -69,7 +69,6 @@ Basic user model with:
 - `/client/src`: React frontend
   - `/components`: UI components including login dialog
   - `/pages`: Page components (home, admin, etc.)
-  - `/contexts`: React context providers
   - `/hooks`: Custom React hooks
 - `/server`: Express backend
   - `/routes.ts`: API endpoints
@@ -77,7 +76,7 @@ Basic user model with:
   - `/db.ts`: SQLite database connection
 - `/shared`: Shared code between frontend and backend
   - `/schema.ts`: Database schema
-- `/data`: SQLite database file
+- `/data`: SQLite database file location
 
 ## Example: Building a Quiz Game
 
