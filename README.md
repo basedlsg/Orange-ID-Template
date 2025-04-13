@@ -1,10 +1,17 @@
-# 🍊 Orange Auth Template
+# Orange ID Template
 
 ## Quick Start
 
 Just click "Run" in Replit to start the application. No setup required!
 
-> **Important**: You must whitelist your application's URLs in the OrangeID Dashboard. Visit https://vibecodinglist.com/orange-id-integration to whitelist both your development URL and production URL to make the authentication widget work properly.
+> **Important**: You must set up Orange ID authentication by following these steps:
+
+1. Visit [https://vibecodinglist.com/orange-id-integration](https://vibecodinglist.com/orange-id-integration)
+2. Generate a unique Project ID (or use an existing one)
+3. Whitelist your application URLs (both development and production)
+4. Copy your Project ID and replace the `tenantId` value in `client/src/components/OrangeAuthProvider.tsx` with your own Project ID
+
+The authentication will not work unless you update the `tenantId` with your own Project ID from the Orange ID Dashboard.
 
 ### Features at a Glance
 

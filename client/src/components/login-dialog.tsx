@@ -11,20 +11,26 @@ interface LoginDialogProps {
 
 // Default settings for the login panel
 const defaultSettings = {
-  panelClass: "bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-lg shadow-lg container py-6 px-4 md:px-8",
-  buttonClass: "w-full bg-[#F37920] hover:bg-[#D86A10] text-white transition-all duration-200 hover:border-[#F37920] font-medium py-2.5 rounded-md",
-  headerClass: "justify-center pb-6",
-  logo: "/images/orange.png",
+  panelClass: "container p-2 md:p-8 rounded-2xl max-w-[480px]",
+  buttonClass: "hover:border-orange-500",
+  headerClass: "justify-center",
+  logo: "https://irp.cdn-website.com/e81c109a/dms3rep/multi/orange-web3-logo-v2a-20241018.svg",
   title: "Sign in to",
-  titleClass: "text-xl font-semibold text-[#F37920]",
-  logoAlt: "Orange Auth",
+  titleClass: "text-xl font-bold",
+  logoAlt: "Orange Web3",
   logoClass: "ml-2 h-8",
-  showConnectWallet: true,
+  showConnectWallet: false,
   walletButtonText: "Connect Wallet",
-  walletButtonClass: "w-full border border-gray-700 hover:bg-gray-800 transition-all duration-200 text-[#F37920] font-medium py-2.5 rounded-md",
   separatorText: "OR",
-  separatorTextClass: "bg-black text-[#F37920] px-2",
-  separatorClass: "bg-gray-700"
+  separatorTextClass: "bg-orange-900",
+  separatorClass: "bg-orange-900",
+  linkRowClass: "justify-center",
+  features: {
+    enableWalletConnect: false,
+    enableAppleLogin: true,
+    enableGoogleLogin: true,
+    enableEmailLogin: true,
+  },
 };
 
 export function LoginDialog({
