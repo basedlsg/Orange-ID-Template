@@ -31,7 +31,6 @@ import { useBedrockPassport } from "@bedrock_org/passport";
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'wouter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LoginPanelEditor } from "@/components/login-panel-editor";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { 
@@ -302,9 +301,6 @@ export default function AdminPage() {
           <TabsTrigger value="users" className="data-[state=active]:bg-[#F37920] data-[state=active]:text-white">
             User Management
           </TabsTrigger>
-          <TabsTrigger value="customization" className="data-[state=active]:bg-[#F37920] data-[state=active]:text-white">
-            Login Customization
-          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="analytics">
@@ -446,20 +442,6 @@ export default function AdminPage() {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="customization">
-          <Card className="bg-gray-900 border-gray-800">
-            <CardHeader>
-              <CardTitle className="text-[#F37920]">Login Panel Editor</CardTitle>
-              <CardDescription className="text-gray-400">
-                Customize the appearance of your Bedrock Passport login panel
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <LoginPanelEditor />
             </CardContent>
           </Card>
         </TabsContent>
