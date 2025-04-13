@@ -7,18 +7,8 @@ import { useLocation } from "wouter";
 export default function Home() {
   const { isLoggedIn, user } = useBedrockPassport();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
-  const [dbType, setDbType] = useState<string>("sqlite");
-  const [isLoadingDbType, setIsLoadingDbType] = useState<boolean>(true);
   const { toast } = useToast();
   const [location] = useLocation();
-
-  // No need for database switch notifications anymore
-
-  // No need to check database type anymore - we're always using SQLite
-  useEffect(() => {
-    setDbType('sqlite'); // Always set to SQLite
-    setIsLoadingDbType(false);
-  }, []);
 
   // Check if the user is an admin with caching
   useEffect(() => {
@@ -246,21 +236,14 @@ export default function Home() {
             
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 bg-gray-800 rounded-md">
-                {isLoadingDbType ? (
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
-                    <span className="text-gray-300">Loading database configuration...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className="text-gray-300">
-                      Currently using: <span className="font-semibold text-[#F37920]">
-                        {dbType === 'sqlite' ? 'SQLite Database' : 'PostgreSQL Database'}
-                      </span>
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-gray-300">
+                    Currently using: <span className="font-semibold text-[#F37920]">
+                      SQLite Database
                     </span>
-                  </div>
-                )}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
