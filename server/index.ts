@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
+import MemoryStore from "memorystore";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import path from "path";
@@ -14,16 +15,22 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Setup memory store for session
+const MemoryStoreSession = MemoryStore(session);
+
 // Session configuration
 const sessionConfig: session.SessionOptions = {
-  secret: process.env.SESSION_SECRET || 'orange-vibe-session-secret',
+  secret: process.env.SESSION_SECRET || 'orange-auth-session-secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-  }
+  },
+  store: new MemoryStoreSession({
+    checkPeriod: 86400000 // prune expired entries every 24h
+  })
 };
 
 // Ensure data directory exists for SQLite
@@ -32,7 +39,6 @@ if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
 }
 
-// Use simple in-memory session store for development
 console.log("Using in-memory session store for development");
 
 // Apply session middleware
