@@ -207,10 +207,15 @@ export default function Home() {
                   Clone this template as a starting point
                 </li>
                 <li className="text-gray-300">
-                  Configure your Orange ID credentials
+                  <span className="font-semibold">IMPORTANT:</span> Set up your Orange ID Project ID:
+                  <ul className="list-disc pl-6 mt-2 space-y-1 text-xs">
+                    <li>Visit <a href="https://vibecodinglist.com/orange-id-integration" target="_blank" rel="noopener noreferrer" className="text-[#F37920] underline">vibecodinglist.com/orange-id-integration</a></li>
+                    <li>Generate a unique Project ID and whitelist your URLs</li>
+                    <li>Replace the <code className="bg-gray-800 px-1 rounded text-gray-200">tenantId</code> in <code className="bg-gray-800 px-1 rounded text-gray-200">OrangeAuthProvider.tsx</code></li>
+                  </ul>
                 </li>
                 <li className="text-gray-300">
-                  Start developing right away - no setup required
+                  Start developing right away - minimal setup required
                 </li>
                 <li className="text-gray-300">
                   Be the first to log in to automatically become an admin
