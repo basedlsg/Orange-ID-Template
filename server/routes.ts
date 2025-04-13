@@ -50,50 +50,7 @@ async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId:
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // API Route to get current database type - we're always using SQLite now
-  app.get("/api/database-type", async (req, res) => {
-    // Hardcoded as SQLite - we no longer support multiple database types
-    res.json({ type: 'sqlite' });
-  });
-
-  // API Route to switch database type
-  app.post("/api/switch-database", async (req, res) => {
-    try {
-      // Get the target database type from the form submission
-      // For GET requests or form submissions, use req.query; for POST form submissions, use req.body
-      const targetDbType = req.body && req.body.dbType ? req.body.dbType : (req.query.dbType || 'sqlite');
-      const useSqlite = targetDbType === 'sqlite';
-      
-      console.log(`Switching database to: ${targetDbType} (useSqlite=${useSqlite}) - Code-based switch only (no .env modification)`);
-      
-      // Set a global flag for the current session - this is a simple in-memory switch
-      // This won't persist across server restarts, but is useful for demonstrating the concept
-      // and for agents to understand the database selection mechanism
-      (global as any).USE_SQLITE = useSqlite;
-      
-      // If this is an AJAX request, respond with JSON
-      if (req.xhr || req.headers.accept?.includes('application/json')) {
-        return res.json({ 
-          success: true, 
-          message: `Database preference set to ${useSqlite ? 'SQLite' : 'PostgreSQL'}. Note: This is a temporary session-only change for demonstration.`,
-          type: useSqlite ? 'sqlite' : 'postgres'
-        });
-      }
-      
-      // For form submissions, redirect back to the home page with a success message
-      res.redirect('/?db_switched=true&type=' + (useSqlite ? 'sqlite' : 'postgres'));
-    } catch (error) {
-      console.error("Error switching database type:", error);
-      
-      // If this is an AJAX request, respond with JSON error
-      if (req.xhr || req.headers.accept?.includes('application/json')) {
-        return res.status(500).json({ message: "Failed to switch database type" });
-      }
-      
-      // For form submissions, redirect back to the home page with an error message
-      res.redirect('/?db_error=true');
-    }
-  });
+  // No database switching routes needed - we only use SQLite
 
   // User API
   app.post("/api/users", async (req, res) => {
