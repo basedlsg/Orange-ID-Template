@@ -13,6 +13,7 @@ Just click "Run" in Replit to start the application. No setup required!
 - **Admin Dashboard**: User management and analytics
 - **Auto-Admin**: First user to login becomes admin automatically
 - **Modern UI**: Dark theme with orange accents
+- **Production-Ready**: SQLite for both data and session storage
 
 ## How to Use This Template
 
@@ -41,8 +42,8 @@ Edit the `defaultSettings` object in `client/src/components/login-dialog.tsx` to
 ## Technical Stack
 
 - **Frontend**: React (TypeScript), Vite, Tailwind CSS, shadcn/ui
-- **Backend**: Express.js with session management
-- **Database**: SQLite with Drizzle ORM
+- **Backend**: Express.js with SQLite-based session management
+- **Database**: SQLite with Drizzle ORM for persistence
 - **Auth**: OrangeID (via Bedrock Passport)
 
 ## User Schema
@@ -76,7 +77,9 @@ Basic user model with:
   - `/db.ts`: SQLite database connection
 - `/shared`: Shared code between frontend and backend
   - `/schema.ts`: Database schema
-- `/data`: SQLite database file location
+- `/data`: SQLite database storage
+  - `orange_auth.db`: Main application database
+  - `sessions.db`: Session storage (in production)
 
 ## Example: Building a Quiz Game
 
