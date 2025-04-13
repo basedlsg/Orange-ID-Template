@@ -181,7 +181,7 @@ function ProtectedRoute({
   if (isLoggedIn === null || (requiresAdmin && isCheckingAdmin)) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black">
-        <img src="/orangelogo.svg" alt="Orange Logo" className="h-12 mb-4" />
+        <img src="/orange_logo.png" alt="Orange Logo" className="h-12 mb-4" />
         <div className="animate-pulse text-[#F37920] font-medium">
           Loading authentication state...
         </div>
