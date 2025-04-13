@@ -181,7 +181,7 @@ function ProtectedRoute({
   if (isLoggedIn === null || (requiresAdmin && isCheckingAdmin)) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-black">
-        <img src="/orange_logo.png" alt="Orange Logo" className="h-12 mb-4" />
+        <img src="/images/orange.png" alt="Orange Logo" className="h-12 mb-4" />
         <div className="animate-pulse text-[#F37920] font-medium">
           Loading authentication state...
         </div>
@@ -267,7 +267,7 @@ function Navigation() {
     <nav className="border-b border-gray-800 bg-black">
       <div className="container mx-auto flex h-16 items-center px-4">
         <Link href="/">
-          <img src="/orangelogo.svg" alt="Orange Logo" className="h-8 cursor-pointer" />
+          <Logo className="cursor-pointer" />
         </Link>
 
         {/* Navigation links */}
