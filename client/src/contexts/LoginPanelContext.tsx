@@ -41,7 +41,7 @@ export const defaultSettings: LoginPanelSettings = {
   panelClass: "bg-black text-white w-full backdrop-blur-lg border border-gray-700 rounded-lg shadow-lg container py-6 px-4 md:px-8",
   buttonClass: "w-full bg-[#F37920] hover:bg-[#D86A10] text-white transition-all duration-200 hover:border-[#F37920] font-medium py-2.5 rounded-md",
   headerClass: "justify-center pb-6",
-  logo: "/images/orangelogo.svg",
+  logo: "/images/orange.png",
   title: "Sign in to",
   titleClass: "text-xl font-semibold text-[#F37920]",
   logoAlt: "Orange Auth",
