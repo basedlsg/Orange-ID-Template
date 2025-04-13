@@ -267,7 +267,7 @@ function Navigation() {
     <nav className="border-b border-gray-800 bg-black">
       <div className="container mx-auto flex h-16 items-center px-4">
         <Link href="/">
-          <img src="/images/orange.png" alt="Orange Logo" className="h-8 cursor-pointer" />
+          <img src="/images/orangelogo.svg" alt="Orange Logo" className="h-8 cursor-pointer" />
         </Link>
 
         {/* Navigation links */}
