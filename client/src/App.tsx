@@ -248,6 +248,14 @@ function Navigation() {
   const handleLogout = async () => {
     try {
       await signOut?.();
+      // Track logout event with GTM
+      if (typeof window !== 'undefined') {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          'event': 'logout',
+          'userId': (user as any)?.sub || (user as any)?.id
+        });
+      }
       toast({
         title: "Logged out successfully",
         description: "Come back soon!",
