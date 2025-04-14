@@ -48,11 +48,11 @@ Add pages in `client/src/pages` and register them in `client/src/App.tsx`.
 
 Edit the `defaultSettings` object in `client/src/components/login-dialog.tsx` to customize the login panel appearance.
 
-### Add Analytics Tracking
+### Analytics Tracking
 
-The template doesn't include any analytics tracking by default. To add Google Tag Manager (GTM) or other analytics:
+The template includes Google Tag Manager by default. You can replace the existing GTM-5SVVB3WM ID with your own GTM ID if needed:
 
-1. Edit `client/index.html` to include your GTM script in the `<head>` section:
+1. The GTM script is already included in `client/index.html`:
 
 ```html
 <!-- Google Tag Manager -->
@@ -60,30 +60,9 @@ The template doesn't include any analytics tracking by default. To add Google Ta
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-XXXX');</script>
+})(window,document,'script','dataLayer','GTM-5SVVB3WM');</script>
 <!-- End Google Tag Manager -->
 ```
-
-2. Or use the React Helmet component in `App.tsx` to dynamically add analytics scripts:
-
-```jsx
-<Helmet>
-  {/* Other meta tags */}
-  
-  {/* Google Analytics */}
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXX"></script>
-  <script>
-    {`
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXX');
-    `}
-  </script>
-</Helmet>
-```
-
-3. Replace any placeholder tracking IDs (`GTM-XXXX` or `G-XXXXXXXX`) with your own
 
 ## Technical Stack
 
