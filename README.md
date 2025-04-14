@@ -12,6 +12,7 @@ Just click "Run" in Replit to start the application. No setup required!
    You can do this in two ways:
    - Ask the Assistant: Simply type "Update the tenant ID to [your-project-id]" 
    - Manually edit the OrangeAuthProvider.tsx file
+
 The authentication will not work unless you update the `tenantId` with your own Project ID from the Orange ID Dashboard.
 
 ### Features at a Glance
