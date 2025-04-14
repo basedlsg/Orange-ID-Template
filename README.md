@@ -50,7 +50,7 @@ Edit the `defaultSettings` object in `client/src/components/login-dialog.tsx` to
 
 ### Analytics Tracking
 
-The template includes Google Tag Manager by default. You can replace the existing GTM-S5VV3SWM ID with your own GTM ID if needed:
+The template includes Google Tag Manager by default. You can replace the existing GTM-5SVVB3WM ID with your own GTM ID if needed:
 
 1. The GTM script is already included in `client/index.html`:
 
@@ -60,7 +60,7 @@ The template includes Google Tag Manager by default. You can replace the existin
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-S5VV3SWM');</script>
+})(window,document,'script','dataLayer','GTM-5SVVB3WM');</script>
 <!-- End Google Tag Manager -->
 ```
 
