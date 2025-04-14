@@ -15,6 +15,8 @@ Just click "Run" in Replit to start the application. No setup required!
 
 The authentication will not work unless you update the `tenantId` with your own Project ID from the Orange ID Dashboard.
 
+For more detailed documentation on Bedrock Passport integration, see the [official example repository](https://github.com/Bedrock-Org/bedrock-passport-example).
+
 ### Features at a Glance
 
 - **Zero Configuration**: Pre-configured SQLite database ready to use
