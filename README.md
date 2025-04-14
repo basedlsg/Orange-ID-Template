@@ -9,6 +9,9 @@ Just click "Run" in Replit to start the application. No setup required!
 2. Generate a unique Project ID (or use an existing one)
 3. Whitelist your application URLs (both development and production)
 4. Copy your Project ID and replace the `tenantId` value in `client/src/components/OrangeAuthProvider.tsx` with your own Project ID.
+   You can do this in two ways:
+   - Ask the Assistant: Simply type "Update the tenant ID to [your-project-id]" 
+   - Manually edit the OrangeAuthProvider.tsx file
 The authentication will not work unless you update the `tenantId` with your own Project ID from the Orange ID Dashboard.
 
 ### Features at a Glance
