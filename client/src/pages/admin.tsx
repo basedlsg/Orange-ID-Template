@@ -261,17 +261,6 @@ export default function AdminPage() {
         variant: 'default',
       });
       
-      // Track admin toggle action with GTM
-      if (typeof window !== 'undefined') {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-          'event': 'adminAction',
-          'actionType': updatedUser.isAdmin ? 'makeAdmin' : 'removeAdmin',
-          'targetUser': updatedUser.username,
-          'performedBy': currentUserOrangeId
-        });
-      }
-      
       // If the current user changed their own status, update the session
       if (updatedUser.orangeId === currentUserOrangeId) {
         sessionStorage.setItem(`adminStatus-${currentUserOrangeId}`, updatedUser.isAdmin.toString());
