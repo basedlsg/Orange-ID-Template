@@ -9,6 +9,16 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { User as UserIcon } from "lucide-react";
 
+// Initialize dataLayer for Google Tag Manager
+declare global {
+  interface Window {
+    dataLayer: any[];
+  }
+}
+
+// Initialize dataLayer if it doesn't exist
+window.dataLayer = window.dataLayer || [];
+
 
 // Define a type for the Bedrock user
 interface BedrockUser {
