@@ -76,9 +76,11 @@ async function storeUserInDB(user: any) {
 function StoreUserData() {
   const { isLoggedIn, user } = useBedrockPassport();
   const { toast } = useToast();
+  const [hasTrackedLogin, setHasTrackedLogin] = useState(false);
 
   useEffect(() => {
     if (isLoggedIn && user) {
+      // Store user in database
       storeUserInDB(user).catch((err) => {
         console.error("Failed to store user:", err);
         toast({
@@ -88,8 +90,19 @@ function StoreUserData() {
             err instanceof Error ? err.message : "Please try again later",
         });
       });
+      
+      // Track login event with GTM (only once per session)
+      if (!hasTrackedLogin && typeof window !== 'undefined') {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          'event': 'login',
+          'method': 'orange_id',
+          'userId': (user as any)?.sub || (user as any)?.id
+        });
+        setHasTrackedLogin(true);
+      }
     }
-  }, [isLoggedIn, user, toast]);
+  }, [isLoggedIn, user, toast, hasTrackedLogin]);
 
   return null;
 }
