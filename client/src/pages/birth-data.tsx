@@ -64,13 +64,28 @@ export default function BirthDataPage() {
   }
   
   // Query to fetch existing birth data
-  const { data: birthData, isLoading, error } = useQuery<BirthData>({
+  const { 
+    data: birthData, 
+    isLoading, 
+    error,
+    isError 
+  } = useQuery<BirthData>({
     queryKey: ["/api/birth-data"],
     queryFn: async () => {
-      return apiRequest("/api/birth-data", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      try {
+        return await apiRequest("/api/birth-data", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (err) {
+        // If we get a 404, it means the user doesn't have birth data yet
+        // We'll handle this in the UI by showing the form
+        if (err instanceof Error && err.message.includes("404")) {
+          console.log("No birth data found, will show form for initial data entry");
+          return null;
+        }
+        throw err;
+      }
     },
     enabled: !!isLoggedIn,
   });
@@ -158,8 +173,8 @@ export default function BirthDataPage() {
     );
   }
 
-  // Show error state
-  if (error) {
+  // Show error state for non-404 errors
+  if (error && !(error instanceof Error && error.message.includes("404"))) {
     return (
       <div className="container mx-auto py-10">
         <Card className="bg-black border border-gray-800">
