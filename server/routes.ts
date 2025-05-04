@@ -625,8 +625,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ error: "Access denied" });
       }
       
-      // Update the discussion
-      const updatedDiscussion = await storage.updateSpiritualDiscussion(discussionId, req.body);
+      // Check if we should enhance the discussion with Gemini AI
+      const useGemini = req.query.useGemini === 'true' || req.body.useGemini === true;
+      
+      // Create an object with the updates
+      let updates = { ...req.body };
+      
+      if (useGemini) {
+        try {
+          console.log(`Enhancing updated spiritual discussion with Gemini AI for user ${userId}`);
+          
+          // Check if the user has a natal chart
+          const natalChart = await storage.getNatalChart(userId);
+          
+          if (natalChart) {
+            // Import the Gemini function dynamically
+            const { generateAstrologicalInsights } = await import('./gemini');
+            
+            // Generate astrological insights
+            const insights = await generateAstrologicalInsights(natalChart, updates.topic || existingDiscussion.topic);
+            
+            // Add the generated insights to the updates
+            updates = {
+              ...updates,
+              astrologicalContext: insights.astrologicalContext || updates.astrologicalContext || existingDiscussion.astrologicalContext,
+              kabbalisticElements: insights.kabbalisticElements || updates.kabbalisticElements || existingDiscussion.kabbalisticElements
+            };
+            
+            console.log(`Successfully enhanced discussion update with Gemini AI insights for user ${userId}`);
+          } else {
+            console.log(`No natal chart found for user ${userId}, skipping Gemini enhancement for update`);
+          }
+        } catch (geminiError) {
+          console.error("Error enhancing discussion update with Gemini:", geminiError);
+          // Continue without Gemini enhancement if it fails
+        }
+      }
+      
+      // Update the discussion with the potentially enhanced data
+      const updatedDiscussion = await storage.updateSpiritualDiscussion(discussionId, updates);
       
       if (!updatedDiscussion) {
         return res.status(404).json({ error: "Failed to update discussion" });

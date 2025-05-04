@@ -122,7 +122,7 @@ export async function generateAstrologicalInsights(natalChart: NatalChart, topic
       - Mercury Sign: ${natalChart.mercurySign || "Unknown"}
       - Venus Sign: ${natalChart.venusSign || "Unknown"}
       - Mars Sign: ${natalChart.marsSign || "Unknown"}
-      - Jupiter Sign: ${natalChart.saturnSign || "Unknown"}
+      - Jupiter Sign: ${natalChart.jupiterSign || "Unknown"}
       - Saturn Sign: ${natalChart.saturnSign || "Unknown"}
       
       Discussion Topic: ${topic}
