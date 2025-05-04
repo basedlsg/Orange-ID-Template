@@ -354,12 +354,20 @@ function AdminRoute() {
   );
 }
 
+// Import our new pages
+import BirthDataPage from "@/pages/birth-data";
+import NatalChartPage from "@/pages/natal-chart";
+import SpiritualDiscussionsPage from "@/pages/spiritual-discussions";
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/auth/callback" component={AuthCallback} />
       <Route path="/admin" component={AdminRoute} />
+      <Route path="/birth-data" component={() => <ProtectedRoute component={BirthDataPage} />} />
+      <Route path="/natal-chart" component={() => <ProtectedRoute component={NatalChartPage} />} />
+      <Route path="/spiritual-discussions" component={() => <ProtectedRoute component={SpiritualDiscussionsPage} />} />
       <Route component={NotFound} />
     </Switch>
   );
