@@ -132,12 +132,24 @@ export default function NatalChartPage() {
   // Query for birth data
   const birthDataQuery = useQuery<BirthData>({
     queryKey: ["/api/birth-data"],
+    queryFn: async () => {
+      return apiRequest("/api/birth-data", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+    },
     enabled: !!isLoggedIn,
   });
 
   // Query for natal chart
   const natalChartQuery = useQuery<NatalChart>({
     queryKey: ["/api/natal-chart"],
+    queryFn: async () => {
+      return apiRequest("/api/natal-chart", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+    },
     enabled: !!isLoggedIn,
   });
 
