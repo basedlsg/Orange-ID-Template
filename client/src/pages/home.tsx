@@ -71,11 +71,10 @@ export default function Home() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold mb-6 text-[#F37920]">
-              Orange Auth Template
+              Spiritual Astrology Portal
             </h1>
             <p className="text-xl mb-4 text-gray-300">
-              A clean, ready-to-use authentication system with Orange ID
-              integration
+              Explore your astrological profile and engage in spiritual discussions based on cosmic alignments
             </p>
             <div className="inline-block border-b-2 border-[#F37920] w-24 mb-8"></div>
           </div>
@@ -162,37 +161,37 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
             <div className="bg-gray-900 shadow rounded-lg p-6 border border-gray-800">
               <h3 className="text-xl font-semibold mb-3 text-[#F37920]">
-                Features Included
+                Astrological Features
               </h3>
               <ul className="space-y-2">
                 <li className="flex items-start">
                   <span className="text-[#F37920] mr-2">✓</span>
                   <span className="text-gray-300">
-                    Orange ID Authentication with secure sessions
+                    Birth data collection with precise location and time
                   </span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-[#F37920] mr-2">✓</span>
                   <span className="text-gray-300">
-                    SQLite database integration with session persistence
+                    Comprehensive natal chart generation
                   </span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-[#F37920] mr-2">✓</span>
                   <span className="text-gray-300">
-                    Role-based authorization system
+                    Insights into zodiac signs, planetary alignments, and aspects
                   </span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-[#F37920] mr-2">✓</span>
                   <span className="text-gray-300">
-                    Admin dashboard with user management
+                    Spiritual discussions with Kabbalistic elements
                   </span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-[#F37920] mr-2">✓</span>
                   <span className="text-gray-300">
-                    First-user-is-admin automatic privilege
+                    User-specific astrological profiles with historical data
                   </span>
                 </li>
               </ul>
@@ -200,31 +199,28 @@ export default function Home() {
 
             <div className="bg-gray-900 shadow rounded-lg p-6 border border-gray-800">
               <h3 className="text-xl font-semibold mb-3 text-[#F37920]">
-                How to Use This Template
+                How to Get Started
               </h3>
               <ol className="space-y-2 list-decimal pl-5">
                 <li className="text-gray-300">
-                  Clone this template as a starting point
+                  Log in using the Orange ID integration in the top-right corner
                 </li>
                 <li className="text-gray-300">
-                  <span className="font-semibold">IMPORTANT:</span> Set up your Orange ID Project ID:
+                  Navigate to the <span className="font-semibold text-[#F37920]">Birth Data</span> page and enter your birth information:
                   <ul className="list-disc pl-6 mt-2 space-y-1 text-xs">
-                    <li>Visit <a href="https://vibecodinglist.com/orange-id-integration" target="_blank" rel="noopener noreferrer" className="text-[#F37920] underline">vibecodinglist.com/orange-id-integration</a></li>
-                    <li>Generate a unique Project ID and whitelist your URLs</li>
-                    <li>Replace the <code className="bg-gray-800 px-1 rounded text-gray-200">tenantId</code> in <code className="bg-gray-800 px-1 rounded text-gray-200">OrangeAuthProvider.tsx</code></li>
+                    <li>Birth date (required for accurate chart generation)</li>
+                    <li>Birth time (for more precise astrological insights)</li>
+                    <li>Birth location (enhances planetary calculations)</li>
                   </ul>
                 </li>
                 <li className="text-gray-300">
-                  Start developing right away - minimal setup required
+                  View your <span className="font-semibold text-[#F37920]">Natal Chart</span> to discover your astrological profile
                 </li>
                 <li className="text-gray-300">
-                  Be the first to log in to automatically become an admin
+                  Engage in <span className="font-semibold text-[#F37920]">Spiritual Discussions</span> based on your cosmic alignments
                 </li>
                 <li className="text-gray-300">
-                  Extend the user schema as needed in{" "}
-                  <code className="bg-gray-800 px-1 rounded text-gray-200">
-                    shared/schema.ts
-                  </code>
+                  Connect with Kabbalistic wisdom and astrological insights for a deeper understanding
                 </li>
               </ol>
             </div>
@@ -232,11 +228,11 @@ export default function Home() {
 
           <div className="bg-gray-900 shadow rounded-lg p-6 border border-gray-800 mb-8">
             <h3 className="text-xl font-semibold mb-3 text-[#F37920]">
-              Database Configuration
+              Astrological Data Security
             </h3>
             <p className="text-gray-300 mb-4">
-              This template uses SQLite for all data storage, which requires zero configuration and works for all Replit users.
-              Everything is automatically created in the <code className="bg-gray-800 px-1 mx-1 rounded text-gray-200">data</code> directory.
+              Your personal birth data and spiritual insights are securely stored and accessible only to you.
+              All astrological calculations are performed with precision to provide authentic cosmic insights.
             </p>
             
             <div className="space-y-4">
@@ -245,33 +241,42 @@ export default function Home() {
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                   <span className="text-gray-300">
                     <span className="font-semibold text-[#F37920]">
-                      SQLite Database
-                    </span> for both user data and session storage
+                      Persistent Storage
+                    </span> for your natal charts and spiritual discussions
                   </span>
                 </div>
               </div>
               <div className="p-3 bg-gray-800 rounded-md text-xs text-gray-300">
-                <span className="font-semibold text-[#F37920]">Production Ready:</span> Sessions are stored in SQLite when deployed, 
-                ensuring persistence across server restarts and better security.
+                <span className="font-semibold text-[#F37920]">Astrological Accuracy:</span> The system uses precise astronomical 
+                calculations to generate authentic natal charts based on your exact birth details.
               </div>
             </div>
           </div>
 
           <div className="bg-gray-800 rounded-lg p-6 text-center">
             <h3 className="text-xl font-semibold mb-3 text-[#F37920]">
-              Developer Documentation
+              Begin Your Spiritual Journey
             </h3>
             <p className="text-gray-300 mb-4">
-              For more detailed information about the template structure and how
-              to extend it, check the README.md file in the project root.
+              Explore your cosmic profile, understand your astrological alignments, and engage in
+              meaningful spiritual discussions guided by celestial influences.
             </p>
             <div className="inline-flex space-x-4">
-              <a
-                href="/admin"
-                className="px-4 py-2 bg-[#F37920] text-white rounded-md hover:bg-[#D86A10] transition-colors"
-              >
-                Admin Dashboard
-              </a>
+              {isLoggedIn ? (
+                <a
+                  href="/birth-data"
+                  className="px-4 py-2 bg-[#F37920] text-white rounded-md hover:bg-[#D86A10] transition-colors"
+                >
+                  Enter Birth Data
+                </a>
+              ) : (
+                <button
+                  onClick={() => setIsLoginDialogOpen(true)}
+                  className="px-4 py-2 bg-[#F37920] text-white rounded-md hover:bg-[#D86A10] transition-colors"
+                >
+                  Login to Begin
+                </button>
+              )}
             </div>
           </div>
         </div>
