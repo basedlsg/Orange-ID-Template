@@ -129,12 +129,24 @@ export default function SpiritualDiscussionsPage() {
   // Query to fetch natal chart
   const natalChartQuery = useQuery<NatalChart>({
     queryKey: ["/api/natal-chart"],
+    queryFn: async () => {
+      return apiRequest("/api/natal-chart", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+    },
     enabled: !!isLoggedIn,
   });
 
   // Query to fetch spiritual discussions
   const discussionsQuery = useQuery<SpiritualDiscussion[]>({
     queryKey: ["/api/spiritual-discussions"],
+    queryFn: async () => {
+      return apiRequest("/api/spiritual-discussions", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+    },
     enabled: !!isLoggedIn,
   });
 
