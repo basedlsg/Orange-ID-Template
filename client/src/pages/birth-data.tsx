@@ -63,13 +63,14 @@ export default function BirthDataPage() {
     createdAt: string;
   }
   
-  // Query to fetch existing birth data
+  // Query to fetch existing birth data with special handling for 404 errors
   const { 
     data: birthData, 
     isLoading, 
     error,
-    isError 
-  } = useQuery<BirthData>({
+    isError,
+    refetch 
+  } = useQuery<BirthData | null>({
     queryKey: ["/api/birth-data"],
     queryFn: async () => {
       try {
@@ -79,14 +80,17 @@ export default function BirthDataPage() {
         });
       } catch (err) {
         // If we get a 404, it means the user doesn't have birth data yet
-        // We'll handle this in the UI by showing the form
+        // We'll handle this in the UI by showing the form for initial entry
         if (err instanceof Error && err.message.includes("404")) {
-          console.log("No birth data found, will show form for initial data entry");
+          console.log("No birth data found, showing form for initial data entry");
           return null;
         }
+        // For other errors, rethrow
         throw err;
       }
     },
+    retry: false, // Don't retry 404 errors
+    retryOnMount: false,
     enabled: !!isLoggedIn,
   });
 

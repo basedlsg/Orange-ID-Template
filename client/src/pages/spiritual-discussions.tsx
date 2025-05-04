@@ -24,6 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { 
   PlusCircle, 
   MessageCircle, 
@@ -67,6 +68,7 @@ const discussionFormSchema = z.object({
   tags: z.string().optional(),
   kabbalisticElements: z.string().optional(),
   astrologicalContext: z.string().optional(),
+  useGemini: z.boolean().optional().default(false),
 });
 
 type DiscussionFormValues = z.infer<typeof discussionFormSchema>;
@@ -123,6 +125,7 @@ export default function SpiritualDiscussionsPage() {
       tags: "",
       kabbalisticElements: "",
       astrologicalContext: "",
+      useGemini: false,
     },
   });
 
@@ -159,6 +162,7 @@ export default function SpiritualDiscussionsPage() {
         tags: editingDiscussion.tags,
         kabbalisticElements: editingDiscussion.kabbalisticElements,
         astrologicalContext: editingDiscussion.astrologicalContext,
+        useGemini: false,
       });
     } else {
       form.reset({
@@ -167,6 +171,7 @@ export default function SpiritualDiscussionsPage() {
         tags: "",
         kabbalisticElements: "",
         astrologicalContext: "",
+        useGemini: false,
       });
     }
   }, [editingDiscussion, form]);
@@ -398,6 +403,7 @@ export default function SpiritualDiscussionsPage() {
                         <TabsTrigger value="tags">Tags</TabsTrigger>
                         <TabsTrigger value="kabbalah">Kabbalah</TabsTrigger>
                         <TabsTrigger value="astrology">Astrology</TabsTrigger>
+                        <TabsTrigger value="ai">AI Enhancement</TabsTrigger>
                       </TabsList>
                       
                       <TabsContent value="tags">
