@@ -51,8 +51,20 @@ export default function BirthDataPage() {
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Define the birth data interface
+  interface BirthData {
+    id: number;
+    userId: number;
+    birthDate: string;
+    birthTime?: string;
+    birthLocation?: string;
+    birthLatitude?: number;
+    birthLongitude?: number;
+    createdAt: string;
+  }
+  
   // Query to fetch existing birth data
-  const { data: birthData, isLoading, error } = useQuery({
+  const { data: birthData, isLoading, error } = useQuery<BirthData>({
     queryKey: ["/api/birth-data"],
     enabled: !!isLoggedIn,
   });
@@ -87,6 +99,7 @@ export default function BirthDataPage() {
     mutationFn: async (data: BirthDataFormValues) => {
       return apiRequest("/api/birth-data", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
     },

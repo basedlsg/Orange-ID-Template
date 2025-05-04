@@ -71,6 +71,27 @@ const discussionFormSchema = z.object({
 
 type DiscussionFormValues = z.infer<typeof discussionFormSchema>;
 
+// Interface for natal chart
+interface NatalChart {
+  id: number;
+  userId: number;
+  sunSign?: string;
+  moonSign?: string;
+  ascendantSign?: string;
+  mercurySign?: string;
+  venusSign?: string;
+  marsSign?: string;
+  jupiterSign?: string;
+  saturnSign?: string;
+  uranusSign?: string;
+  neptuneSign?: string;
+  plutoSign?: string;
+  houses?: string;
+  aspects?: string;
+  chartData?: string;
+  lastUpdated: string;
+}
+
 // Interface for discussion from API
 interface SpiritualDiscussion {
   id: number;
@@ -106,13 +127,13 @@ export default function SpiritualDiscussionsPage() {
   });
 
   // Query to fetch natal chart
-  const natalChartQuery = useQuery({
+  const natalChartQuery = useQuery<NatalChart>({
     queryKey: ["/api/natal-chart"],
     enabled: !!isLoggedIn,
   });
 
   // Query to fetch spiritual discussions
-  const discussionsQuery = useQuery({
+  const discussionsQuery = useQuery<SpiritualDiscussion[]>({
     queryKey: ["/api/spiritual-discussions"],
     enabled: !!isLoggedIn,
   });

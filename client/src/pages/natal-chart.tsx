@@ -18,6 +18,38 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
+// Define interfaces for the data
+interface BirthData {
+  id: number;
+  userId: number;
+  birthDate: string;
+  birthTime?: string;
+  birthLocation?: string;
+  birthLatitude?: number;
+  birthLongitude?: number;
+  createdAt: string;
+}
+
+interface NatalChart {
+  id: number;
+  userId: number;
+  sunSign?: string;
+  moonSign?: string;
+  ascendantSign?: string;
+  mercurySign?: string;
+  venusSign?: string;
+  marsSign?: string;
+  jupiterSign?: string;
+  saturnSign?: string;
+  uranusSign?: string;
+  neptuneSign?: string;
+  plutoSign?: string;
+  houses?: string;
+  aspects?: string;
+  chartData?: string;
+  lastUpdated: string;
+}
+
 // Helper function to get the zodiac sign emoji
 function getZodiacEmoji(sign: string | null | undefined): string {
   if (!sign) return "⭐";
@@ -98,13 +130,13 @@ export default function NatalChartPage() {
   const [, setLocation] = useLocation();
   
   // Query for birth data
-  const birthDataQuery = useQuery({
+  const birthDataQuery = useQuery<BirthData>({
     queryKey: ["/api/birth-data"],
     enabled: !!isLoggedIn,
   });
 
   // Query for natal chart
-  const natalChartQuery = useQuery({
+  const natalChartQuery = useQuery<NatalChart>({
     queryKey: ["/api/natal-chart"],
     enabled: !!isLoggedIn,
   });
@@ -235,11 +267,11 @@ export default function NatalChartPage() {
   }
 
   // We have both birth data and natal chart
-  const birthData = birthDataQuery.data;
-  const natalChart = natalChartQuery.data;
+  const birthData = birthDataQuery.data as BirthData;
+  const natalChart = natalChartQuery.data as NatalChart;
 
   // Format birth data for display
-  const formattedBirthDate = birthData.birthDate 
+  const formattedBirthDate = birthData?.birthDate 
     ? new Date(birthData.birthDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : 'Unknown';
 
