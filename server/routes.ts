@@ -30,6 +30,7 @@ declare module 'express-session' {
 async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId: string } | null> {
   // Get user info from session if available
   if (req.session && req.session.userId && req.session.orangeId) {
+    console.log("Auth from session:", { userId: req.session.userId, orangeId: req.session.orangeId });
     return {
       userId: req.session.userId,
       orangeId: req.session.orangeId
@@ -37,16 +38,33 @@ async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId:
   }
   
   // Fall back to query parameters if session is not available
-  const orangeId = req.body.orangeId || req.query.orangeId;
-  if (!orangeId) {
-    return null;
+  const orangeId = req.query.orangeId || req.body?.orangeId;
+  
+  if (orangeId) {
+    console.log("Auth from query/body orangeId:", orangeId);
+    
+    // Get the user from our database
+    const user = await storage.getUserByOrangeId(orangeId);
+    if (user) {
+      console.log("Found user by orangeId:", user.id);
+      
+      // Update the session with this user info
+      if (req.session) {
+        req.session.userId = user.id;
+        req.session.orangeId = user.orangeId;
+        req.session.isAdmin = user.isAdmin;
+      }
+      
+      return {
+        userId: user.id,
+        orangeId: user.orangeId
+      };
+    }
   }
-
-  // Get the user from our database
-  const user = await storage.getUserByOrangeId(orangeId);
-  if (!user) {
-    return null;
-  }
+  
+  // No valid auth found
+  console.log("No valid auth found for request");
+  return null;
 
   // Store in session for future requests
   if (req.session) {
