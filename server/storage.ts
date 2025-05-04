@@ -1,5 +1,8 @@
 import { 
-  users, type User, type InsertUser
+  users, type User, type InsertUser, 
+  type BirthData, type InsertBirthData,
+  type NatalChart, type InsertNatalChart,
+  type SpiritualDiscussion, type InsertSpiritualDiscussion
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, sql } from "drizzle-orm";
@@ -15,6 +18,21 @@ export interface IStorage {
   
   // Admin management operations
   toggleUserAdminStatus(userId: number, makeAdmin: boolean): Promise<User | undefined>;
+  
+  // Birth data operations
+  getBirthData(userId: number): Promise<BirthData | undefined>;
+  createOrUpdateBirthData(data: InsertBirthData): Promise<BirthData>;
+  
+  // Natal chart operations
+  getNatalChart(userId: number): Promise<NatalChart | undefined>;
+  createOrUpdateNatalChart(chart: InsertNatalChart): Promise<NatalChart>;
+  
+  // Spiritual discussion operations
+  getSpiritualDiscussions(userId: number): Promise<SpiritualDiscussion[]>;
+  getSpiritualDiscussionById(id: number): Promise<SpiritualDiscussion | undefined>;
+  createSpiritualDiscussion(discussion: InsertSpiritualDiscussion): Promise<SpiritualDiscussion>;
+  updateSpiritualDiscussion(id: number, discussion: Partial<InsertSpiritualDiscussion>): Promise<SpiritualDiscussion | undefined>;
+  deleteSpiritualDiscussion(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
