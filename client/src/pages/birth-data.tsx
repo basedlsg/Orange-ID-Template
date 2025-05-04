@@ -45,11 +45,23 @@ const birthDataSchema = z.object({
 
 type BirthDataFormValues = z.infer<typeof birthDataSchema>;
 
+// Define the BedrockUser type to match what's returned from Bedrock Passport
+interface BedrockUser {
+  id?: string;
+  sub?: string; // ID field from Bedrock Passport
+  name?: string;
+  email?: string;
+  // Add other fields as needed
+}
+
 export default function BirthDataPage() {
   const { isLoggedIn, user } = useBedrockPassport();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Cast the user to the correct type
+  const typedUser = user as BedrockUser | undefined;
 
   // Define the birth data interface
   interface BirthData {
@@ -74,9 +86,18 @@ export default function BirthDataPage() {
     queryKey: ["/api/birth-data"],
     queryFn: async () => {
       try {
+        // Extract user ID from Bedrock Passport user if available
+        const orangeId = typedUser?.sub || typedUser?.id;
+        console.log("Current user orangeId:", orangeId);
+
         return await apiRequest("/api/birth-data", {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+          },
+          // Add orangeId as a query parameter to ensure authentication works
+          // even if the session is not properly maintained
+          credentials: "include"
         });
       } catch (err) {
         // If we get a 404, it means the user doesn't have birth data yet
@@ -85,13 +106,21 @@ export default function BirthDataPage() {
           console.log("No birth data found, showing form for initial data entry");
           return null;
         }
+        
+        // For authentication errors, try to refresh the page or notify the user
+        if (err instanceof Error && err.message.includes("401")) {
+          console.log("Authentication error in birth data fetch, might need to login again");
+          console.log("User authenticated status:", isLoggedIn);
+          console.log("User object:", typedUser);
+        }
+        
         // For other errors, rethrow
         throw err;
       }
     },
     retry: false, // Don't retry 404 errors
     retryOnMount: false,
-    enabled: !!isLoggedIn,
+    enabled: !!isLoggedIn && !!typedUser,
   });
 
   // Create form with react-hook-form
@@ -122,10 +151,17 @@ export default function BirthDataPage() {
   // Save birth data mutation
   const saveBirthData = useMutation({
     mutationFn: async (data: BirthDataFormValues) => {
-      return apiRequest("/api/birth-data", {
+      // Extract user ID from Bedrock Passport if available
+      const orangeId = typedUser?.sub || typedUser?.id;
+      console.log("Current user orangeId for birth data saving:", orangeId);
+      
+      // Include orangeId in the request to ensure auth works
+      // even if session cookies aren't working properly
+      return apiRequest(`/api/birth-data?orangeId=${orangeId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
+        credentials: "include"
       });
     },
     onSuccess: () => {
