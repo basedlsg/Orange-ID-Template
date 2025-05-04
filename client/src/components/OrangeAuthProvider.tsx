@@ -12,7 +12,7 @@ export function OrangeAuthProvider({
     <BedrockPassportProvider
       baseUrl="https://api.bedrockpassport.com"
       authCallbackUrl={`${origin}/auth/callback`}
-      tenantId="orange-vibe" // IMPORTANT: Replace with your Project ID from vibecodinglist.com/orange-id-integration
+      tenantId="orange-dhl93pieq6" // Updated with the correct tenant ID
     >
       {children}
     </BedrockPassportProvider>
