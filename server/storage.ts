@@ -36,6 +36,7 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // User operations
   async getUser(id: number): Promise<User | undefined> {
     return db.getUser(id);
   }
@@ -103,6 +104,50 @@ export class DatabaseStorage implements IStorage {
       console.error(`Error toggling admin status for user ${userId}:`, error);
       throw error;
     }
+  }
+  
+  // Birth data operations
+  async getBirthData(userId: number): Promise<BirthData | undefined> {
+    return db.getBirthData(userId);
+  }
+  
+  async createOrUpdateBirthData(data: InsertBirthData): Promise<BirthData> {
+    console.log(`Creating/updating birth data for user ${data.userId}`);
+    return db.createOrUpdateBirthData(data);
+  }
+  
+  // Natal chart operations
+  async getNatalChart(userId: number): Promise<NatalChart | undefined> {
+    return db.getNatalChart(userId);
+  }
+  
+  async createOrUpdateNatalChart(chart: InsertNatalChart): Promise<NatalChart> {
+    console.log(`Creating/updating natal chart for user ${chart.userId}`);
+    return db.createOrUpdateNatalChart(chart);
+  }
+  
+  // Spiritual discussion operations
+  async getSpiritualDiscussions(userId: number): Promise<SpiritualDiscussion[]> {
+    return db.getSpiritualDiscussions(userId);
+  }
+  
+  async getSpiritualDiscussionById(id: number): Promise<SpiritualDiscussion | undefined> {
+    return db.getSpiritualDiscussionById(id);
+  }
+  
+  async createSpiritualDiscussion(discussion: InsertSpiritualDiscussion): Promise<SpiritualDiscussion> {
+    console.log(`Creating spiritual discussion for user ${discussion.userId}`);
+    return db.createSpiritualDiscussion(discussion);
+  }
+  
+  async updateSpiritualDiscussion(id: number, discussion: Partial<InsertSpiritualDiscussion>): Promise<SpiritualDiscussion | undefined> {
+    console.log(`Updating spiritual discussion ${id}`);
+    return db.updateSpiritualDiscussion(id, discussion);
+  }
+  
+  async deleteSpiritualDiscussion(id: number): Promise<boolean> {
+    console.log(`Deleting spiritual discussion ${id}`);
+    return db.deleteSpiritualDiscussion(id);
   }
 }
 
