@@ -476,6 +476,48 @@ export default function SpiritualDiscussionsPage() {
                           )}
                         />
                       </TabsContent>
+                      
+                      <TabsContent value="ai">
+                        <FormField
+                          control={form.control}
+                          name="useGemini"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between p-4 rounded-lg border border-gray-800">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Gemini AI Enhancement</FormLabel>
+                                <FormDescription>
+                                  Use Google's Gemini AI to analyze your natal chart and enhance your discussion with personalized astrological insights.
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  className="data-[state=checked]:bg-[#F37920]"
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        {!hasNatalChart && (
+                          <div className="mt-2 p-3 bg-gray-900 border border-gray-800 rounded-md">
+                            <p className="text-sm text-amber-400 flex items-center gap-1">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                              You need to enter your birth data first
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              AI enhancement requires your natal chart information to generate personalized insights.
+                            </p>
+                            <Button 
+                              variant="link" 
+                              onClick={() => setLocation("/birth-data")}
+                              className="text-[#F37920] p-0 h-auto mt-2 text-xs"
+                            >
+                              Enter Birth Data
+                            </Button>
+                          </div>
+                        )}
+                      </TabsContent>
                     </Tabs>
 
                     <DialogFooter>
