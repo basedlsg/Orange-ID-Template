@@ -272,6 +272,37 @@ function Navigation() {
 
         {/* Navigation links */}
         <div className="mx-4 flex space-x-4">
+          {isLoggedIn && (
+            <>
+              <Link href="/birth-data">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm font-medium text-[#F37920] hover:text-white hover:bg-gray-800"
+                >
+                  Birth Data
+                </Button>
+              </Link>
+              <Link href="/natal-chart">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm font-medium text-[#F37920] hover:text-white hover:bg-gray-800"
+                >
+                  Natal Chart
+                </Button>
+              </Link>
+              <Link href="/spiritual-discussions">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm font-medium text-[#F37920] hover:text-white hover:bg-gray-800"
+                >
+                  Discussions
+                </Button>
+              </Link>
+            </>
+          )}
           {isLoggedIn && isAdmin && (
             <Link href="/admin">
               <Button
@@ -302,6 +333,24 @@ function Navigation() {
                 align="end"
                 className="border border-gray-700 bg-black"
               >
+                <DropdownMenuItem
+                  asChild
+                  className="text-[#F37920] hover:text-white focus:text-white hover:bg-gray-800 focus:bg-gray-800"
+                >
+                  <Link href="/birth-data">Birth Data</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  asChild
+                  className="text-[#F37920] hover:text-white focus:text-white hover:bg-gray-800 focus:bg-gray-800"
+                >
+                  <Link href="/natal-chart">Natal Chart</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  asChild
+                  className="text-[#F37920] hover:text-white focus:text-white hover:bg-gray-800 focus:bg-gray-800"
+                >
+                  <Link href="/spiritual-discussions">Discussions</Link>
+                </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem
                     asChild
@@ -381,47 +430,47 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <OrangeAuthProvider>
         <Helmet>
-          <title>Orange Auth Template</title>
+          <title>Spiritual Astrology Portal</title>
           <meta
             name="description"
-            content="A clean, ready-to-use authentication system with Orange ID integration."
+            content="Explore your astrological profile with birth charts, natal patterns, and engage in spiritual discussions based on cosmic alignments."
           />
 
           {/* OpenGraph Meta Tags */}
-          <meta property="og:title" content="Orange Auth Template" />
+          <meta property="og:title" content="Spiritual Astrology Portal" />
           <meta
             property="og:description"
-            content="A clean, ready-to-use authentication system with Orange ID integration."
+            content="Explore your astrological profile with birth charts, natal patterns, and engage in spiritual discussions based on cosmic alignments."
           />
           <meta
             property="og:image"
-            content={`${window.location.origin}/og-image.png`}
+            content={`${window.location.origin}/images/orange.png`}
           />
           <meta property="og:image:width" content="1200" />
           <meta property="og:image:height" content="630" />
           <meta property="og:url" content={window.location.origin} />
           <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="Orange Auth Template" />
+          <meta property="og:site_name" content="Spiritual Astrology Portal" />
 
           {/* Twitter Card Meta Tags */}
           <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content="Orange Auth Template" />
+          <meta name="twitter:title" content="Spiritual Astrology Portal" />
           <meta
             name="twitter:description"
-            content="A clean, ready-to-use authentication system with Orange ID integration."
+            content="Explore your astrological profile with birth charts, natal patterns, and engage in spiritual discussions based on cosmic alignments."
           />
           <meta
             name="twitter:image"
-            content={`${window.location.origin}/twitter-card.png`}
+            content={`${window.location.origin}/images/orange.png`}
           />
-          <meta name="twitter:image:alt" content="Orange Auth Template" />
+          <meta name="twitter:image:alt" content="Spiritual Astrology Portal" />
 
           {/* Additional SEO Meta Tags */}
           <meta name="robots" content="index, follow" />
-          <meta name="author" content="Orange Auth Template" />
+          <meta name="author" content="Spiritual Astrology Portal" />
           <meta
             name="keywords"
-            content="authentication, template, Orange ID, user management, session-based"
+            content="astrology, natal chart, birth chart, zodiac, spiritual discussions, horoscope, kabbalah, cosmic alignments, planetary positions"
           />
         </Helmet>
         <Navigation />
