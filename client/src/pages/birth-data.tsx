@@ -66,6 +66,12 @@ export default function BirthDataPage() {
   // Query to fetch existing birth data
   const { data: birthData, isLoading, error } = useQuery<BirthData>({
     queryKey: ["/api/birth-data"],
+    queryFn: async () => {
+      return apiRequest("/api/birth-data", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+    },
     enabled: !!isLoggedIn,
   });
 
