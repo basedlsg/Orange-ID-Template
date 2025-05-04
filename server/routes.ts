@@ -415,10 +415,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = (req as any).userId;
       console.log(`Fetching natal chart for user ${userId}`);
       
-      const natalChart = await storage.getNatalChart(userId);
+      // First check if the user already has a natal chart
+      let natalChart = await storage.getNatalChart(userId);
       
+      // If no natal chart exists, check if the user has birth data
       if (!natalChart) {
-        return res.status(404).json({ error: "Natal chart not found" });
+        console.log(`No natal chart found for user ${userId}, checking birth data`);
+        const birthData = await storage.getBirthData(userId);
+        
+        if (!birthData) {
+          return res.status(404).json({ error: "Birth data needed to generate natal chart" });
+        }
+        
+        // User has birth data but no chart, use Gemini to generate one
+        try {
+          console.log(`Generating new natal chart for user ${userId} using Gemini AI`);
+          
+          // Import the Gemini function dynamically to avoid loading it unnecessarily
+          const { generateNatalChart } = await import('./gemini');
+          
+          // Generate the natal chart
+          const natalChartData = await generateNatalChart(birthData);
+          
+          // Save the generated chart to the database
+          natalChart = await storage.createOrUpdateNatalChart(natalChartData);
+          console.log(`Generated and saved new natal chart for user ${userId}`);
+        } catch (generationError) {
+          console.error("Error generating natal chart with Gemini:", generationError);
+          return res.status(500).json({ error: "Failed to generate natal chart" });
+        }
       }
       
       res.json(natalChart);
@@ -516,10 +541,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Creating spiritual discussion for user ${userId}`);
       
       // Merge the user ID with the request body
-      const discussionWithUserId = {
+      let discussionWithUserId = {
         ...req.body,
         userId
       };
+      
+      // Check if we should enhance the discussion with Gemini AI
+      const useGemini = req.query.useGemini === 'true' || req.body.useGemini === true;
+      
+      if (useGemini) {
+        try {
+          console.log(`Enhancing spiritual discussion with Gemini AI for user ${userId}`);
+          
+          // Check if the user has a natal chart
+          const natalChart = await storage.getNatalChart(userId);
+          
+          if (natalChart) {
+            // Import the Gemini function dynamically
+            const { generateAstrologicalInsights } = await import('./gemini');
+            
+            // Generate astrological insights
+            const insights = await generateAstrologicalInsights(natalChart, discussionWithUserId.topic);
+            
+            // Add the generated insights to the discussion data
+            discussionWithUserId = {
+              ...discussionWithUserId,
+              astrologicalContext: insights.astrologicalContext || discussionWithUserId.astrologicalContext,
+              kabbalisticElements: insights.kabbalisticElements || discussionWithUserId.kabbalisticElements
+            };
+            
+            console.log(`Successfully enhanced discussion with Gemini AI insights for user ${userId}`);
+          } else {
+            console.log(`No natal chart found for user ${userId}, skipping Gemini enhancement`);
+          }
+        } catch (geminiError) {
+          console.error("Error enhancing discussion with Gemini:", geminiError);
+          // Continue without Gemini enhancement if it fails
+        }
+      }
       
       // Validate the data
       const validatedData = insertSpiritualDiscussionSchema.parse(discussionWithUserId);
