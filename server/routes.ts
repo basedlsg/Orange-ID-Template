@@ -3,8 +3,17 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import {
   insertUserSchema,
+  insertBirthDataSchema,
+  insertNatalChartSchema,
+  insertSpiritualDiscussionSchema,
   type User,
-  type InsertUser
+  type InsertUser,
+  type BirthData,
+  type InsertBirthData,
+  type NatalChart,
+  type InsertNatalChart,
+  type SpiritualDiscussion,
+  type InsertSpiritualDiscussion
 } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import 'express-session';
@@ -322,6 +331,300 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error toggling user admin status:", error);
       res.status(500).json({ error: "Failed to update user admin status" });
+    }
+  });
+  
+  // Middleware to ensure user is authenticated
+  const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = await getUserFromRequest(req);
+      
+      if (!user) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      // Add the user id to the request for handlers
+      (req as any).userId = user.userId;
+      next();
+    } catch (error) {
+      console.error("Error in auth middleware:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  };
+  
+  // Birth Data API routes
+  
+  // Get birth data for the current user
+  app.get("/api/birth-data", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      console.log(`Fetching birth data for user ${userId}`);
+      
+      const birthData = await storage.getBirthData(userId);
+      
+      if (!birthData) {
+        return res.status(404).json({ error: "Birth data not found" });
+      }
+      
+      res.json(birthData);
+    } catch (error) {
+      console.error("Error fetching birth data:", error);
+      res.status(500).json({ error: "Failed to fetch birth data" });
+    }
+  });
+  
+  // Create or update birth data for the current user
+  app.post("/api/birth-data", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      console.log(`Creating/updating birth data for user ${userId}`);
+      
+      // Merge the user ID with the request body
+      const birthDataWithUserId = {
+        ...req.body,
+        userId
+      };
+      
+      // Validate the data
+      const validatedData = insertBirthDataSchema.parse(birthDataWithUserId);
+      
+      // Create or update birth data
+      const birthData = await storage.createOrUpdateBirthData(validatedData);
+      
+      res.json(birthData);
+    } catch (error) {
+      console.error("Error creating/updating birth data:", error);
+      
+      // Handle Zod validation errors
+      if (error instanceof Error && error.name === 'ZodError') {
+        const validationError = fromZodError(error as any);
+        return res.status(400).json({ error: validationError.message });
+      }
+      
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to save birth data" 
+      });
+    }
+  });
+  
+  // Natal Chart API routes
+  
+  // Get natal chart for the current user
+  app.get("/api/natal-chart", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      console.log(`Fetching natal chart for user ${userId}`);
+      
+      const natalChart = await storage.getNatalChart(userId);
+      
+      if (!natalChart) {
+        return res.status(404).json({ error: "Natal chart not found" });
+      }
+      
+      res.json(natalChart);
+    } catch (error) {
+      console.error("Error fetching natal chart:", error);
+      res.status(500).json({ error: "Failed to fetch natal chart" });
+    }
+  });
+  
+  // Create or update natal chart for the current user
+  app.post("/api/natal-chart", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      console.log(`Creating/updating natal chart for user ${userId}`);
+      
+      // Merge the user ID with the request body
+      const chartWithUserId = {
+        ...req.body,
+        userId
+      };
+      
+      // Validate the data
+      const validatedData = insertNatalChartSchema.parse(chartWithUserId);
+      
+      // Create or update the natal chart
+      const natalChart = await storage.createOrUpdateNatalChart(validatedData);
+      
+      res.json(natalChart);
+    } catch (error) {
+      console.error("Error creating/updating natal chart:", error);
+      
+      // Handle Zod validation errors
+      if (error instanceof Error && error.name === 'ZodError') {
+        const validationError = fromZodError(error as any);
+        return res.status(400).json({ error: validationError.message });
+      }
+      
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to save natal chart" 
+      });
+    }
+  });
+  
+  // Spiritual Discussion API routes
+  
+  // Get all spiritual discussions for the current user
+  app.get("/api/spiritual-discussions", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      console.log(`Fetching spiritual discussions for user ${userId}`);
+      
+      const discussions = await storage.getSpiritualDiscussions(userId);
+      
+      res.json(discussions);
+    } catch (error) {
+      console.error("Error fetching spiritual discussions:", error);
+      res.status(500).json({ error: "Failed to fetch spiritual discussions" });
+    }
+  });
+  
+  // Get a single spiritual discussion by ID
+  app.get("/api/spiritual-discussions/:id", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      const discussionId = parseInt(req.params.id, 10);
+      
+      if (isNaN(discussionId)) {
+        return res.status(400).json({ error: "Invalid discussion ID" });
+      }
+      
+      console.log(`Fetching spiritual discussion ${discussionId} for user ${userId}`);
+      
+      const discussion = await storage.getSpiritualDiscussionById(discussionId);
+      
+      if (!discussion) {
+        return res.status(404).json({ error: "Discussion not found" });
+      }
+      
+      // Check if the discussion belongs to the current user
+      if (discussion.userId !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      res.json(discussion);
+    } catch (error) {
+      console.error("Error fetching spiritual discussion:", error);
+      res.status(500).json({ error: "Failed to fetch spiritual discussion" });
+    }
+  });
+  
+  // Create a new spiritual discussion
+  app.post("/api/spiritual-discussions", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      console.log(`Creating spiritual discussion for user ${userId}`);
+      
+      // Merge the user ID with the request body
+      const discussionWithUserId = {
+        ...req.body,
+        userId
+      };
+      
+      // Validate the data
+      const validatedData = insertSpiritualDiscussionSchema.parse(discussionWithUserId);
+      
+      // Create the discussion
+      const discussion = await storage.createSpiritualDiscussion(validatedData);
+      
+      res.status(201).json(discussion);
+    } catch (error) {
+      console.error("Error creating spiritual discussion:", error);
+      
+      // Handle Zod validation errors
+      if (error instanceof Error && error.name === 'ZodError') {
+        const validationError = fromZodError(error as any);
+        return res.status(400).json({ error: validationError.message });
+      }
+      
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to create spiritual discussion" 
+      });
+    }
+  });
+  
+  // Update a spiritual discussion
+  app.patch("/api/spiritual-discussions/:id", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      const discussionId = parseInt(req.params.id, 10);
+      
+      if (isNaN(discussionId)) {
+        return res.status(400).json({ error: "Invalid discussion ID" });
+      }
+      
+      console.log(`Updating spiritual discussion ${discussionId} for user ${userId}`);
+      
+      // First check if the discussion exists and belongs to the user
+      const existingDiscussion = await storage.getSpiritualDiscussionById(discussionId);
+      
+      if (!existingDiscussion) {
+        return res.status(404).json({ error: "Discussion not found" });
+      }
+      
+      if (existingDiscussion.userId !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      // Update the discussion
+      const updatedDiscussion = await storage.updateSpiritualDiscussion(discussionId, req.body);
+      
+      if (!updatedDiscussion) {
+        return res.status(404).json({ error: "Failed to update discussion" });
+      }
+      
+      res.json(updatedDiscussion);
+    } catch (error) {
+      console.error("Error updating spiritual discussion:", error);
+      
+      // Handle Zod validation errors
+      if (error instanceof Error && error.name === 'ZodError') {
+        const validationError = fromZodError(error as any);
+        return res.status(400).json({ error: validationError.message });
+      }
+      
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to update spiritual discussion" 
+      });
+    }
+  });
+  
+  // Delete a spiritual discussion
+  app.delete("/api/spiritual-discussions/:id", requireAuth, async (req, res) => {
+    try {
+      const userId = (req as any).userId;
+      const discussionId = parseInt(req.params.id, 10);
+      
+      if (isNaN(discussionId)) {
+        return res.status(400).json({ error: "Invalid discussion ID" });
+      }
+      
+      console.log(`Deleting spiritual discussion ${discussionId} for user ${userId}`);
+      
+      // First check if the discussion exists and belongs to the user
+      const existingDiscussion = await storage.getSpiritualDiscussionById(discussionId);
+      
+      if (!existingDiscussion) {
+        return res.status(404).json({ error: "Discussion not found" });
+      }
+      
+      if (existingDiscussion.userId !== userId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+      
+      // Delete the discussion
+      const success = await storage.deleteSpiritualDiscussion(discussionId);
+      
+      if (!success) {
+        return res.status(500).json({ error: "Failed to delete discussion" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting spiritual discussion:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to delete spiritual discussion" 
+      });
     }
   });
   
