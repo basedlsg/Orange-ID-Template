@@ -65,15 +65,6 @@ async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId:
   // No valid auth found
   console.log("No valid auth found for request");
   return null;
-
-  // Store in session for future requests
-  if (req.session) {
-    req.session.userId = user.id;
-    req.session.orangeId = user.orangeId;
-    req.session.isAdmin = user.isAdmin;
-  }
-
-  return { userId: user.id, orangeId };
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
