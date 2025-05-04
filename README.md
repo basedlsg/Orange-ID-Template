@@ -15,7 +15,6 @@ Just click "Run" in Replit to start the application. No setup required!
 
 The authentication will not work unless you update the `tenantId` with your own Project ID from the Orange ID Dashboard.
 
-For more detailed documentation on Bedrock Passport integration, see the [official example repository](https://github.com/Bedrock-Org/bedrock-passport-example).
 
 ### Features at a Glance
 
@@ -50,6 +49,8 @@ Add pages in `client/src/pages` and register them in `client/src/App.tsx`.
 
 Edit the `defaultSettings` object in `client/src/components/login-dialog.tsx` to customize the login panel appearance.
 
+For more detailed documentation on Orange ID integration, features and styling options, see the [official example repository](https://github.com/Bedrock-Org/bedrock-passport-example).
+
 ### Analytics Tracking
 
 The template includes Google Tag Manager by default. You can replace the existing GTM-5SVVB3WM ID with your own GTM ID if needed:
@@ -79,7 +80,7 @@ Basic user model with:
 - ID (auto-generated)
 - Orange ID (unique identifier from Bedrock Passport)
 - Username
-- Email (optional)
+- Email 
 - Role
 - Admin status
 - Creation date
