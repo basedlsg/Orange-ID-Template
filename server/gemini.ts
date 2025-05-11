@@ -3,11 +3,23 @@ import { BirthData, NatalChart, type InsertNatalChart } from "@shared/schema";
 import { log } from "./vite";
 
 // Initialize the Gemini API with the API key
-const apiKey = process.env.GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey || "");
+// Hardcoded API key - in production, use environment variables instead
+const apiKey = "AIzaSyBdDVJrXw3Jpo27cuT5CuvM-o4BRUhIW0Y"; // process.env.GEMINI_API_KEY
+console.log("Using Gemini API key:", apiKey ? "Key is set" : "Key is NOT set");
+
+// Initialize the API client
+const genAI = new GoogleGenerativeAI(apiKey);
 
 // Model configuration
-const geminiPro = genAI.getGenerativeModel({ model: "gemini-pro" });
+const geminiPro = genAI.getGenerativeModel({ 
+  model: "gemini-1.0-pro",
+  generationConfig: {
+    temperature: 0.7,
+    topK: 40,
+    topP: 0.95,
+    maxOutputTokens: 2048,
+  }
+});
 
 /**
  * Generate a natal chart based on birth data
@@ -15,6 +27,11 @@ const geminiPro = genAI.getGenerativeModel({ model: "gemini-pro" });
 export async function generateNatalChart(birthData: BirthData): Promise<InsertNatalChart> {
   try {
     log("Generating natal chart with Gemini AI", "gemini");
+    
+    // Validate birth data
+    if (!birthData.birthLatitude || !birthData.birthLongitude) {
+      throw new Error("Birth location coordinates (latitude/longitude) are required for chart generation");
+    }
     
     // Create prompt for Gemini to generate the natal chart
     const prompt = `
@@ -97,7 +114,7 @@ export async function generateNatalChart(birthData: BirthData): Promise<InsertNa
     
   } catch (error) {
     console.error("Error generating natal chart with Gemini:", error);
-    throw new Error("Failed to generate natal chart. Please try again later.");
+    throw new Error(`Failed to generate natal chart: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }
 
