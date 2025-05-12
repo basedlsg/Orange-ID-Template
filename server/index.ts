@@ -122,14 +122,27 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
+  // ALWAYS serve the app on port 3002
   // this serves both the API and the client
-  const port = 5000;
+  const port = 3002;
   server.listen({
     port,
-    host: "0.0.0.0",
-    reusePort: true,
+    host: "127.0.0.1",
   }, () => {
-    log(`serving on port ${port}`);
+    log(`Server running at http://localhost:${port}`);
+  });
+
+  // Handle server errors
+  server.on('error', (error: any) => {
+    if (error.code === 'EADDRINUSE') {
+      log(`Port ${port} is already in use. Try a different port.`);
+      process.exit(1);
+    } else if (error.code === 'ENOTSUP') {
+      log(`The socket operation is not supported. Try using a different host address.`);
+      process.exit(1);
+    } else {
+      log(`Server error: ${error.message}`);
+      throw error;
+    }
   });
 })();
