@@ -436,14 +436,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(404).json({ error: "Birth data needed to generate natal chart" });
         }
         
-        // Check if birth data has latitude and longitude
-        if (!birthData.birthLatitude || !birthData.birthLongitude) {
-          console.log("Birth data missing latitude or longitude, cannot generate accurate chart");
-          return res.status(400).json({ 
-            error: "Birth location coordinates (latitude/longitude) are required for accurate chart generation"
-          });
-        }
-        
         // User has birth data but no chart, use Gemini to generate one
         try {
           console.log(`Generating new natal chart for user ${userId} using Gemini AI`);
@@ -459,20 +451,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Generated and saved new natal chart for user ${userId}`);
         } catch (generationError) {
           console.error("Error generating natal chart with Gemini:", generationError);
-          return res.status(500).json({ 
-            error: generationError instanceof Error 
-              ? `Failed to generate natal chart: ${generationError.message}` 
-              : "Failed to generate natal chart" 
-          });
+          return res.status(500).json({ error: "Failed to generate natal chart" });
         }
       }
       
       res.json(natalChart);
     } catch (error) {
       console.error("Error fetching natal chart:", error);
-      res.status(500).json({ 
-        error: error instanceof Error ? error.message : "Failed to fetch natal chart" 
-      });
+      res.status(500).json({ error: "Failed to fetch natal chart" });
     }
   });
   

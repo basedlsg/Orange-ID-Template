@@ -54,31 +54,6 @@ interface BedrockUser {
   // Add other fields as needed
 }
 
-// Add a geocoding function to convert location to lat/long
-const geocodeLocation = async (location: string): Promise<{lat: number, lng: number} | null> => {
-  try {
-    // Use the OpenStreetMap Nominatim API for geocoding
-    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
-    if (!response.ok) {
-      throw new Error('Geocoding service unavailable');
-    }
-    
-    const data = await response.json();
-    
-    if (data.length === 0) {
-      return null;
-    }
-    
-    return {
-      lat: parseFloat(data[0].lat),
-      lng: parseFloat(data[0].lon)
-    };
-  } catch (error) {
-    console.error("Error geocoding location:", error);
-    return null;
-  }
-};
-
 export default function BirthDataPage() {
   const { isLoggedIn, user } = useBedrockPassport();
   const { toast } = useToast();
@@ -211,20 +186,6 @@ export default function BirthDataPage() {
   const onSubmit = async (data: BirthDataFormValues) => {
     try {
       setIsSubmitting(true);
-      
-      // If we have a location but no coordinates, try to geocode
-      if (data.birthLocation && (!data.birthLatitude || !data.birthLongitude)) {
-        console.log("Geocoding location:", data.birthLocation);
-        const coordinates = await geocodeLocation(data.birthLocation);
-        if (coordinates) {
-          console.log("Geocoding successful:", coordinates);
-          data.birthLatitude = coordinates.lat;
-          data.birthLongitude = coordinates.lng;
-        } else {
-          console.log("Geocoding failed for location:", data.birthLocation);
-        }
-      }
-      
       await saveBirthData.mutateAsync(data);
     } catch (error) {
       console.error("Error saving birth data:", error);

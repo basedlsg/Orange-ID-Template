@@ -13,7 +13,7 @@
   "dependencies": {
     "@bedrock_org/passport": "1.0.1",
     "@google-cloud/storage": "^7.15.2",
-    "@google/genai": "^0.13.0",
+    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.9.1",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@libsql/client": "^0.15.2",
