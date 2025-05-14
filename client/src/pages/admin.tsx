@@ -7,6 +7,7 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
+import { getOrangeId } from "../App";
 import { 
   Table, 
   TableBody, 
@@ -95,10 +96,20 @@ export default function AdminPage() {
       }
       
       try {
-        // Get the orangeId from the user object
+        // Get the orangeId from multiple sources
         // @ts-ignore - type is too complex to handle directly
-        const orangeId = (user as any).sub || (user as any).id;
+        const orangeIdFromUser = (user as any).sub || (user as any).id;
+        const storedOrangeId = getOrangeId();
+        const orangeId = orangeIdFromUser || storedOrangeId;
+
+        console.log("Admin page using orangeId:", orangeId);
+        
         if (!orangeId) {
+          toast({
+            title: "Authentication Error",
+            description: "Could not identify your user account. Please log in again.",
+            variant: "destructive"
+          });
           setLocation('/');
           return;
         }
