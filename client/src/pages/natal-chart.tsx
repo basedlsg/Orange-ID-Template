@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
+import { getOrangeId } from "../App";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -183,6 +184,7 @@ const NatalChartPageContent: React.FC = () => {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   
+<<<<<<< HEAD
   const [birthDate, setBirthDate] = useState<string>('');
   const [birthTime, setBirthTime] = useState<string>('');
   const [cityId, setCityId] = useState<number | null>(null);
@@ -235,29 +237,44 @@ const NatalChartPageContent: React.FC = () => {
     console.log('[NatalChartPage] Form validation passed. Calling mutation.');
     calculateChartMutation.mutate({ birthDate, birthTime, cityId });
   };
+=======
+  // Get orangeId from multiple sources for redundancy
+  const typedUser = user as any;
+  const orangeIdFromUser = typedUser?.sub || typedUser?.id;
+  const storedOrangeId = getOrangeId();
+  const orangeId = orangeIdFromUser || storedOrangeId;
+  
+  console.log("Natal chart using orangeId:", orangeId);
+>>>>>>> dd3b931 (Ensure users can view personalized astrological charts after logging in)
   
   // Query for birth data
   const birthDataQuery = useQuery<BirthData>({
     queryKey: ["/api/birth-data"],
     queryFn: async () => {
-      return apiRequest("/api/birth-data", {
+      if (!orangeId) {
+        throw new Error("No authentication found. Please log in again.");
+      }
+      return apiRequest(`/api/birth-data?orangeId=${orangeId}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
     },
-    enabled: !!isLoggedIn,
+    enabled: !!isLoggedIn || !!orangeId,
   });
 
   // Query for natal chart
   const natalChartQuery = useQuery<NatalChart>({
     queryKey: ["/api/natal-chart"],
     queryFn: async () => {
-      return apiRequest("/api/natal-chart", {
+      if (!orangeId) {
+        throw new Error("No authentication found. Please log in again.");
+      }
+      return apiRequest(`/api/natal-chart?orangeId=${orangeId}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
     },
-    enabled: !!isLoggedIn,
+    enabled: !!isLoggedIn || !!orangeId,
   });
 
   // Determine if we have birth data
