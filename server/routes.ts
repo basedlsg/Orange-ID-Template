@@ -353,11 +353,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware to ensure user is authenticated
   const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      console.log("Authentication request details:", {
+        path: req.path,
+        method: req.method,
+        query: req.query,
+        session: req.session ? {
+          userId: req.session.userId,
+          orangeId: req.session.orangeId
+        } : "No session"
+      });
+      
       const user = await getUserFromRequest(req);
       
       if (!user) {
+        console.log("Authentication failed for request:", req.path);
         return res.status(401).json({ error: "Authentication required" });
       }
+      
+      console.log("User authenticated successfully:", user);
       
       // Add the user id to the request for handlers
       (req as any).userId = user.userId;
@@ -374,7 +387,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/birth-data", requireAuth, async (req, res) => {
     try {
       const userId = (req as any).userId;
-      console.log(`Fetching birth data for user ${userId}`);
+      const orangeId = req.query.orangeId || 'none';
+      console.log(`Fetching birth data for user ${userId} (from orangeId: ${orangeId})`);
       
       const birthData = await storage.getBirthData(userId);
       
@@ -393,7 +407,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/birth-data", requireAuth, async (req, res) => {
     try {
       const userId = (req as any).userId;
-      console.log(`Creating/updating birth data for user ${userId}`);
+      const orangeId = req.query.orangeId || 'none';
+      console.log(`Creating/updating birth data for user ${userId} (from orangeId: ${orangeId})`);
       
       // Merge the user ID with the request body
       const birthDataWithUserId = {
