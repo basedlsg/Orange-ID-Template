@@ -89,8 +89,12 @@ export default function BirthDataPage() {
         // Extract user ID from Bedrock Passport user if available
         const orangeId = typedUser?.sub || typedUser?.id;
         console.log("Current user orangeId:", orangeId);
+        
+        if (!orangeId) {
+          throw new Error("No orangeId available. Cannot authenticate request.");
+        }
 
-        return await apiRequest("/api/birth-data", {
+        return await apiRequest(`/api/birth-data?orangeId=${orangeId}`, {
           method: "GET",
           headers: { 
             "Content-Type": "application/json",
@@ -112,6 +116,12 @@ export default function BirthDataPage() {
           console.log("Authentication error in birth data fetch, might need to login again");
           console.log("User authenticated status:", isLoggedIn);
           console.log("User object:", typedUser);
+          console.log("orangeId being used:", orangeId);
+          toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: "There was a problem authenticating your request. Try logging out and logging in again.",
+          });
         }
         
         // For other errors, rethrow
@@ -154,6 +164,10 @@ export default function BirthDataPage() {
       // Extract user ID from Bedrock Passport if available
       const orangeId = typedUser?.sub || typedUser?.id;
       console.log("Current user orangeId for birth data saving:", orangeId);
+      
+      if (!orangeId) {
+        throw new Error("No orangeId available. Cannot authenticate request.");
+      }
       
       // Include orangeId in the request to ensure auth works
       // even if session cookies aren't working properly
