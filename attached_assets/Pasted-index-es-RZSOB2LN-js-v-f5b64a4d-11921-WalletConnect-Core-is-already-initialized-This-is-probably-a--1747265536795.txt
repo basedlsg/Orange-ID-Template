@@ -1,0 +1,98 @@
+index.es-RZSOB2LN.js?v=f5b64a4d:11921 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 2 times.
+getGlobalCore @ index.es-RZSOB2LN.js?v=f5b64a4d:11921
+index.es-RZSOB2LN.js?v=f5b64a4d:11921 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 3 times.
+getGlobalCore @ index.es-RZSOB2LN.js?v=f5b64a4d:11921
+VM7:1 MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 connect listeners added. Use emitter.setMaxListeners() to increase limit
+    at v (<anonymous>:1:1611)
+    at o.addListener (<anonymous>:1:4195)
+    at Object.setup (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=f5b64a4d:41642:20)
+v @ VM7:1
+VM7:1 MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 accountsChanged listeners added. Use emitter.setMaxListeners() to increase limit
+    at v (<anonymous>:1:1611)
+    at o.addListener (<anonymous>:1:4195)
+    at Object.setup (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=f5b64a4d:41646:20)
+v @ VM7:1
+index.es-RZSOB2LN.js?v=f5b64a4d:11921 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 4 times.
+getGlobalCore @ index.es-RZSOB2LN.js?v=f5b64a4d:11921
+index.es-RZSOB2LN.js?v=f5b64a4d:11921 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 5 times.
+getGlobalCore @ index.es-RZSOB2LN.js?v=f5b64a4d:11921
+App.tsx:247 Navigation checking admin status for: xze2pn0og8xiakg31e8stgyxb
+App.tsx:41 Stored orangeId in localStorage: xze2pn0og8xiakg31e8stgyxb
+App.tsx:74 Storing user in database: Object
+index.es-RZSOB2LN.js?v=f5b64a4d:11921 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 6 times.
+getGlobalCore @ index.es-RZSOB2LN.js?v=f5b64a4d:11921
+App.tsx:251 Navigation admin check result: Object
+api.bedrockpassport.com/api/v1/economy/currency:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+@bedrock_org_passport.js?v=f5b64a4d:127377 ƒ toJSON() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+     …
+(anonymous) @ @bedrock_org_passport.js?v=f5b64a4d:127377
+natal-chart.tsx:140 Natal chart using orangeId: xze2pn0og8xiakg31e8stgyxb
+api/natal-chart?orangeId=xze2pn0og8xiakg31e8stgyxb:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+natal-chart.tsx:140 Natal chart using orangeId: xze2pn0og8xiakg31e8stgyxb
+api/birth-data?orangeId=xze2pn0og8xiakg31e8stgyxb:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+api/natal-chart?orangeId=xze2pn0og8xiakg31e8stgyxb:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+natal-chart.tsx:140 Natal chart using orangeId: xze2pn0og8xiakg31e8stgyxb
+api/birth-data?orangeId=xze2pn0og8xiakg31e8stgyxb:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+api/natal-chart?orangeId=xze2pn0og8xiakg31e8stgyxb:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+natal-chart.tsx:140 Natal chart using orangeId: xze2pn0og8xiakg31e8stgyxb
+api/birth-data?orangeId=xze2pn0og8xiakg31e8stgyxb:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+api/natal-chart?orangeId=xze2pn0og8xiakg31e8stgyxb:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+natal-chart.tsx:140 Natal chart using orangeId: xze2pn0og8xiakg31e8stgyxb
+api/birth-data?orangeId=xze2pn0og8xiakg31e8stgyxb:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+natal-chart.tsx:140 Natal chart using orangeId: xze2pn0og8xiakg31e8stgyxb
+birth-data.tsx:177 Current user orangeId for birth data saving: xze2pn0og8xiakg31e8stgyxb
+birth-data.tsx:101 Using orangeId from user object: xze2pn0og8xiakg31e8stgyxb
+natal-chart.tsx:140 Natal chart using orangeId: xze2pn0og8xiakg31e8stgyxb
+api/natal-chart?orangeId=xze2pn0og8xiakg31e8stgyxb:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+api/natal-chart?orangeId=xze2pn0og8xiakg31e8stgyxb:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+natal-chart.tsx:140 Natal chart using orangeId: xze2pn0og8xiakg31e8stgyxb
+api/natal-chart?orangeId=xze2pn0og8xiakg31e8stgyxb:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+api/natal-chart?orangeId=xze2pn0og8xiakg31e8stgyxb:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+natal-chart.tsx:140 Natal chart using orangeId: xze2pn0og8xiakg31e8stgyxb
