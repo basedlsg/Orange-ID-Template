@@ -34,6 +34,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Helmet } from "react-helmet";
 
+// Store orangeId in localStorage for authentication
+export function storeOrangeId(orangeId: string) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('orangeId', orangeId);
+    console.log('Stored orangeId in localStorage:', orangeId);
+  }
+}
+
+// Get orangeId from localStorage
+export function getOrangeId(): string | null {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('orangeId');
+  }
+  return null;
+}
+
 async function storeUserInDB(user: any) {
   if (!user) {
     throw new Error("No user data provided");
@@ -43,6 +59,9 @@ async function storeUserInDB(user: any) {
   if (!orangeId) {
     throw new Error("Missing Orange ID (sub or id)");
   }
+  
+  // Store orangeId for later use
+  storeOrangeId(orangeId);
 
   try {
     const userData = {
