@@ -116,6 +116,14 @@ export default function SpiritualDiscussionsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingDiscussion, setEditingDiscussion] = useState<SpiritualDiscussion | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<number | null>(null);
+  
+  // Get orangeId from multiple sources for redundancy
+  const typedUser = user as any;
+  const orangeIdFromUser = typedUser?.sub || typedUser?.id;
+  const storedOrangeId = getOrangeId();
+  const orangeId = orangeIdFromUser || storedOrangeId;
+  
+  console.log("Spiritual discussions using orangeId:", orangeId);
 
   // Create form with react-hook-form
   const form = useForm<DiscussionFormValues>({
@@ -134,24 +142,30 @@ export default function SpiritualDiscussionsPage() {
   const natalChartQuery = useQuery<NatalChart>({
     queryKey: ["/api/natal-chart"],
     queryFn: async () => {
-      return apiRequest("/api/natal-chart", {
+      if (!orangeId) {
+        throw new Error("No authentication found. Please log in again.");
+      }
+      return apiRequest(`/api/natal-chart?orangeId=${orangeId}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
     },
-    enabled: !!isLoggedIn,
+    enabled: !!isLoggedIn || !!orangeId,
   });
 
   // Query to fetch spiritual discussions
   const discussionsQuery = useQuery<SpiritualDiscussion[]>({
     queryKey: ["/api/spiritual-discussions"],
     queryFn: async () => {
-      return apiRequest("/api/spiritual-discussions", {
+      if (!orangeId) {
+        throw new Error("No authentication found. Please log in again.");
+      }
+      return apiRequest(`/api/spiritual-discussions?orangeId=${orangeId}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
     },
-    enabled: !!isLoggedIn,
+    enabled: !!isLoggedIn || !!orangeId,
   });
 
   // Reset form when editing a discussion
@@ -180,7 +194,11 @@ export default function SpiritualDiscussionsPage() {
   // Create spiritual discussion mutation
   const createDiscussionMutation = useMutation({
     mutationFn: async (data: DiscussionFormValues) => {
-      return apiRequest("/api/spiritual-discussions", {
+      if (!orangeId) {
+        throw new Error("No authentication found. Please log in again.");
+      }
+      // Add orangeId as a query parameter for authentication fallback
+      return apiRequest(`/api/spiritual-discussions?orangeId=${orangeId}`, {
         method: "POST",
         body: JSON.stringify(data),
       });
@@ -206,7 +224,11 @@ export default function SpiritualDiscussionsPage() {
   // Update spiritual discussion mutation
   const updateDiscussionMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number, data: DiscussionFormValues }) => {
-      return apiRequest(`/api/spiritual-discussions/${id}`, {
+      if (!orangeId) {
+        throw new Error("No authentication found. Please log in again.");
+      }
+      // Add orangeId as a query parameter for authentication fallback
+      return apiRequest(`/api/spiritual-discussions/${id}?orangeId=${orangeId}`, {
         method: "PATCH",
         body: JSON.stringify(data),
       });
@@ -233,7 +255,11 @@ export default function SpiritualDiscussionsPage() {
   // Delete spiritual discussion mutation
   const deleteDiscussionMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/spiritual-discussions/${id}`, {
+      if (!orangeId) {
+        throw new Error("No authentication found. Please log in again.");
+      }
+      // Add orangeId as a query parameter for authentication fallback
+      return apiRequest(`/api/spiritual-discussions/${id}?orangeId=${orangeId}`, {
         method: "DELETE",
       });
     },
