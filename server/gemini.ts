@@ -6,8 +6,9 @@ import { log } from "./vite";
 const apiKey = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
-// Model configuration
-const geminiPro = genAI.getGenerativeModel({ model: "gemini-pro" });
+// Model configuration - using gemini-1.0-pro instead of gemini-pro
+// The model name may have changed from gemini-pro to gemini-1.0-pro in a recent API update
+const geminiPro = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
 
 /**
  * Generate a natal chart based on birth data
@@ -95,9 +96,19 @@ export async function generateNatalChart(birthData: BirthData): Promise<InsertNa
       };
     }
     
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating natal chart with Gemini:", error);
-    throw new Error("Failed to generate natal chart. Please try again later.");
+    
+    // Provide more detailed error information
+    if (error && error.message && typeof error.message === 'string' && error.message.includes("404")) {
+      throw new Error("Failed to connect to AI service. The API may have changed. Please check the API key and model name.");
+    } else if (error && error.message && typeof error.message === 'string' && error.message.includes("403")) {
+      throw new Error("Failed to authenticate with AI service. Please check your API key.");
+    } else if (!apiKey || apiKey === "") {
+      throw new Error("Missing API key for AI service. Please add GEMINI_API_KEY to your environment.");
+    } else {
+      throw new Error("Failed to generate natal chart. Please try again later.");
+    }
   }
 }
 
@@ -167,10 +178,22 @@ export async function generateAstrologicalInsights(natalChart: NatalChart, topic
       };
     }
     
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating astrological insights with Gemini:", error);
+    
+    let errorMessage = "Unable to generate insights at this time. Please try again later.";
+    
+    // Provide more detailed error information
+    if (error && error.message && typeof error.message === 'string' && error.message.includes("404")) {
+      errorMessage = "Failed to connect to AI service. The API may have changed.";
+    } else if (error && error.message && typeof error.message === 'string' && error.message.includes("403")) {
+      errorMessage = "Failed to authenticate with AI service. Please check your API key.";
+    } else if (!apiKey || apiKey === "") {
+      errorMessage = "Missing API key for AI service. Please add GEMINI_API_KEY to your environment.";
+    }
+    
     return {
-      astrologicalContext: "Unable to generate insights at this time. Please try again later.",
+      astrologicalContext: errorMessage,
       kabbalisticElements: "Unable to generate Kabbalistic connections at this time."
     };
   }
