@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { getOrangeId } from "../App";
 
 import {
   Form,
@@ -86,12 +87,22 @@ export default function BirthDataPage() {
     queryKey: ["/api/birth-data"],
     queryFn: async () => {
       try {
-        // Extract user ID from Bedrock Passport user if available
-        const orangeId = typedUser?.sub || typedUser?.id;
-        console.log("Current user orangeId:", orangeId);
+        // Get orangeId from multiple sources for redundancy
+        let orangeId = typedUser?.sub || typedUser?.id;
+        
+        // If not found in user object, try localStorage
+        if (!orangeId) {
+          const storedOrangeId = getOrangeId();
+          if (storedOrangeId) {
+            orangeId = storedOrangeId;
+            console.log("Using orangeId from localStorage:", orangeId);
+          }
+        } else {
+          console.log("Using orangeId from user object:", orangeId);
+        }
         
         if (!orangeId) {
-          throw new Error("No orangeId available. Cannot authenticate request.");
+          throw new Error("No orangeId available. Cannot authenticate request. Please try logging out and logging in again.");
         }
 
         return await apiRequest(`/api/birth-data?orangeId=${orangeId}`, {
@@ -116,7 +127,7 @@ export default function BirthDataPage() {
           console.log("Authentication error in birth data fetch, might need to login again");
           console.log("User authenticated status:", isLoggedIn);
           console.log("User object:", typedUser);
-          console.log("orangeId being used:", orangeId);
+          console.log("orangeId from localStorage:", getOrangeId());
           toast({
             variant: "destructive",
             title: "Authentication Error",
