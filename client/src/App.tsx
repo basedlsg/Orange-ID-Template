@@ -274,7 +274,7 @@ function Navigation() {
         <div className="mx-4 flex space-x-4">
           {isLoggedIn && (
             <>
-              <Link href="/birth-data">
+              {/* <Link href="/birth-data">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -282,7 +282,7 @@ function Navigation() {
                 >
                   Birth Data
                 </Button>
-              </Link>
+              </Link> */}
               <Link href="/natal-chart">
                 <Button
                   variant="ghost"
@@ -333,12 +333,12 @@ function Navigation() {
                 align="end"
                 className="border border-gray-700 bg-black"
               >
-                <DropdownMenuItem
+                {/* <DropdownMenuItem
                   asChild
                   className="text-[#F37920] hover:text-white focus:text-white hover:bg-gray-800 focus:bg-gray-800"
                 >
                   <Link href="/birth-data">Birth Data</Link>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem
                   asChild
                   className="text-[#F37920] hover:text-white focus:text-white hover:bg-gray-800 focus:bg-gray-800"
