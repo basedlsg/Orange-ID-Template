@@ -439,18 +439,18 @@ const NatalChartPageContent: React.FC = () => {
     const currentBirthData = birthDataQuery.data as BirthData;
     const formattedBirthDateForDisplay = currentBirthData?.birthDate
       ? new Date(currentBirthData.birthDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-      : 'Unknown';
+    : 'Unknown';
 
-    return (
+  return (
       <div style={pageContainerStyle}>
-        <Card className="bg-black border border-gray-800 text-white mb-8">
-          <CardHeader>
+      <Card className="bg-black border border-gray-800 text-white mb-8">
+        <CardHeader>
             <CardTitle className="text-[#F37920] text-2xl">Calculate Your Natal Chart</CardTitle>
-            <CardDescription>
+          <CardDescription>
               Enter or confirm your birth details below to generate your natal chart.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
             {/* Calculation Form */}
             <form onSubmit={handleCalculateChart}>
               <div style={inputGroupStyle}>
@@ -560,11 +560,11 @@ const NatalChartPageContent: React.FC = () => {
           <Card className="bg-red-900/30 border border-red-700 text-white mb-8">
             <CardHeader>
               <CardTitle className="text-red-400">Calculation Error</CardTitle>
-            </CardHeader>
-            <CardContent>
+              </CardHeader>
+              <CardContent>
               <p>{calculateChartMutation.error.message}</p>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
         )}
 
         {/* Display newly calculated chart data */}
@@ -572,8 +572,8 @@ const NatalChartPageContent: React.FC = () => {
           <Card className="bg-black border border-gray-800 text-white mt-8">
             <CardHeader>
                 <CardTitle className="text-[#F37920] text-2xl">Newly Calculated Natal Chart</CardTitle>
-            </CardHeader>
-            <CardContent>
+              </CardHeader>
+              <CardContent>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}> {/* Responsive flex direction removed for simplicity */}
                 <div style={{ flex: 1, minWidth: '300px' }}>
                    <NatalChartWheel chartData={chartData} />
@@ -581,9 +581,9 @@ const NatalChartPageContent: React.FC = () => {
                 <div style={{ flex: 1, minWidth: '300px' }}>
                   <ChartSummary chartData={chartData} getInterpretationFn={apiClient.getInterpretation} />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
         )}
 
         {/* Display existing natal chart if available and no new chart was just calculated */}
@@ -594,8 +594,8 @@ const NatalChartPageContent: React.FC = () => {
               <CardDescription>
                 This is your previously generated astrological profile.
               </CardDescription>
-            </CardHeader>
-            <CardContent>
+              </CardHeader>
+              <CardContent>
               <div className="bg-gray-900 rounded-lg p-4 mb-6">
                 <h3 className="text-lg font-medium text-gray-300 mb-2">Birth Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -618,11 +618,11 @@ const NatalChartPageContent: React.FC = () => {
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}> {/* Responsive flex direction removed for simplicity */}
                         <div style={{ flex: 1, minWidth: '300px' }}>
                           <NatalChartWheel chartData={parsedSavedChart} />
-                        </div>
+              </div>
                         <div style={{ flex: 1, minWidth: '300px' }}>
                           <ChartSummary chartData={parsedSavedChart} getInterpretationFn={apiClient.getInterpretation} />
-                        </div>
-                      </div>
+              </div>
+              </div>
                     );
                   } else if (natalChartQuery.data) { 
                     // Fallback if chartData field is missing but we have some natalChart record.
@@ -635,7 +635,7 @@ const NatalChartPageContent: React.FC = () => {
                           {sunSign && <Card className="bg-gray-900 border-gray-700"><CardHeader className="pb-2"><CardTitle className="text-lg flex items-center"><Sun className="h-5 w-5 mr-2 text-yellow-500" />Sun Sign</CardTitle></CardHeader><CardContent><div className="flex items-center mb-2"><Badge className={`text-lg mr-2 ${getZodiacColor(sunSign)}`}>{getZodiacEmoji(sunSign)}</Badge><span className="text-xl font-semibold">{sunSign}</span></div></CardContent></Card>}
                           {moonSign && <Card className="bg-gray-900 border-gray-700"><CardHeader className="pb-2"><CardTitle className="text-lg flex items-center"><Moon className="h-5 w-5 mr-2 text-blue-200" />Moon Sign</CardTitle></CardHeader><CardContent><div className="flex items-center mb-2"><Badge className={`text-lg mr-2 ${getZodiacColor(moonSign)}`}>{getZodiacEmoji(moonSign)}</Badge><span className="text-xl font-semibold">{moonSign}</span></div></CardContent></Card>}
                           {ascendantSign && <Card className="bg-gray-900 border-gray-700"><CardHeader className="pb-2"><CardTitle className="text-lg flex items-center"><ArrowUp className="h-5 w-5 mr-2 text-purple-400" />Ascendant</CardTitle></CardHeader><CardContent><div className="flex items-center mb-2"><Badge className={`text-lg mr-2 ${getZodiacColor(ascendantSign)}`}>{getZodiacEmoji(ascendantSign)}</Badge><span className="text-xl font-semibold">{ascendantSign}</span></div></CardContent></Card>}
-                        </div>
+              </div>
                        );
                     }
                     return <p className="text-center text-gray-400">Saved chart data is incomplete or in an unexpected format.</p>;
@@ -648,7 +648,7 @@ const NatalChartPageContent: React.FC = () => {
               })()}
             </CardContent>
           </Card>
-        )}
+            )}
 
         {!chartData && !natalChartQuery.data && (
            <Card className="bg-black border border-gray-800 text-white mt-8">

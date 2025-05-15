@@ -67,6 +67,22 @@ export const spiritualDiscussions = sqliteTable("spiritual_discussions", {
   updatedAt: text("updated_at"),
 });
 
+// Cities table for location data
+export const cities = sqliteTable("cities", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(), // city_ascii or city
+  cityAscii: text("city_ascii"), // From worldcities.csv
+  country: text("country").notNull(),
+  latitude: real("latitude").notNull(),
+  longitude: real("longitude").notNull(),
+  timezoneStr: text("timezone_str").notNull(), // IANA timezone string, e.g., "America/Los_Angeles"
+  population: integer("population"),
+  adminName: text("admin_name"),
+  iso2: text("iso2"),
+  iso3: text("iso3"),
+  capital: text("capital"), // From worldcities.csv
+});
+
 // Create insert schemas
 export const insertUserSchema = createInsertSchema(users)
   .omit({
@@ -108,6 +124,8 @@ export const insertSpiritualDiscussionSchema = createInsertSchema(spiritualDiscu
     astrologicalContext: z.string().optional(),
   });
 
+export const insertCitySchema = createInsertSchema(cities); // Basic insert schema, can be customized
+
 // Type definitions
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -120,3 +138,33 @@ export type NatalChart = typeof natalCharts.$inferSelect;
 
 export type InsertSpiritualDiscussion = z.infer<typeof insertSpiritualDiscussionSchema>;
 export type SpiritualDiscussion = typeof spiritualDiscussions.$inferSelect;
+
+export type City = typeof cities.$inferSelect;
+export type InsertCity = z.infer<typeof insertCitySchema>;
+
+// Interpretations table for astrological explanations
+export const interpretations = sqliteTable('interpretations', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  elementType: text('element_type').notNull(), // e.g., 'sun_sign', 'moon_sign', 'ascendant_sign', 'planet_in_sign', 'planet_in_house', 'aspect'
+  key: text('key').notNull(),                 // e.g., 'Aries', 'Taurus', 'Sun_Aries', 'Moon_Leo_5H', 'Sun_Trine_Moon'
+  text: text('text_content').notNull(),        // The interpretation text
+  // Optional: Add category, subCategory, keywords for better organization/filtering later
+});
+
+export type Interpretation = typeof interpretations.$inferSelect;
+export type InsertInterpretation = typeof interpretations.$inferInsert;
+
+// Schema for natal chart calculation request
+export const natalChartCalculationRequestSchema = z.object({
+  birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, {
+    message: "Birth date must be in YYYY-MM-DD format.",
+  }),
+  birthTime: z.string().regex(/^\d{2}:\d{2}$/, {
+    message: "Birth time must be in HH:MM format.",
+  }),
+  cityId: z.number().int().positive({
+    message: "City ID must be a positive integer.",
+  }),
+});
+
+export type NatalChartCalculationRequest = z.infer<typeof natalChartCalculationRequestSchema>;

@@ -13,10 +13,17 @@ import {
   type NatalChart,
   type InsertNatalChart,
   type SpiritualDiscussion,
-  type InsertSpiritualDiscussion
+  type InsertSpiritualDiscussion,
+  natalChartCalculationRequestSchema,
+  cities,
+  interpretations
 } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import 'express-session';
+import { DateTime } from 'luxon';
+import { calculateNatalChart } from './astrologyEngine';
+import { eq } from 'drizzle-orm';
+import { db } from './db';
 
 // Extend Express Request type to include session
 declare module 'express-session' {
@@ -425,34 +432,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Fetching natal chart for user ${userId}`);
       
       // First check if the user already has a natal chart
-      let natalChart = await storage.getNatalChart(userId);
+      const natalChart = await storage.getNatalChart(userId);
       
-      // If no natal chart exists, check if the user has birth data
       if (!natalChart) {
-        console.log(`No natal chart found for user ${userId}, checking birth data`);
-        const birthData = await storage.getBirthData(userId);
-        
-        if (!birthData) {
-          return res.status(404).json({ error: "Birth data needed to generate natal chart" });
-        }
-        
-        // User has birth data but no chart, use Gemini to generate one
-        try {
-          console.log(`Generating new natal chart for user ${userId} using Gemini AI`);
-          
-          // Import the Gemini function dynamically to avoid loading it unnecessarily
-          const { generateNatalChart } = await import('./gemini');
-          
-          // Generate the natal chart
-          const natalChartData = await generateNatalChart(birthData);
-          
-          // Save the generated chart to the database
-          natalChart = await storage.createOrUpdateNatalChart(natalChartData);
-          console.log(`Generated and saved new natal chart for user ${userId}`);
-        } catch (generationError) {
-          console.error("Error generating natal chart with Gemini:", generationError);
-          return res.status(500).json({ error: "Failed to generate natal chart" });
-        }
+        console.log(`No natal chart found for user ${userId}. Client should prompt for calculation.`);
+        // If no natal chart exists, send a 404 or an empty object/null.
+        // The frontend is set up to handle the case where natalChartQuery.data is null or undefined.
+        // Sending null is consistent with how the frontend might expect an empty state.
+        return res.status(200).json(null); 
       }
       
       res.json(natalChart);
@@ -493,6 +480,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         error: error instanceof Error ? error.message : "Failed to save natal chart" 
       });
+    }
+  });
+  
+  // Natal Chart Calculation Route
+  app.post("/api/natal-chart/calculate", async (req, res) => {
+    try {
+      // 1. Validate request body
+      const validatedBody = natalChartCalculationRequestSchema.parse(req.body);
+      const { birthDate, birthTime, cityId } = validatedBody;
+
+      // 2. Fetch city details from database
+      // Assuming 'db' is your Drizzle instance and 'cities' is your schema
+      const cityResult = await db.select({
+        latitude: cities.latitude,
+        longitude: cities.longitude,
+        timezoneStr: cities.timezoneStr,
+        name: cities.name
+      })
+      .from(cities)
+      .where(eq(cities.id, cityId))
+      .limit(1);
+
+      if (!cityResult || cityResult.length === 0) {
+        return res.status(404).json({ error: "City not found." });
+      }
+      const city = cityResult[0];
+      if (!city.latitude || !city.longitude) {
+        return res.status(400).json({ error: `City '${city.name}' is missing latitude or longitude data.` });
+      }
+      if (!city.timezoneStr) {
+        return res.status(400).json({ error: `City '${city.name}' is missing timezone data.` });
+      }
+
+      // 3. Convert local birthDate and birthTime to UTC Date object
+      const localDateTimeStr = `${birthDate}T${birthTime}`;
+      const luxonDateTime = DateTime.fromISO(localDateTimeStr, { zone: city.timezoneStr });
+
+      if (!luxonDateTime.isValid) {
+        return res.status(400).json({ error: `Invalid date or time for the specified timezone. Reason: ${luxonDateTime.invalidReason} | ${luxonDateTime.invalidExplanation}` });
+      }
+      const utcDateTime = luxonDateTime.toJSDate();
+
+      // 4. Call calculateNatalChart
+      const chartData = calculateNatalChart({
+        utcDateTime,
+        latitude: city.latitude,
+        longitude: city.longitude,
+      });
+
+      if (!chartData) {
+        // This case might indicate an internal error in calculation if it's not an exception
+        return res.status(500).json({ error: "Failed to calculate natal chart. The calculation returned no data." });
+      }
+
+      // 5. Send successful response
+      return res.status(200).json(chartData);
+
+    } catch (error) {
+      console.error("Natal chart calculation error:", error);
+      if (error instanceof Error && error.name === 'ZodError') {
+        const validationError = fromZodError(error as any);
+        return res.status(400).json({ error: "Invalid request body.", details: validationError.details });
+      } 
+      // Handle errors from calculateNatalChart if it throws specific errors
+      // For now, general error handling:
+      if (error instanceof Error) {
+         // Check for specific error messages if calculateNatalChart throws them
+        if (error.message.includes("Swiss Ephemeris Error")) { // Example error check
+             return res.status(500).json({ error: "Calculation error with ephemeris data.", details: error.message });
+        }
+        return res.status(500).json({ error: error.message });
+      }
+      return res.status(500).json({ error: "An unknown error occurred during chart calculation." });
+    }
+  });
+  
+  // API route to get all cities
+  app.get("/api/cities", async (req, res) => {
+    try {
+      const allCities = await db.select().from(cities).orderBy(cities.name); // Order by name for easier selection
+      return res.status(200).json(allCities);
+    } catch (error) {
+      console.error("Error fetching cities:", error);
+      return res.status(500).json({ error: "Failed to fetch cities." });
     }
   });
   
@@ -730,6 +801,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         error: error instanceof Error ? error.message : "Failed to delete spiritual discussion" 
       });
+    }
+  });
+  
+  // API route to get specific interpretation
+  app.get("/api/interpretations", async (req, res) => {
+    try {
+      const { elementType, key } = req.query;
+
+      if (!elementType || !key) {
+        return res.status(400).json({ error: "elementType and key query parameters are required." });
+      }
+
+      const result = await db.select()
+        .from(interpretations)
+        .where(eq(interpretations.elementType, elementType as string) && eq(interpretations.key, key as string))
+        .limit(1);
+
+      if (result.length === 0) {
+        return res.status(404).json({ error: "Interpretation not found." });
+      }
+
+      return res.status(200).json(result[0]);
+    } catch (error) {
+      console.error("Error fetching interpretation:", error);
+      return res.status(500).json({ error: "Failed to fetch interpretation." });
     }
   });
   
