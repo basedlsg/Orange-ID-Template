@@ -6,9 +6,36 @@ import { log } from "./vite";
 const apiKey = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
-// Model configuration - using gemini-1.0-pro instead of gemini-pro
-// The model name may have changed from gemini-pro to gemini-1.0-pro in a recent API update
-const geminiPro = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+// Attempt to list available models
+async function listAvailableModels() {
+  try {
+    console.log("Listing available Gemini AI models...");
+    const result = await fetch("https://generativelanguage.googleapis.com/v1beta/models?key=" + apiKey);
+    const data = await result.json();
+    console.log("Available models:", JSON.stringify(data, null, 2));
+    return data;
+  } catch (error) {
+    console.error("Error listing Gemini models:", error);
+    return null;
+  }
+}
+
+// Try to list models when initializing
+listAvailableModels().catch(err => console.error("Failed to list models:", err));
+
+// Let's try with different model names based on Gemini's latest API
+// The model name has changed in the Gemini API
+const modelName = "gemini-pro"; // Using the standard name as fallback
+
+console.log("Initializing Gemini AI with model:", modelName);
+const geminiPro = genAI.getGenerativeModel({ 
+  model: modelName,
+  generationConfig: {
+    temperature: 0.7,
+    topP: 0.8,
+    topK: 40
+  }
+});
 
 /**
  * Generate a natal chart based on birth data
