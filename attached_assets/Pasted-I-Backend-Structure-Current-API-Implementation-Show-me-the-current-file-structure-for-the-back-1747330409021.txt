@@ -1,0 +1,57 @@
+I. Backend Structure & Current API Implementation:
+
+"Show me the current file structure for the backend, particularly where API routes and business logic are defined."
+
+"What backend framework (e.g., Express.js, Flask, Fast API, or vanilla Node.js http module) is currently being used to handle API requests?"
+
+"Display the exact code block for the GET /api/natal-chart endpoint, including how it currently attempts to interact with the Gemini AI."
+
+"Display the code block for the POST /api/birth-data endpoint. How does it currently process and store birth location information?"
+
+"How is the Bedrock Passport authentication flow integrated? Show me the relevant middleware or route protection mechanisms."
+
+II. Database and Data Management:
+
+"What database solution is currently active for the Birth Data Table and Natal Chart Table (e.g., Replit DB, Replit PostgreSQL, an external service)? Show me the connection and schema definition code if available."
+
+"How are database queries currently constructed and executed for creating, reading, and updating birth data and natal charts?"
+
+"What is the exact current schema (fields and data types) for the Birth Data Table and Natal Chart Table as implemented in the database?"
+
+III. Location Data Handling (Current State):
+
+"When a user submits birth location as free text, what backend code processes this input? Is there any current attempt (even if flawed) to parse, validate, or geocode this text?"
+
+IV. Gemini AI Integration (Current Problem Area):
+
+"Pinpoint the exact lines of code where the models/gemini-pro and gemini-1.0-pro API calls are made. Include any request headers, parameters, and error handling logic surrounding these calls."
+
+"Are there any API keys or configuration variables related to Gemini AI stored, and how are they accessed (e.g., environment variables, hardcoded values)?"
+
+V. Frontend Structure & Data Flow:
+
+"What frontend framework or library (e.g., React, Vue, Svelte, vanilla JavaScript) is used for the user interface?"
+
+"Show me the code for the current birth data input form. How does it capture date, time, and location?"
+
+"How is data passed from the frontend form to the backend API endpoints (POST /api/birth-data, POST /api/natal-chart)?"
+
+"How is the data returned from GET /api/natal-chart currently displayed on the frontend (even if it's just text or an error message)?"
+
+VI. Validation and Error Handling:
+
+"What validation logic, if any, currently exists on the backend for the birthDate, birthTime, and birthLocation fields?"
+
+"How are errors from external API calls (like Gemini) or internal processing currently caught, logged, and communicated back to the frontend?"
+
+VII. Dependencies & Environment:
+
+"List all major backend dependencies (from package.json, requirements.txt, etc.) related to API handling, database interaction, or external service calls."
+
+"List all major frontend dependencies related to UI, state management, or API calls."
+
+VIII. Code Modularity & Reusability:
+
+"Are there any existing utility functions or modules for date/time manipulation, data transformation, or external API communication that could be repurposed?"
+
+"How coupled is the current natal chart generation logic (even the failing AI part) with other parts of the backend? How easy would it be to swap it out?"
