@@ -68,7 +68,7 @@ function getZodiacEmoji(sign: string | null | undefined): string {
   if (!sign) return "⭐";
 
   const signLower = sign.toLowerCase();
-  
+
   switch(signLower) {
     case "aries": return "♈";
     case "taurus": return "♉";
@@ -91,7 +91,7 @@ function getZodiacColor(sign: string | null | undefined): string {
   if (!sign) return "bg-gray-700";
 
   const signLower = sign.toLowerCase();
-  
+
   switch(signLower) {
     case "aries": return "bg-red-700";
     case "taurus": return "bg-green-700";
@@ -114,7 +114,7 @@ function getZodiacElement(sign: string | null | undefined): string {
   if (!sign) return "Unknown";
 
   const signLower = sign.toLowerCase();
-  
+
   switch(signLower) {
     case "aries":
     case "leo":
@@ -183,8 +183,7 @@ const NatalChartPageContent: React.FC = () => {
   const { isLoggedIn, user } = useBedrockPassport();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  
-<<<<<<< HEAD
+
   const [birthDate, setBirthDate] = useState<string>('');
   const [birthTime, setBirthTime] = useState<string>('');
   const [cityId, setCityId] = useState<number | null>(null);
@@ -237,16 +236,15 @@ const NatalChartPageContent: React.FC = () => {
     console.log('[NatalChartPage] Form validation passed. Calling mutation.');
     calculateChartMutation.mutate({ birthDate, birthTime, cityId });
   };
-=======
+
   // Get orangeId from multiple sources for redundancy
   const typedUser = user as any;
   const orangeIdFromUser = typedUser?.sub || typedUser?.id;
   const storedOrangeId = getOrangeId();
   const orangeId = orangeIdFromUser || storedOrangeId;
-  
+
   console.log("Natal chart using orangeId:", orangeId);
->>>>>>> dd3b931 (Ensure users can view personalized astrological charts after logging in)
-  
+
   // Query for birth data
   const birthDataQuery = useQuery<BirthData>({
     queryKey: ["/api/birth-data"],
@@ -279,7 +277,7 @@ const NatalChartPageContent: React.FC = () => {
 
   // Determine if we have birth data
   const hasBirthData = !!birthDataQuery.data;
-  
+
   // Handling missing birth data
   const handleAddBirthData = () => {
     setLocation("/birth-data");
@@ -323,7 +321,7 @@ const NatalChartPageContent: React.FC = () => {
     color: '#E0E0E0',
     fontSize: '1em'
   };
-  
+
   const selectStyle: React.CSSProperties = {
     ...inputStyle, // Inherit common input styles
     // any select-specific overrides if needed
@@ -624,7 +622,7 @@ const NatalChartPageContent: React.FC = () => {
                   <Button variant="link" onClick={handleAddBirthData} className="text-[#F37920] p-0 h-auto">Edit Birth Info</Button>
                 </div>
               </div>
-              
+
               {/* Attempt to parse and display the saved chart data */}
               {(() => {
                 try {
