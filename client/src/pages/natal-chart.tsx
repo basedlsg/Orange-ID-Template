@@ -478,8 +478,8 @@ const NatalChartPageContent: React.FC = () => {
                         <CommandInput 
                           placeholder="Search cities..." 
                           className="text-white" 
-                          value={citySearchQuery}
-                          onValueChange={setCitySearchQuery}
+                          value={citySearchInput}
+                          onValueChange={setCitySearchInput}
                         />
                         <CommandEmpty>No city found.</CommandEmpty>
                         <CommandList>
@@ -489,7 +489,7 @@ const NatalChartPageContent: React.FC = () => {
                                 <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
                                 <span className="ml-2 text-gray-400">Loading cities...</span>
                               </div>
-                            ) : isSearching ? (
+                            ) : isCitySearching ? (
                               <div className="flex justify-center py-4">
                                 <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
                                 <span className="ml-2 text-gray-400">Searching...</span>
