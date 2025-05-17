@@ -245,6 +245,31 @@ const NatalChartPageContent: React.FC = () => {
     onSuccess: (data) => {
       console.log('[NatalChartPage] calculateChartMutation onSuccess. Data received:', data);
       setChartData(data);
+      
+      // Also save the birth data for this user to prevent future 404 errors in deployment
+      if (orangeId) {
+        // Create request to save birth data so it persists for future sessions
+        fetch('/api/birth-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            birthDate,
+            birthTime: birthTime || '12:00',
+            cityId
+          })
+        })
+        .then(response => {
+          if (response.ok) {
+            console.log("Birth data saved successfully for future sessions");
+          } else {
+            console.warn("Failed to save birth data, but chart calculation was successful");
+          }
+        })
+        .catch(err => {
+          console.error("Error saving birth data:", err);
+        });
+      }
+      
       toast({ title: "Natal Chart Calculated", description: "Your chart has been successfully generated." });
     },
     onError: (error) => {
@@ -306,7 +331,7 @@ const NatalChartPageContent: React.FC = () => {
         });
       } catch (error) {
         // If birth data not found (404), we'll handle it gracefully
-        if (error.message && error.message.includes('404')) {
+        if (error && (error as any).message && (error as any).message.includes('404')) {
           console.log("Birth data not found in database, will create form for input");
           return null;
         }
@@ -334,6 +359,9 @@ const NatalChartPageContent: React.FC = () => {
 
   // Determine if we have birth data
   const hasBirthData = !!birthDataQuery.data;
+  
+  // Track if we're in deployment with missing birth data
+  const isHandlingMissingData = birthDataQuery.isSuccess && birthDataQuery.data === null;
 
   // No longer redirecting to birth-data page
   const handleAddBirthData = () => {
@@ -429,8 +457,10 @@ const NatalChartPageContent: React.FC = () => {
   }
 
   // Handle the case where birth data is missing - show birth data form directly instead of redirecting
-  if (!hasBirthData) {
+  if (!hasBirthData || isHandlingMissingData) {
     // We'll enter birth data directly on this page
+    // This handles both local environment and deployed environment cases where birth data is missing
+    console.log("Showing birth data form - hasBirthData:", hasBirthData, "isHandlingMissingData:", isHandlingMissingData);
     return (
       <div style={pageContainerStyle}>
         <Card className="bg-black border border-gray-800 text-white mb-8">
