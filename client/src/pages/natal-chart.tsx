@@ -200,24 +200,41 @@ const NatalChartPageContent: React.FC = () => {
     queryFn: apiClient.getCities,
   });
   
+  // State for debounced searching
+  const [isSearching, setIsSearching] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  
+  // Apply debouncing to search query
+  useEffect(() => {
+    if (citySearchQuery !== debouncedQuery) {
+      setIsSearching(true);
+      const timer = setTimeout(() => {
+        setDebouncedQuery(citySearchQuery);
+        setIsSearching(false);
+      }, 350); // 350ms debounce delay - good balance between responsiveness and performance
+      
+      return () => clearTimeout(timer);
+    }
+  }, [citySearchQuery, debouncedQuery]);
+  
   // Memoize filtered cities to avoid unnecessary re-filtering on every render
   const filteredCities = useMemo(() => {
     if (!allCities) {
       return []; // Return empty array if no cities loaded yet
     }
     
-    if (!citySearchQuery.trim()) {
+    if (!debouncedQuery.trim()) {
       return allCities.slice(0, 50); // Show only first 50 if no search query for better performance
     }
     
-    const lowerQuery = citySearchQuery.toLowerCase().trim();
+    const lowerQuery = debouncedQuery.toLowerCase().trim();
     return allCities
       .filter(city => 
         (city.name?.toLowerCase().includes(lowerQuery)) || 
         (city.country?.toLowerCase().includes(lowerQuery))
       )
       .slice(0, 100); // Limit to 100 results for performance
-  }, [allCities, citySearchQuery]);
+  }, [allCities, debouncedQuery]);
 
   const calculateChartMutation = useMutation<NatalChartData, Error, { birthDate: string; birthTime: string; cityId: number }>({
     mutationFn: (payload) => {
@@ -470,6 +487,12 @@ const NatalChartPageContent: React.FC = () => {
                             {isLoadingCities ? (
                               <div className="flex justify-center py-4">
                                 <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                                <span className="ml-2 text-gray-400">Loading cities...</span>
+                              </div>
+                            ) : isSearching ? (
+                              <div className="flex justify-center py-4">
+                                <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                                <span className="ml-2 text-gray-400">Searching...</span>
                               </div>
                             ) : citiesError ? (
                               <CommandItem className="text-red-500">
