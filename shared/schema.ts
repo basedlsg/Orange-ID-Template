@@ -145,10 +145,9 @@ export type InsertCity = z.infer<typeof insertCitySchema>;
 // Interpretations table for astrological explanations
 export const interpretations = sqliteTable('interpretations', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  elementType: text('element_type').notNull(), // e.g., 'sun_sign', 'moon_sign', 'ascendant_sign', 'planet_in_sign', 'planet_in_house', 'aspect'
-  key: text('key').notNull(),                 // e.g., 'Aries', 'Taurus', 'Sun_Aries', 'Moon_Leo_5H', 'Sun_Trine_Moon'
-  text: text('text_content').notNull(),        // The interpretation text
-  // Optional: Add category, subCategory, keywords for better organization/filtering later
+  elementType: text('element_type').notNull(), // e.g., 'sun_sign', 'moon_sign', 'ascendant_sign'
+  key: text('key').notNull(),                 // e.g., 'Aries', 'Taurus'
+  textContent: text('text_content').notNull(), // The interpretation text
 });
 
 export type Interpretation = typeof interpretations.$inferSelect;
