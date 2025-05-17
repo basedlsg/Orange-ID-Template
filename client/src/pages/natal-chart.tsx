@@ -467,8 +467,12 @@ const NatalChartPageContent: React.FC = () => {
                               <div className="flex justify-center py-4">
                                 <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
                               </div>
+                            ) : citiesError ? (
+                              <CommandItem className="text-red-500">
+                                Error loading cities. Please try again.
+                              </CommandItem>
                             ) : (
-                              filteredCities.map((city) => (
+                              (filteredCities || []).map((city: City) => (
                                 <CommandItem
                                   key={city.id}
                                   onSelect={() => {
@@ -631,11 +635,10 @@ const NatalChartPageContent: React.FC = () => {
                       className="w-full justify-between h-10 rounded-md border border-[#444] bg-[#1e1e1e] px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       style={{ color: selectedCityValue || cityId ? '#E0E0E0' : '#707070' }}
                     >
-                      {selectedCityValue
-                        ? cities?.find((city) => city.id.toString() === selectedCityValue)?.name + ", " + cities?.find((city) => city.id.toString() === selectedCityValue)?.country
-                        : (cityId && cities?.find(c => c.id === cityId)) 
-                          ? cities?.find(c => c.id === cityId)?.name + ", " + cities?.find(c => c.id === cityId)?.country
-                          : "Select city..."}
+                      {selectedCityValue || 
+                        (cityId && allCities 
+                          ? (allCities.find(c => c.id === cityId)?.name + ", " + allCities.find(c => c.id === cityId)?.country) 
+                          : "Select city...")}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -650,12 +653,12 @@ const NatalChartPageContent: React.FC = () => {
                         <CommandGroup>
                           {isLoadingCities && <CommandItem className="text-gray-400">Loading cities...</CommandItem>}
                           {citiesError && <CommandItem className="text-red-500">Error loading cities.</CommandItem>}
-                          {cities?.map((city) => (
+                          {(filteredCities || []).map((city) => (
                             <CommandItem
                               key={city.id}
                               value={city.id.toString()} // Keep this as string for comparison with selectedCityValue
                               onSelect={(currentValue) => { // currentValue is city.id.toString()
-                                const selected = cities.find(c => c.id.toString() === currentValue);
+                                const selected = filteredCities.find(c => c.id.toString() === currentValue);
                                 if (selected) {
                                   setSelectedCityValue(currentValue); // Store the string ID
                                   setCityId(selected.id); // Store the number ID
