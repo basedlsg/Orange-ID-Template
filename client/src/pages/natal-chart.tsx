@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useBedrockPassport } from "@bedrock_org/passport";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
+import { useDebounce } from "../hooks/useDebounce";
 import { getOrangeId } from "../App";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -192,7 +193,7 @@ const NatalChartPageContent: React.FC = () => {
   // For Combobox with improved search performance
   const [openCombobox, setOpenCombobox] = useState(false);
   const [selectedCityValue, setSelectedCityValue] = useState("");
-  const [citySearchQuery, setCitySearchQuery] = useState("");
+  const [citySearchInput, setCitySearchInput] = useState("");
   
   // Get all cities but we'll filter them client-side for better performance
   const { data: allCities, isLoading: isLoadingCities, error: citiesError } = useQuery<City[]>({
@@ -200,22 +201,21 @@ const NatalChartPageContent: React.FC = () => {
     queryFn: apiClient.getCities,
   });
   
-  // State for debounced searching
-  const [isSearching, setIsSearching] = useState(false);
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  // State for tracking if search is in progress
+  const [isCitySearching, setIsCitySearching] = useState(false);
   
-  // Apply debouncing to search query
+  // Use the custom debounce hook to debounce the search input
+  const debouncedCitySearchTerm = useDebounce(citySearchInput, 350); // 350ms delay
+  
+  // Update the searching state when input changes
   useEffect(() => {
-    if (citySearchQuery !== debouncedQuery) {
-      setIsSearching(true);
-      const timer = setTimeout(() => {
-        setDebouncedQuery(citySearchQuery);
-        setIsSearching(false);
-      }, 350); // 350ms debounce delay - good balance between responsiveness and performance
-      
-      return () => clearTimeout(timer);
+    // If search input is not empty and differs from debounced term, we're still searching
+    if (citySearchInput && citySearchInput !== debouncedCitySearchTerm) {
+      setIsCitySearching(true);
+    } else {
+      setIsCitySearching(false);
     }
-  }, [citySearchQuery, debouncedQuery]);
+  }, [citySearchInput, debouncedCitySearchTerm]);
   
   // Memoize filtered cities to avoid unnecessary re-filtering on every render
   const filteredCities = useMemo(() => {
@@ -223,18 +223,18 @@ const NatalChartPageContent: React.FC = () => {
       return []; // Return empty array if no cities loaded yet
     }
     
-    if (!debouncedQuery.trim()) {
+    if (!debouncedCitySearchTerm.trim()) {
       return allCities.slice(0, 50); // Show only first 50 if no search query for better performance
     }
     
-    const lowerQuery = debouncedQuery.toLowerCase().trim();
+    const lowerQuery = debouncedCitySearchTerm.toLowerCase().trim();
     return allCities
       .filter(city => 
         (city.name?.toLowerCase().includes(lowerQuery)) || 
         (city.country?.toLowerCase().includes(lowerQuery))
       )
       .slice(0, 100); // Limit to 100 results for performance
-  }, [allCities, debouncedQuery]);
+  }, [allCities, debouncedCitySearchTerm]);
 
   const calculateChartMutation = useMutation<NatalChartData, Error, { birthDate: string; birthTime: string; cityId: number }>({
     mutationFn: (payload) => {
