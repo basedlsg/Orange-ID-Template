@@ -161,7 +161,7 @@ export const natalChartCalculationRequestSchema = z.object({
   }),
   birthTime: z.string().regex(/^\d{2}:\d{2}$/, {
     message: "Birth time must be in HH:MM format.",
-  }),
+  }).optional().default('12:00'), // Make birth time optional, default to noon
   cityId: z.number().int().positive({
     message: "City ID must be a positive integer.",
   }),

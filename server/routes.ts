@@ -503,7 +503,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // 1. Validate request body
       const validatedBody = natalChartCalculationRequestSchema.parse(req.body);
-      const { birthDate, birthTime, cityId } = validatedBody;
+      
+      // Ensure birthTime defaults to noon if not provided
+      const { birthDate, birthTime = '12:00', cityId } = validatedBody;
+      
+      console.log(`Calculating chart with birthTime: ${birthTime || '12:00'} (default noon if empty)`);
 
       // 2. Fetch city details from database
       // Assuming 'db' is your Drizzle instance and 'cities' is your schema
