@@ -299,12 +299,22 @@ const NatalChartPageContent: React.FC = () => {
       if (!orangeId) {
         throw new Error("No authentication found. Please log in again.");
       }
-      return apiRequest(`/api/birth-data?orangeId=${orangeId}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      try {
+        return await apiRequest(`/api/birth-data?orangeId=${orangeId}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (error) {
+        // If birth data not found (404), we'll handle it gracefully
+        if (error.message && error.message.includes('404')) {
+          console.log("Birth data not found in database, will create form for input");
+          return null;
+        }
+        throw error;
+      }
     },
     enabled: !!isLoggedIn || !!orangeId,
+    retry: false, // Don't retry on 404 errors
   });
 
   // Query for natal chart
