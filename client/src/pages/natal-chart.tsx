@@ -152,10 +152,16 @@ const apiClient = {
     birthTime: string;
     cityId: number;
   }): Promise<NatalChartData> => {
-    const response = await fetch('/api/natal-chart/calculate', {
+    // Get orangeId from localStorage for authentication
+    const orangeId = localStorage.getItem('orangeId');
+    
+    const response = await fetch('/api/natal-chart/calculate' + (orangeId ? `?orangeId=${orangeId}` : ''), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        ...payload,
+        orangeId // Include in the body as well for maximum compatibility
+      }),
     });
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: 'Failed to parse error response' }));
@@ -249,13 +255,14 @@ const NatalChartPageContent: React.FC = () => {
       // Also save the birth data for this user to prevent future 404 errors in deployment
       if (orangeId) {
         // Create request to save birth data so it persists for future sessions
-        fetch('/api/birth-data', {
+        fetch('/api/birth-data?orangeId=' + encodeURIComponent(orangeId), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             birthDate,
             birthTime: birthTime || '12:00',
-            cityId
+            cityId,
+            orangeId // Include orangeId in both query params and body for robustness
           })
         })
         .then(response => {

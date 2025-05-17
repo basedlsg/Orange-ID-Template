@@ -35,6 +35,14 @@ declare module 'express-session' {
 }
 
 async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId: string } | null> {
+  // For debugging in deployment scenarios
+  console.log("Authentication request details:", {
+    path: req.path,
+    method: req.method,
+    query: req.query,
+    session: req.session
+  });
+
   // Get user info from session if available
   if (req.session && req.session.userId && req.session.orangeId) {
     console.log("Auth from session:", { userId: req.session.userId, orangeId: req.session.orangeId });
@@ -44,7 +52,8 @@ async function getUserFromRequest(req: any): Promise<{ userId: number, orangeId:
     };
   }
   
-  // Fall back to query parameters if session is not available
+  // Fall back to query parameters or request body if session is not available
+  // This is critical for deployed environments where session might not work consistently
   const orangeId = req.query.orangeId || req.body?.orangeId;
   
   if (orangeId) {
