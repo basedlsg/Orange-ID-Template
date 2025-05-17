@@ -1,0 +1,191 @@
+Error with Permissions-Policy header: Unrecognized feature: 'browsing-topics'.
+Error with Permissions-Policy header: Unrecognized feature: 'run-ad-auction'.
+Error with Permissions-Policy header: Origin trial controlled feature not enabled: 'join-ad-interest-group'.
+Error with Permissions-Policy header: Unrecognized feature: 'private-state-token-redemption'.
+Error with Permissions-Policy header: Unrecognized feature: 'private-state-token-issuance'.
+Error with Permissions-Policy header: Unrecognized feature: 'private-aggregation'.
+Error with Permissions-Policy header: Unrecognized feature: 'attribution-reporting'.
+index.es-GXBZEL5R.js?v=60497d95:11921 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 2 times.
+getGlobalCore @ index.es-GXBZEL5R.js?v=60497d95:11921
+app.family.co/_vercel/insights/script.js:1 
+            
+            
+           Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+2947-6af19bf3b9533e09.js:1 [Vercel Web Analytics] Failed to load script from /_vercel/insights/script.js. Be sure to enable Web Analytics for your project and deploy again. See https://vercel.com/docs/analytics/quickstart for more information.
+index.es-GXBZEL5R.js?v=60497d95:11921 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 3 times.
+getGlobalCore @ index.es-GXBZEL5R.js?v=60497d95:11921
+index.es-GXBZEL5R.js?v=60497d95:11921 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 4 times.
+getGlobalCore @ index.es-GXBZEL5R.js?v=60497d95:11921
+index.es-GXBZEL5R.js?v=60497d95:11921 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 5 times.
+getGlobalCore @ index.es-GXBZEL5R.js?v=60497d95:11921
+App.tsx:247 Navigation checking admin status for: x6nvdnrxtqgyjzqwztljnalxu
+App.tsx:41 Stored orangeId in localStorage: x6nvdnrxtqgyjzqwztljnalxu
+App.tsx:74 Storing user in database: Object
+index.es-GXBZEL5R.js?v=60497d95:11921 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 6 times.
+getGlobalCore @ index.es-GXBZEL5R.js?v=60497d95:11921
+api.bedrockpassport.com/api/v1/economy/currency:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+@bedrock_org_passport.js?v=60497d95:127377 ƒ toJSON() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+     …
+(anonymous) @ @bedrock_org_passport.js?v=60497d95:127377
+App.tsx:251 Navigation admin check result: Object
+as.coinbase.com/metrics:1 
+            
+            
+           Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+as.coinbase.com/metrics:1 
+            
+            
+           Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+natal-chart:1 A soft navigation has been detected: https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/natal-chart
+natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+api/birth-data?orangeId=x6nvdnrxtqgyjzqwztljnalxu:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+api/birth-data?orangeId=x6nvdnrxtqgyjzqwztljnalxu:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+api/birth-data?orangeId=x6nvdnrxtqgyjzqwztljnalxu:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+api/birth-data?orangeId=x6nvdnrxtqgyjzqwztljnalxu:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+birth-data.tsx:101 Using orangeId from user object: x6nvdnrxtqgyjzqwztljnalxu
+birth-data:1 A soft navigation has been detected: https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/birth-data
+api/birth-data?orangeId=x6nvdnrxtqgyjzqwztljnalxu:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+birth-data.tsx:121 No birth data found, showing form for initial data entry
+content.js:1 Disconnected from polkadot{.js}-0x6e10e163a1550e8d-content
+birth-data.tsx:101 Using orangeId from user object: x6nvdnrxtqgyjzqwztljnalxu
+api/birth-data?orangeId=x6nvdnrxtqgyjzqwztljnalxu:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)
+birth-data.tsx:121 No birth data found, showing form for initial data entry
+birth-data.tsx:177 Current user orangeId for birth data saving: x6nvdnrxtqgyjzqwztljnalxu
+birth-data.tsx:101 Using orangeId from user object: x6nvdnrxtqgyjzqwztljnalxu
+natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+natal-chart:1 A soft navigation has been detected: https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/natal-chart
+natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+5natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+requestRelay.js:2 WebSocket connection to 'wss://www.walletlink.org/rpc' failed: WebSocket is closed before the connection is established.
+disconnect @ requestRelay.js:2
+heartbeat @ requestRelay.js:2
+(anonymous) @ requestRelay.js:2
+setInterval
+(anonymous) @ requestRelay.js:2
+await in (anonymous)
+i.onopen @ requestRelay.js:2
+requestRelay.js:2 WebSocket connection to 'wss://www.walletlink.org/rpc' failed: WebSocket is closed before the connection is established.
+disconnect @ requestRelay.js:2
+heartbeat @ requestRelay.js:2
+(anonymous) @ requestRelay.js:2
+setInterval
+(anonymous) @ requestRelay.js:2
+await in (anonymous)
+i.onopen @ requestRelay.js:2
+2natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+natal-chart.tsx:224 [NatalChartPage] handleCalculateChart triggered.
+natal-chart.tsx:225 [NatalChartPage] Form values: {birthDate: '2005-12-31', birthTime: '00:59', cityId: 72867}
+natal-chart.tsx:239 [NatalChartPage] Form validation passed. Calling mutation with time: 00:59
+natal-chart.tsx:203 [NatalChartPage] calculateChartMutation.mutateFn (apiClient.calculateNatalChart) called with payload: {birthDate: '2005-12-31', birthTime: '00:59', cityId: 72867}
+natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+natal-chart.tsx:207 [NatalChartPage] calculateChartMutation onSuccess. Data received: {planets: Array(0), houses: Array(0), aspects: Array(0)}
+natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+8ChartSummary.tsx:239 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at ChartSummary (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/src/components/ChartSummary.tsx:90:25)
+    at div
+    at div
+    at div
+    at _c9 (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/src/components/ui/card.tsx:114:12)
+    at div
+    at _c (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at NatalChartPageContent (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/src/pages/natal-chart.tsx:170:32)
+    at QueryClientProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-JK7KBM7U.js?v=60497d95:2872:3)
+    at NatalChartPage
+    at ProtectedRoute (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/src/App.tsx?v=_rXjOlM2e4ZXvrksEX9S9:163:14)
+    at component
+    at Route (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=60497d95:191:16)
+    at Switch (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=60497d95:247:17)
+    at Router
+    at Le (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:70650:42)
+    at Web3ContextProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:112616:30)
+    at ConnectKitProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:116102:29)
+    at QueryClientProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-JK7KBM7U.js?v=60497d95:2872:3)
+    at Hydrate (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:43130:11)
+    at WagmiProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:43154:11)
+    at Qu (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:127025:16)
+    at kd (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:127222:16)
+    at OrangeAuthProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/src/components/OrangeAuthProvider.tsx:20:3)
+    at QueryClientProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-JK7KBM7U.js?v=60497d95:2872:3)
+    at App
+printWarning @ react_jsx-dev-runtime.js?v=60497d95:64
+error @ react_jsx-dev-runtime.js?v=60497d95:48
+validateFragmentProps @ react_jsx-dev-runtime.js?v=60497d95:796
+jsxWithValidation @ react_jsx-dev-runtime.js?v=60497d95:874
+(anonymous) @ ChartSummary.tsx:239
+ChartSummary @ ChartSummary.tsx:238
+renderWithHooks @ chunk-Z2GUPSCO.js?v=60497d95:11548
+mountIndeterminateComponent @ chunk-Z2GUPSCO.js?v=60497d95:14926
+beginWork @ chunk-Z2GUPSCO.js?v=60497d95:15914
+beginWork$1 @ chunk-Z2GUPSCO.js?v=60497d95:19753
+performUnitOfWork @ chunk-Z2GUPSCO.js?v=60497d95:19198
+workLoopSync @ chunk-Z2GUPSCO.js?v=60497d95:19137
+renderRootSync @ chunk-Z2GUPSCO.js?v=60497d95:19116
+performConcurrentWorkOnRoot @ chunk-Z2GUPSCO.js?v=60497d95:18678
+workLoop @ chunk-Z2GUPSCO.js?v=60497d95:197
+flushWork @ chunk-Z2GUPSCO.js?v=60497d95:176
+performWorkUntilDeadline @ chunk-Z2GUPSCO.js?v=60497d95:384
+natal-chart.tsx:254 Natal chart using orangeId: x6nvdnrxtqgyjzqwztljnalxu
+8ChartSummary.tsx:239 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at ChartSummary (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/src/components/ChartSummary.tsx:90:25)
+    at div
+    at div
+    at div
+    at _c9 (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/src/components/ui/card.tsx:114:12)
+    at div
+    at _c (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at NatalChartPageContent (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/src/pages/natal-chart.tsx:170:32)
+    at QueryClientProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-JK7KBM7U.js?v=60497d95:2872:3)
+    at NatalChartPage
+    at ProtectedRoute (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/src/App.tsx?v=_rXjOlM2e4ZXvrksEX9S9:163:14)
+    at component
+    at Route (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=60497d95:191:16)
+    at Switch (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=60497d95:247:17)
+    at Router
+    at Le (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:70650:42)
+    at Web3ContextProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:112616:30)
+    at ConnectKitProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:116102:29)
+    at QueryClientProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-JK7KBM7U.js?v=60497d95:2872:3)
+    at Hydrate (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:43130:11)
+    at WagmiProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:43154:11)
+    at Qu (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:127025:16)
+    at kd (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@bedrock_org_passport.js?v=60497d95:127222:16)
+    at OrangeAuthProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/src/components/OrangeAuthProvider.tsx:20:3)
+    at QueryClientProvider (https://100f0b46-2609-44e1-b3c6-5198dbbd8d1d-00-ohmudmgafnvn.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-JK7KBM7U.js?v=60497d95:2872:3)
+    at App

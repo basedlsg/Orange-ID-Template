@@ -422,8 +422,7 @@ function AdminRoute() {
   );
 }
 
-// Import our new pages
-import BirthDataPage from "@/pages/birth-data";
+// Import our pages
 import NatalChartPage from "@/pages/natal-chart";
 import SpiritualDiscussionsPage from "@/pages/spiritual-discussions";
 
@@ -433,7 +432,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/auth/callback" component={AuthCallback} />
       <Route path="/admin" component={AdminRoute} />
-      <Route path="/birth-data" component={() => <ProtectedRoute component={BirthDataPage} />} />
+      {/* Birth data page removed - now handled directly in the natal chart page */}
       <Route path="/natal-chart" component={() => <ProtectedRoute component={NatalChartPage} />} />
       <Route path="/spiritual-discussions" component={() => <ProtectedRoute component={SpiritualDiscussionsPage} />} />
       <Route component={NotFound} />

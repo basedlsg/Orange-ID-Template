@@ -286,9 +286,15 @@ const NatalChartPageContent: React.FC = () => {
   // Determine if we have birth data
   const hasBirthData = !!birthDataQuery.data;
 
-  // Handling missing birth data
+  // No longer redirecting to birth-data page
   const handleAddBirthData = () => {
-    setLocation("/birth-data");
+    // Now handled directly on this page
+    console.log("Birth data will be handled directly on the natal chart page");
+    // No redirection, just focus on the form
+    const birthDateInput = document.getElementById('birth-date-input');
+    if (birthDateInput) {
+      birthDateInput.focus();
+    }
   };
 
   const pageContainerStyle: React.CSSProperties = {
@@ -373,28 +379,114 @@ const NatalChartPageContent: React.FC = () => {
     );
   }
 
-  // Show missing birth data state
+  // Handle the case where birth data is missing - show birth data form directly instead of redirecting
   if (!hasBirthData) {
+    // We'll enter birth data directly on this page
     return (
       <div style={pageContainerStyle}>
-        <Card className="bg-black border border-gray-800 text-white">
+        <Card className="bg-black border border-gray-800 text-white mb-8">
           <CardHeader>
-            <CardTitle className="text-[#F37920]">Your Natal Chart</CardTitle>
-            <CardDescription>Birth information needed for your natal chart</CardDescription>
+            <CardTitle className="text-[#F37920] text-2xl">Enter Birth Details for Your Natal Chart</CardTitle>
+            <CardDescription>Your birth details are required to generate your personalized natal chart</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center py-8">
-            <CalendarClock className="h-20 w-20 text-[#F37920] mb-4 opacity-70" />
-            <h3 className="text-xl font-medium mb-2">Birth Information Required</h3>
-            <p className="text-center text-gray-400 mb-6">
-              To generate your natal chart and provide personalized astrological insights,
-              we need your birth date, time, and location.
-            </p>
-            <Button 
-              onClick={handleAddBirthData}
-              className="bg-[#F37920] hover:bg-[#D86A10]"
-            >
-              Enter Birth Information
-            </Button>
+          <CardContent>
+            <form onSubmit={handleCalculateChart}>
+              <div className="space-y-5">
+                <div>
+                  <label htmlFor="birth-date-input" className="block text-sm font-medium text-gray-300 mb-1">Birth Date</label>
+                  <input
+                    id="birth-date-input"
+                    type="date"
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(e.target.value)}
+                    className="w-full p-2 bg-gray-800 border border-gray-700 rounded-md text-white"
+                    required
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Enter your birth date in YYYY-MM-DD format</p>
+                </div>
+                
+                <div>
+                  <label htmlFor="birth-time-input" className="block text-sm font-medium text-gray-300 mb-1">
+                    Birth Time (optional)
+                    <span className="text-gray-400 text-xs ml-2">Leave empty for noon (12:00 PM) chart</span>
+                  </label>
+                  <input
+                    id="birth-time-input"
+                    type="time"
+                    value={birthTime}
+                    onChange={(e) => setBirthTime(e.target.value)}
+                    className="w-full p-2 bg-gray-800 border border-gray-700 rounded-md text-white"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">Enter your birth time in 24-hour format for more accurate readings</p>
+                </div>
+                
+                <div>
+                  <label htmlFor="city-selector" className="block text-sm font-medium text-gray-300 mb-1">Birth City</label>
+                  <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={openCombobox}
+                        className="w-full justify-between bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+                        onClick={() => setOpenCombobox(!openCombobox)}
+                      >
+                        {selectedCityValue || "Select city..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0 bg-gray-800 border-gray-700">
+                      <Command className="bg-gray-800">
+                        <CommandInput placeholder="Search cities..." className="text-white" />
+                        <CommandEmpty>No city found.</CommandEmpty>
+                        <CommandList>
+                          <CommandGroup className="max-h-60 overflow-y-auto">
+                            {cities?.map((city) => (
+                              <CommandItem
+                                key={city.id}
+                                onSelect={() => {
+                                  setCityId(city.id);
+                                  setSelectedCityValue(`${city.name}, ${city.country}`);
+                                  setOpenCombobox(false);
+                                }}
+                                className={cn(
+                                  "flex items-center text-white",
+                                  cityId === city.id ? "bg-gray-700" : ""
+                                )}
+                              >
+                                <CheckIcon
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    cityId === city.id ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {city.name}, {city.country}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <p className="text-xs text-gray-400 mt-1">Select your birth city for accurate planetary positions</p>
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full mt-6 bg-[#F37920] hover:bg-[#D86A10] text-white"
+                  disabled={calculateChartMutation.isPending}
+                >
+                  {calculateChartMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Calculating...
+                    </>
+                  ) : (
+                    "Calculate Natal Chart"
+                  )}
+                </Button>
+              </div>
+            </form>
           </CardContent>
         </Card>
       </div>
