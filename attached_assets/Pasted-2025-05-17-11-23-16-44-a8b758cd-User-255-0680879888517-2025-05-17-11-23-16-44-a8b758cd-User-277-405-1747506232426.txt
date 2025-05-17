@@ -1,0 +1,148 @@
+2025-05-17 11:23:16.44
+a8b758cd
+User
+255.0680879888517,
+2025-05-17 11:23:16.44
+a8b758cd
+User
+277.4055312492433,
+2025-05-17 11:23:16.44
+a8b758cd
+User
+299.7801980229491,
+2025-05-17 11:23:16.44
+a8b758cd
+User
+326.5658883827799,
+2025-05-17 11:23:16.44
+a8b758cd
+User
+2.6989353408532044
+2025-05-17 11:23:16.44
+a8b758cd
+User
+],
+2025-05-17 11:23:16.44
+a8b758cd
+User
+"julianDay": 2451910.040972222
+2025-05-17 11:23:16.44
+a8b758cd
+User
+}
+2025-05-17 11:23:16.44
+a8b758cd
+User
+[API Calculate] Chart calculation successful with data structure: sun, moon, mercury, venus, mars, jupiter, saturn, uranus, neptune, pluto, ascendant, midheaven, housesCusps, julianDay
+2025-05-17 11:23:16.44
+a8b758cd
+User
+6:23:16 PM [express] POST /api/natal-chart/calculate 200 in 9ms :: {"sun":{"longitude":280.165477829…
+2025-05-17 11:23:16.52
+a8b758cd
+User
+Authentication request details: {
+2025-05-17 11:23:16.52
+a8b758cd
+User
+path: '/api/birth-data',
+2025-05-17 11:23:16.52
+a8b758cd
+User
+method: 'POST',
+2025-05-17 11:23:16.52
+a8b758cd
+User
+query: { orangeId: 'rq5f1t1ysvh51esaaqlqtdh3l' },
+2025-05-17 11:23:16.52
+a8b758cd
+User
+session: { userId: undefined, orangeId: undefined }
+2025-05-17 11:23:16.52
+a8b758cd
+User
+}
+2025-05-17 11:23:16.52
+a8b758cd
+User
+Authentication request details: {
+2025-05-17 11:23:16.52
+a8b758cd
+User
+path: '/api/birth-data',
+2025-05-17 11:23:16.52
+a8b758cd
+User
+method: 'POST',
+2025-05-17 11:23:16.52
+a8b758cd
+User
+query: { orangeId: 'rq5f1t1ysvh51esaaqlqtdh3l' },
+2025-05-17 11:23:16.52
+a8b758cd
+User
+session: Session {
+2025-05-17 11:23:16.52
+a8b758cd
+User
+cookie: {
+2025-05-17 11:23:16.52
+a8b758cd
+User
+path: '/',
+2025-05-17 11:23:16.52
+a8b758cd
+User
+_expires: 2025-06-16T18:23:16.522Z,
+2025-05-17 11:23:16.52
+a8b758cd
+User
+originalMaxAge: 2592000000,
+2025-05-17 11:23:16.52
+a8b758cd
+User
+httpOnly: true,
+2025-05-17 11:23:16.52
+a8b758cd
+User
+secure: true
+2025-05-17 11:23:16.52
+a8b758cd
+User
+}
+2025-05-17 11:23:16.52
+a8b758cd
+User
+}
+2025-05-17 11:23:16.52
+a8b758cd
+User
+}
+2025-05-17 11:23:16.52
+a8b758cd
+User
+Auth from query/body orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+2025-05-17 11:23:16.52
+a8b758cd
+User
+Found user by orangeId: 3
+2025-05-17 11:23:16.52
+a8b758cd
+User
+User authenticated successfully: { userId: 3, orangeId: 'rq5f1t1ysvh51esaaqlqtdh3l' }
+2025-05-17 11:23:16.52
+a8b758cd
+User
+Creating/updating birth data for user 3 (from orangeId: rq5f1t1ysvh51esaaqlqtdh3l)
+2025-05-17 11:23:16.52
+a8b758cd
+User
+Creating/updating birth data for user 3
+2025-05-17 11:23:16.53
+a8b758cd
+User
+6:23:16 PM [express] POST /api/birth-data 200 in 4ms :: {"id":3,"userId":3,"birthDate":"2000-12-31",…
+
+Wrap
+
+Colors

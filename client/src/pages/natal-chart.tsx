@@ -196,6 +196,9 @@ const NatalChartPageContent: React.FC = () => {
   const [birthTime, setBirthTime] = useState<string>('');
   const [cityId, setCityId] = useState<number | null>(null);
   const [chartData, setChartData] = useState<NatalChartData | null>(null);
+  
+  // State to track if chart is still loading after calculation (for interpretations)
+  const [isLoadingChart, setIsLoadingChart] = useState(false);
 
   // For Combobox with improved search performance
   const [openCombobox, setOpenCombobox] = useState(false);
@@ -251,6 +254,15 @@ const NatalChartPageContent: React.FC = () => {
     onSuccess: (data) => {
       console.log('[NatalChartPage] calculateChartMutation onSuccess. Data received:', data);
       setChartData(data);
+      
+      // Show loading state while interpretations are being fetched
+      setIsLoadingChart(true);
+      
+      // Add a delay to give time for interpretations to load
+      // This helps with deployments where there might be network latency
+      setTimeout(() => {
+        setIsLoadingChart(false);
+      }, 2500); // 2.5 seconds should be enough for interpretations to load
       
       // Also save the birth data for this user to prevent future 404 errors in deployment
       if (orangeId) {
@@ -445,7 +457,8 @@ const NatalChartPageContent: React.FC = () => {
   const [isButtonHovered, setIsButtonHovered] = useState(false);
 
   // Show loading state
-  if (birthDataQuery.isLoading || natalChartQuery.isLoading || isLoadingCities) {
+  // Show loading when initial data is loading OR when chart calculations/interpretations are in progress
+  if (birthDataQuery.isLoading || natalChartQuery.isLoading || isLoadingCities || calculateChartMutation.isPending || isLoadingChart) {
     return (
       <div style={pageContainerStyle}>
         <Card className="bg-black border border-gray-800">

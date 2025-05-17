@@ -1,0 +1,97 @@
+[mount.start]: Bedrock Passport
+index-CFP12c-q.js:4888 [INIT]: Token found
+index-CFP12c-q.js:4888 [mount.finish]: Bedrock Passport Provider
+index-CFP12c-q.js:4888 [mount.start]: Bedrock Passport
+index.es-BLvDxJEx.js:38 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 2 times.
+getGlobalCore @ index.es-BLvDxJEx.js:38
+Error with Permissions-Policy header: Unrecognized feature: 'browsing-topics'.
+Error with Permissions-Policy header: Unrecognized feature: 'run-ad-auction'.
+Error with Permissions-Policy header: Origin trial controlled feature not enabled: 'join-ad-interest-group'.
+Error with Permissions-Policy header: Unrecognized feature: 'private-state-token-redemption'.
+Error with Permissions-Policy header: Unrecognized feature: 'private-state-token-issuance'.
+Error with Permissions-Policy header: Unrecognized feature: 'private-aggregation'.
+Error with Permissions-Policy header: Unrecognized feature: 'attribution-reporting'.
+index-CFP12c-q.js:4955 Navigation checking admin status for: rq5f1t1ysvh51esaaqlqtdh3l
+index-CFP12c-q.js:4955 Stored orangeId in localStorage: rq5f1t1ysvh51esaaqlqtdh3l
+index-CFP12c-q.js:4955 Storing user in database: Object
+index.es-BLvDxJEx.js:38 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 3 times.
+getGlobalCore @ index.es-BLvDxJEx.js:38
+api.bedrockpassport.com/api/v1/economy/currency:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+index-CFP12c-q.js:4888 ƒ (){return{message:this.message,name:this.name,description:this.description,number:this.number,fileName:this.fileName,lineNumber:this.lineNumber,columnNumber:this.columnNumber,stack:this.stack,config:…
+(anonymous) @ index-CFP12c-q.js:4888
+script.js:1 
+            
+            
+           Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+2947-6af19bf3b9533e09.js:1 [Vercel Web Analytics] Failed to load script from /_vercel/insights/script.js. Be sure to enable Web Analytics for your project and deploy again. See https://vercel.com/docs/analytics/quickstart for more information.
+index-CFP12c-q.js:4955 Navigation admin check result: Object
+index-CFP12c-q.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+natal-chart:1 A soft navigation has been detected: https://malkuthorange.replit.app/natal-chart
+7index-CFP12c-q.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+index-CFP12c-q.js:4942 [NatalChartPage] handleCalculateChart triggered.
+index-CFP12c-q.js:4942 [NatalChartPage] Form values: Object
+index-CFP12c-q.js:4942 [NatalChartPage] Form validation passed. Calling mutation with time: 12:59
+index-CFP12c-q.js:4942 [NatalChartPage] calculateChartMutation.mutateFn (apiClient.calculateNatalChart) called with payload: Object
+index-CFP12c-q.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+index-CFP12c-q.js:4942 [NatalChartPage] calculateChartMutation onSuccess. Data received: Object
+index-CFP12c-q.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+index-CFP12c-q.js:4939 CHART_SUMMARY_DEBUG - Raw chartData: Object
+index-CFP12c-q.js:4939 CHART_SUMMARY_DEBUG - Specific properties: Object
+index-CFP12c-q.js:4942 Birth data saved successfully for future sessions
+api/interpretations?elementType=planet_in_sign&key=Mercury_Capricorn:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+api/interpretations?elementType=planet_in_sign&key=Saturn_Taurus:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+api/interpretations?elementType=planet_in_sign&key=Uranus_Aquarius:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+api/interpretations?elementType=planet_in_sign&key=Jupiter_Gemini:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+api/interpretations?elementType=planet_in_sign&key=Mars_Scorpio:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+as.coinbase.com/metrics:1 
+            
+            
+           Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+as.coinbase.com/metrics:1 
+            
+            
+           Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+api/interpretations?elementType=planet_in_sign&key=Saturn_Taurus:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+api/interpretations?elementType=planet_in_sign&key=Mars_Scorpio:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+api/interpretations?elementType=planet_in_sign&key=Jupiter_Gemini:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+api/interpretations?elementType=planet_in_sign&key=Mercury_Capricorn:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+api/interpretations?elementType=planet_in_sign&key=Uranus_Aquarius:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+index-CFP12c-q.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+index-CFP12c-q.js:4939 CHART_SUMMARY_DEBUG - Raw chartData: Object
+index-CFP12c-q.js:4939 CHART_SUMMARY_DEBUG - Specific properties: Object
+index-CFP12c-q.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+index-CFP12c-q.js:4939 CHART_SUMMARY_DEBUG - Raw chartData: Object
+index-CFP12c-q.js:4939 CHART_SUMMARY_DEBUG - Specific properties: Object
