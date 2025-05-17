@@ -1,0 +1,151 @@
+2025-05-17 11:36:35.48
+0e0461b2
+User
+254.70682856717545,
+2025-05-17 11:36:35.48
+0e0461b2
+User
+277.1312897413641,
+2025-05-17 11:36:35.48
+0e0461b2
+User
+299.55378119661464,
+2025-05-17 11:36:35.48
+0e0461b2
+User
+326.3351873536757,
+2025-05-17 11:36:35.48
+0e0461b2
+User
+2.366565180066451
+2025-05-17 11:36:35.48
+0e0461b2
+User
+],
+2025-05-17 11:36:35.48
+0e0461b2
+User
+"julianDay": 2452640.040972222
+2025-05-17 11:36:35.48
+0e0461b2
+User
+}
+2025-05-17 11:36:35.48
+0e0461b2
+User
+[API Calculate] Chart calculation successful with data structure: sun, moon, mercury, venus, mars, jupiter, saturn, uranus, neptune, pluto, ascendant, midheaven, housesCusps, julianDay
+2025-05-17 11:36:35.48
+0e0461b2
+User
+6:36:35 PM [express] POST /api/natal-chart/calculate 200 in 3ms :: {"sun":{"longitude":279.668752155…
+2025-05-17 11:36:35.56
+0e0461b2
+User
+Authentication request details: {
+2025-05-17 11:36:35.56
+0e0461b2
+User
+path: '/api/birth-data',
+2025-05-17 11:36:35.56
+0e0461b2
+User
+method: 'POST',
+2025-05-17 11:36:35.56
+0e0461b2
+User
+query: { orangeId: 'rq5f1t1ysvh51esaaqlqtdh3l' },
+2025-05-17 11:36:35.56
+0e0461b2
+User
+session: { userId: undefined, orangeId: undefined }
+2025-05-17 11:36:35.56
+0e0461b2
+User
+}
+2025-05-17 11:36:35.56
+0e0461b2
+User
+Authentication request details: {
+2025-05-17 11:36:35.56
+0e0461b2
+User
+path: '/api/birth-data',
+2025-05-17 11:36:35.56
+0e0461b2
+User
+method: 'POST',
+2025-05-17 11:36:35.56
+0e0461b2
+User
+query: { orangeId: 'rq5f1t1ysvh51esaaqlqtdh3l' },
+2025-05-17 11:36:35.56
+0e0461b2
+User
+session: Session {
+2025-05-17 11:36:35.56
+0e0461b2
+User
+cookie: {
+2025-05-17 11:36:35.56
+0e0461b2
+User
+path: '/',
+2025-05-17 11:36:35.56
+0e0461b2
+User
+_expires: 2025-06-16T18:36:35.561Z,
+2025-05-17 11:36:35.56
+0e0461b2
+User
+originalMaxAge: 2592000000,
+2025-05-17 11:36:35.56
+0e0461b2
+User
+httpOnly: true,
+2025-05-17 11:36:35.56
+0e0461b2
+User
+secure: true
+2025-05-17 11:36:35.56
+0e0461b2
+User
+}
+2025-05-17 11:36:35.56
+0e0461b2
+User
+}
+2025-05-17 11:36:35.56
+0e0461b2
+User
+}
+2025-05-17 11:36:35.56
+0e0461b2
+User
+Auth from query/body orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+2025-05-17 11:36:35.56
+0e0461b2
+User
+Found user by orangeId: 3
+2025-05-17 11:36:35.56
+0e0461b2
+User
+User authenticated successfully: { userId: 3, orangeId: 'rq5f1t1ysvh51esaaqlqtdh3l' }
+2025-05-17 11:36:35.56
+0e0461b2
+User
+Creating/updating birth data for user 3 (from orangeId: rq5f1t1ysvh51esaaqlqtdh3l)
+2025-05-17 11:36:35.56
+0e0461b2
+User
+Creating/updating birth data for user 3
+2025-05-17 11:36:35.56
+0e0461b2
+User
+6:36:35 PM [express] POST /api/birth-data 200 in 3ms :: {"id":3,"userId":3,"birthDate":"2002-12-31",…
+
+Wrap
+
+Colors
+GEMINI_API_KEY
+••••••••
+Enable "Accessible Terminal" in Workspace Settings to use a screen reader with the shell.

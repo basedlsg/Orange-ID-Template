@@ -199,6 +199,10 @@ const NatalChartPageContent: React.FC = () => {
   
   // State to track if chart is still loading after calculation (for interpretations)
   const [isLoadingChart, setIsLoadingChart] = useState(false);
+  
+  // Track loading phases for better user feedback
+  const [loadingPhase, setLoadingPhase] = useState<'idle' | 'calculating' | 'interpretations' | 'finalizing'>('idle');
+  const [loadingProgress, setLoadingProgress] = useState(0);
 
   // For Combobox with improved search performance
   const [openCombobox, setOpenCombobox] = useState(false);
@@ -249,7 +253,24 @@ const NatalChartPageContent: React.FC = () => {
   const calculateChartMutation = useMutation<NatalChartData, Error, { birthDate: string; birthTime: string; cityId: number }>({
     mutationFn: (payload) => {
       console.log('[NatalChartPage] calculateChartMutation.mutateFn (apiClient.calculateNatalChart) called with payload:', payload);
-      return apiClient.calculateNatalChart(payload);
+      
+      // Start the loading phases
+      setLoadingPhase('calculating');
+      setLoadingProgress(10);
+      
+      // Simulate loading progress during calculation
+      const progressInterval = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev < 40) return prev + 5;
+          return prev;
+        });
+      }, 2000);
+      
+      // Return the API call
+      return apiClient.calculateNatalChart(payload)
+        .finally(() => {
+          clearInterval(progressInterval);
+        });
     },
     onSuccess: (data) => {
       console.log('[NatalChartPage] calculateChartMutation onSuccess. Data received:', data);
@@ -257,12 +278,31 @@ const NatalChartPageContent: React.FC = () => {
       
       // Show loading state while interpretations are being fetched
       setIsLoadingChart(true);
+      setLoadingPhase('interpretations');
+      setLoadingProgress(50);
       
-      // Add a delay to give time for interpretations to load
-      // This helps with deployments where there might be network latency
+      // Simulate continued progress for interpretations loading
+      const interpretationsInterval = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev < 90) return prev + 5;
+          return prev;
+        });
+      }, 3000);
+      
+      // Add a much longer delay to ensure all interpretations load in production
+      // Based on logs, this might take up to 60 seconds in deployed environments
       setTimeout(() => {
-        setIsLoadingChart(false);
-      }, 2500); // 2.5 seconds should be enough for interpretations to load
+        clearInterval(interpretationsInterval);
+        setLoadingPhase('finalizing');
+        setLoadingProgress(95);
+        
+        // Final phase - complete loading and show the chart
+        setTimeout(() => {
+          setIsLoadingChart(false);
+          setLoadingProgress(100);
+          setLoadingPhase('idle');
+        }, 2000);
+      }, 30000); // 30 seconds to accommodate deployment load time
       
       // Also save the birth data for this user to prevent future 404 errors in deployment
       if (orangeId) {
@@ -465,24 +505,41 @@ const NatalChartPageContent: React.FC = () => {
           <CardHeader>
             <CardTitle className="text-[#F37920]">Your Natal Chart</CardTitle>
             <CardDescription>
-              {calculateChartMutation.isPending 
+              {loadingPhase === 'calculating' 
                 ? "Calculating your astrological chart..." 
-                : isLoadingChart 
+                : loadingPhase === 'interpretations'
                   ? "Loading interpretations and insights..." 
-                  : "Loading your astrological data..."}
+                  : loadingPhase === 'finalizing'
+                    ? "Finalizing your personalized chart..."
+                    : "Loading your astrological data..."}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-48 flex flex-col items-center justify-center space-y-4">
+            <div className="h-48 flex flex-col items-center justify-center space-y-6">
               <Loader2 className="h-8 w-8 text-[#F37920] animate-spin" />
-              {calculateChartMutation.isPending && (
+              
+              {/* Progress bar */}
+              <div className="w-full max-w-md bg-gray-800 rounded-full h-2.5">
+                <div 
+                  className="bg-[#F37920] h-2.5 rounded-full transition-all duration-500 ease-out" 
+                  style={{ width: `${loadingProgress}%` }}
+                ></div>
+              </div>
+              
+              {/* Loading phase messages */}
+              {loadingPhase === 'calculating' && (
                 <p className="text-sm text-gray-400 max-w-md text-center">
-                  This may take a moment as we accurately calculate the positions of celestial bodies at your time of birth.
+                  This may take a moment as we accurately calculate the positions of celestial bodies at your time of birth. (Phase 1/3)
                 </p>
               )}
-              {isLoadingChart && (
+              {loadingPhase === 'interpretations' && (
                 <p className="text-sm text-gray-400 max-w-md text-center">
-                  Retrieving personalized interpretations for your unique astrological profile...
+                  Retrieving personalized interpretations for your unique astrological profile... This may take up to a minute to complete. (Phase 2/3)
+                </p>
+              )}
+              {loadingPhase === 'finalizing' && (
+                <p className="text-sm text-gray-400 max-w-md text-center">
+                  Almost there! Putting the final touches on your personalized natal chart... (Phase 3/3)
                 </p>
               )}
             </div>
