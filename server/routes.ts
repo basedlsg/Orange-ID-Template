@@ -553,6 +553,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[API Calculate] Converted local time to UTC: ${utcDateTime.toISOString()}`);
 
       // 4. Call calculateNatalChart
+      console.log(`[API Calculate] Calling calculateNatalChart with UTC date: ${utcDateTime.toISOString()}, latitude: ${city.latitude}, longitude: ${city.longitude}`);
+      
       const chartData = calculateNatalChart({
         utcDateTime,
         latitude: city.latitude,
@@ -560,10 +562,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!chartData) {
+        console.error(`[API Calculate] Chart calculation returned null or undefined`);
         // This case might indicate an internal error in calculation if it's not an exception
         return res.status(500).json({ error: "Failed to calculate natal chart. The calculation returned no data." });
       }
 
+      console.log(`[API Calculate] Chart calculation successful with data structure: ${Object.keys(chartData).join(', ')}`);
+      
       // 5. Send successful response
       return res.status(200).json(chartData);
 
