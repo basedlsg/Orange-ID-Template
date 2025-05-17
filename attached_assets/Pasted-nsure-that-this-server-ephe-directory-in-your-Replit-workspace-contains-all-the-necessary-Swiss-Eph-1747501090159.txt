@@ -1,0 +1,74 @@
+nsure that this server/ephe/ directory in your Replit workspace contains all the necessary Swiss Ephemeris data files (e.g., sepl_18.se1, semo_18.se1, fixstars.cat, and any others required by the specific calculations you're doing). If you only downloaded them locally, you need to upload them to this path in your Replit project.
+
+Action (Code Verification in server/astrologyEngine.ts - Replit):
+
+The line const ephePath = path.join(process.cwd(), 'server', 'ephe'); combined with swisseph.swe_set_ephe_path(ephePath); is likely correct IF:
+
+process.cwd() in Replit points to your project's root directory (e.g., /home/runner/Orange-ID-Template/).
+
+And your ephe files are indeed at /home/runner/Orange-ID-Template/server/ephe/.
+
+Add a Temporary Log to Verify Path (Replit):
+
+At the top of server/astrologyEngine.ts, right after swisseph.swe_set_ephe_path(ephePath);, add:
+
+console.log(`[astrologyEngine] Ephemeris path set to: ${ephePath}`);
+// Optional: Add a check if a key ephemeris file exists at that path using fs, though swisseph might have its own way to report this.
+// For example:
+// import fs from 'fs';
+// if (fs.existsSync(path.join(ephePath, 'sepl_18.se1'))) {
+//   console.log('[astrologyEngine] Main planet ephemeris file found.');
+// } else {
+//   console.error('[astrologyEngine] CRITICAL: Main planet ephemeris file NOT FOUND at expected path.');
+// }
+Use code with caution.
+TypeScript
+Run the server in Replit. This log will appear once when the module is loaded. Check if the path looks correct for your Replit file structure and if the optional fs.existsSync check passes.
+
+Step 2: Harden utcDateTime Construction in POST /api/natal-chart/calculate (Replit)
+
+File: server/routes.ts (or wherever the route handler is).
+
+Action: Modify the section where localDateTime and utcDateTime are created.
+
+// Inside POST /api/natal-chart/calculate handler, after fetching city details:
+// const city = await db.query.cities.findFirst({ where: eq(cities.id, cityId) });
+
+if (!city) {
+  console.error(`[API Calculate] City not found for cityId: ${cityId}`);
+  return res.status(404).json({ error: "City not found." });
+}
+
+// Ensure latitude, longitude, and timezoneStr are valid before proceeding
+if (typeof city.latitude !== 'number' || typeof city.longitude !== 'number' || !city.timezoneStr) {
+  console.error(`[API Calculate] Invalid location data for cityId ${cityId}:`, city);
+  return res.status(500).json({ error: "Invalid location data for the selected city." });
+}
+
+const { latitude, longitude, timezoneStr } = city;
+const birthTimeOrDefault = birthTime || '12:00:00'; // Default to noon if birthTime is empty
+
+console.log(`[API Calculate] Attempting to parse date: ${birthDate}, time: ${birthTimeOrDefault}, with timezone: ${timezoneStr}`);
+
+const localDateTime = DateTime.fromISO(`${birthDate}T${birthTimeOrDefault}`, {
+  zone: timezoneStr, // Ensure timezoneStr is a valid IANA zone string from your DB
+});
+
+if (!localDateTime.isValid) {
+  console.error(`[API Calculate] Luxon failed to parse date/time/zone. Reason: ${localDateTime.invalidReason}, Explanation: ${localDateTime.invalidExplanation}`);
+  // Fallback to UTC if zone parsing fails, though this might not be ideal.
+  // Or return an error. For now, let's log and see if this happens.
+  // A more robust solution would be to validate timezoneStr earlier or have a safe default.
+  // const fallbackDateTime = DateTime.fromISO(`${birthDate}T${birthTimeOrDefault}`, { zone: 'utc' });
+  // if (!fallbackDateTime.isValid) {
+  return res.status(400).json({ error: `Invalid date, time, or timezone format provided. Details: ${localDateTime.invalidReason}` });
+  // }
+  // console.warn(`[API Calculate] Using UTC as fallback due to timezone parsing issue for ${timezoneStr}`);
+  // utcDateTime = fallbackDateTime.toJSDate();
+}
+
+const utcDateTime = localDateTime.toUTC().toJSDate();
+console.log(`[API Calculate] Calculated UTC DateTime: ${utcDateTime.toISOString()}`);
+
+// Now pass this validated utcDateTime, latitude, longitude to astrologyEngine.calculateNatalChart
+// ...

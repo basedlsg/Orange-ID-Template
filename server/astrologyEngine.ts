@@ -1,4 +1,27 @@
 
+import path from 'path';
+import fs from 'fs';
+
+// Set up the ephemeris path
+const ephePath = path.join(process.cwd(), 'server', 'ephe');
+
+// Check if ephemeris directory exists
+if (!fs.existsSync(ephePath)) {
+  console.error(`[astrologyEngine] CRITICAL: Ephemeris directory not found at: ${ephePath}`);
+} else {
+  console.log(`[astrologyEngine] Ephemeris path set to: ${ephePath}`);
+  
+  // Check for essential ephemeris files
+  const requiredFiles = ['sepl_18.se1', 'semo_18.se1'];
+  const missingFiles = requiredFiles.filter(file => !fs.existsSync(path.join(ephePath, file)));
+  
+  if (missingFiles.length > 0) {
+    console.error(`[astrologyEngine] CRITICAL: Missing required ephemeris files: ${missingFiles.join(', ')}`);
+  } else {
+    console.log('[astrologyEngine] All required ephemeris files found.');
+  }
+}
+
 export function calculateNatalChart({ utcDateTime, latitude, longitude }) {
   try {
     // Log the inputs received by the function with more detailed format
