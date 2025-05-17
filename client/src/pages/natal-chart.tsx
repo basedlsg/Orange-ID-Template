@@ -163,18 +163,19 @@ const apiClient = {
     }
     return response.json();
   },
-  getInterpretation: async (elementType: string, key: string): Promise<{ text_content: string } | null> => {
+  getInterpretation: async (elementType: string, key: string): Promise<{ textContent: string } | null> => {
     if (!elementType || !key) return null; 
     const response = await fetch(`/api/interpretations?elementType=${encodeURIComponent(elementType)}&key=${encodeURIComponent(key)}`);
     if (response.status === 404) {
-      return { text_content: 'Interpretation not found.' }; 
+      return { textContent: 'Interpretation not found.' }; 
     }
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Failed to fetch interpretation: ${response.status} ${errorText}`);
     }
-    const data = await response.json(); 
-    return { text_content: data.text_content };
+    const data = await response.json();
+    // Map the response property to match what the component expects 
+    return { textContent: data.textContent || data.text_content };
   },
 };
 
