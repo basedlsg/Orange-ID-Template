@@ -1,0 +1,78 @@
+Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+index-DqbeON2f.js:4888 [mount.start]: Bedrock Passport
+index-DqbeON2f.js:4888 [INIT]: Token found
+index-DqbeON2f.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+index-DqbeON2f.js:4888 [mount.finish]: Bedrock Passport Provider
+index-DqbeON2f.js:4888 [mount.start]: Bedrock Passport
+api/birth-data?orangeId=rq5f1t1ysvh51esaaqlqtdh3l:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+2index-DqbeON2f.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+index-DqbeON2f.js:4955 Navigation checking admin status for: rq5f1t1ysvh51esaaqlqtdh3l
+index-DqbeON2f.js:4955 Stored orangeId in localStorage: rq5f1t1ysvh51esaaqlqtdh3l
+index-DqbeON2f.js:4955 Storing user in database: Object
+api.bedrockpassport.com/api/v1/economy/currency:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+index-DqbeON2f.js:4888 ƒ (){return{message:this.message,name:this.name,description:this.description,number:this.number,fileName:this.fileName,lineNumber:this.lineNumber,columnNumber:this.columnNumber,stack:this.stack,config:…
+(anonymous) @ index-DqbeON2f.js:4888
+index-DqbeON2f.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+index.es-DpkVHLO9.js:38 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 2 times.
+getGlobalCore @ index.es-DpkVHLO9.js:38
+index.es-DpkVHLO9.js:38 WalletConnect Core is already initialized. This is probably a mistake and can lead to unexpected behavior. Init() was called 3 times.
+getGlobalCore @ index.es-DpkVHLO9.js:38
+index-DqbeON2f.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+index-DqbeON2f.js:4955 Navigation admin check result: Object
+index-DqbeON2f.js:200 MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 heartbeat_pulse listeners added. Use emitter.setMaxListeners() to increase limit
+    at uz (https://malkuthorange.replit.app/assets/index-DqbeON2f.js:200:26726)
+    at Nt.addListener (https://malkuthorange.replit.app/assets/index-DqbeON2f.js:200:27012)
+    at jl.on (https://malkuthorange.replit.app/assets/index.es-DpkVHLO9.js:25:2207)
+    at O2.registerEventListeners (https://malkuthorange.replit.app/assets/index.es-DpkVHLO9.js:38:44078)
+    at O2.init (https://malkuthorange.replit.app/assets/index.es-DpkVHLO9.js:38:42409)
+    at T2.init (https://malkuthorange.replit.app/assets/index.es-DpkVHLO9.js:38:55139)
+    at cd.initialize (https://malkuthorange.replit.app/assets/index.es-DpkVHLO9.js:38:100386)
+    at async cd.start (https://malkuthorange.replit.app/assets/index.es-DpkVHLO9.js:38:99912)
+    at async dd.initialize (https://malkuthorange.replit.app/assets/index.es-DpkVHLO9.js:38:162540)
+    at async dd.init (https://malkuthorange.replit.app/assets/index.es-DpkVHLO9.js:38:162376)
+Dfe @ index-DqbeON2f.js:200
+Error with Permissions-Policy header: Unrecognized feature: 'browsing-topics'.
+Error with Permissions-Policy header: Unrecognized feature: 'run-ad-auction'.
+Error with Permissions-Policy header: Origin trial controlled feature not enabled: 'join-ad-interest-group'.
+Error with Permissions-Policy header: Unrecognized feature: 'private-state-token-redemption'.
+Error with Permissions-Policy header: Unrecognized feature: 'private-state-token-issuance'.
+Error with Permissions-Policy header: Unrecognized feature: 'private-aggregation'.
+Error with Permissions-Policy header: Unrecognized feature: 'attribution-reporting'.
+api/birth-data?orangeId=rq5f1t1ysvh51esaaqlqtdh3l:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+app.family.co/_vercel/insights/script.js:1 
+            
+            
+           Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+2947-6af19bf3b9533e09.js:1 [Vercel Web Analytics] Failed to load script from /_vercel/insights/script.js. Be sure to enable Web Analytics for your project and deploy again. See https://vercel.com/docs/analytics/quickstart for more information.
+index-DqbeON2f.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+as.coinbase.com/metrics:1 
+            
+            
+           Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+index-DqbeON2f.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+api/birth-data?orangeId=rq5f1t1ysvh51esaaqlqtdh3l:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+2index-DqbeON2f.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+api/birth-data?orangeId=rq5f1t1ysvh51esaaqlqtdh3l:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+43index-DqbeON2f.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+index-DqbeON2f.js:4942 [NatalChartPage] handleCalculateChart triggered.
+index-DqbeON2f.js:4942 [NatalChartPage] Form values: Object
+index-DqbeON2f.js:4942 [NatalChartPage] Form validation passed. Calling mutation with time: 13:00
+index-DqbeON2f.js:4942 [NatalChartPage] calculateChartMutation.mutateFn (apiClient.calculateNatalChart) called with payload: Object
+index-DqbeON2f.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+index-DqbeON2f.js:4942 [NatalChartPage] calculateChartMutation onSuccess. Data received: Object
+2index-DqbeON2f.js:4942 Natal chart using orangeId: rq5f1t1ysvh51esaaqlqtdh3l
