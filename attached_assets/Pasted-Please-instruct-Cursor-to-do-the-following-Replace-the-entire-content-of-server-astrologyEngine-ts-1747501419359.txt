@@ -1,3 +1,4 @@
+Please instruct Cursor to do the following: "Replace the entire content of server/astrologyEngine.ts with the following code. This version includes detailed logging to help diagnose why chart data might be empty."
 
 // server/astrologyEngine.ts
 import swisseph from 'swisseph';
