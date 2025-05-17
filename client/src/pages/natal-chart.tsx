@@ -583,14 +583,24 @@ const NatalChartPageContent: React.FC = () => {
         </Card>
 
         {calculateChartMutation.isError && (
-          <Card className="bg-red-900/30 border border-red-700 text-white mb-8">
-            <CardHeader>
-              <CardTitle className="text-red-400">Calculation Error</CardTitle>
-              </CardHeader>
-              <CardContent>
-              <p>{calculateChartMutation.error.message}</p>
-              </CardContent>
-            </Card>
+          <Card className="bg-red-900/30 border border-red-700 text-white mb-8 mt-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-red-400 flex items-center">
+                <AlertCircle className="mr-2 h-5 w-5" />
+                Calculation Error
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm">{calculateChartMutation.error?.message || "An unexpected error occurred while calculating your chart. Please try again."}</p>
+              <Button 
+                onClick={() => calculateChartMutation.reset()}
+                variant="outline" 
+                className="mt-3 text-xs border-red-700 hover:bg-red-900/50"
+              >
+                Dismiss
+              </Button>
+            </CardContent>
+          </Card>
         )}
 
         {/* Display newly calculated chart data */}
@@ -598,6 +608,13 @@ const NatalChartPageContent: React.FC = () => {
           <Card className="bg-black border border-gray-800 text-white mt-8">
             <CardHeader>
                 <CardTitle className="text-[#F37920] text-2xl">Newly Calculated Natal Chart</CardTitle>
+                {(!birthTime || birthTime === '12:00') && (
+                  <CardDescription className="mt-2 text-amber-400 flex items-center">
+                    <AlertCircle className="mr-2 h-4 w-4" />
+                    Time of birth was not provided; chart calculated for 12:00 PM. 
+                    Moon, Ascendant, and House positions may not be accurate.
+                  </CardDescription>
+                )}
               </CardHeader>
               <CardContent>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}> {/* Responsive flex direction removed for simplicity */}
