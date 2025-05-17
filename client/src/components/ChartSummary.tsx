@@ -4,7 +4,7 @@ import { NatalChartData, PlanetDetail, LongitudeDetail } from '../../../shared/t
 
 interface ChartSummaryProps {
   chartData: NatalChartData | null;
-  getInterpretationFn: (elementType: string, key: string) => Promise<{ text_content: string } | null>;
+  getInterpretationFn: (elementType: string, key: string) => Promise<{ textContent: string } | null>;
 }
 
 const InterpretationDisplay: React.FC<{ elementType: string; elementKey: string | undefined; getInterpretationFn: ChartSummaryProps['getInterpretationFn']; label: string }> = ({ elementType, elementKey, getInterpretationFn, label }) => {
@@ -13,7 +13,7 @@ const InterpretationDisplay: React.FC<{ elementType: string; elementKey: string 
     isLoading,
     isError,
     error,
-  } = useQuery< { text_content: string } | null, Error >({
+  } = useQuery< { textContent: string } | null, Error >({
     queryKey: ['interpretation', elementType, elementKey],
     queryFn: () => elementKey ? getInterpretationFn(elementType, elementKey) : Promise.resolve(null),
     enabled: !!elementKey, // Only run query if key is available
@@ -26,7 +26,7 @@ const InterpretationDisplay: React.FC<{ elementType: string; elementKey: string 
   return (
     <div style={{ marginBottom: '15px' }}>
       <p style={{ fontWeight: 'bold', color: '#b0b0b0', fontSize: '1em' }}>{label} ({elementKey}):</p>
-      <p style={{ color: '#cccccc', fontSize: '0.85em', paddingLeft: '10px', borderLeft: '2px solid #444', marginBottom: '15px' }}>{interpretation?.text_content || 'No interpretation text available.'}</p>
+      <p style={{ color: '#cccccc', fontSize: '0.85em', paddingLeft: '10px', borderLeft: '2px solid #444', marginBottom: '15px' }}>{interpretation?.textContent || 'No interpretation text available.'}</p>
     </div>
   );
 };
