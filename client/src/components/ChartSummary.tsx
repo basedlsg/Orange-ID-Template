@@ -42,6 +42,14 @@ const ChartSummary: React.FC<ChartSummaryProps> = ({ chartData, getInterpretatio
   if (!chartData) {
     return <p style={{ color: '#E0E0E0' }}>No chart data available.</p>;
   }
+  
+  // Debug log to see what's in chartData
+  console.log('ChartSummary received chartData:', {
+    ascendant: chartData.ascendant,
+    midheaven: chartData.midheaven,
+    hasAscendant: !!chartData.ascendant,
+    hasMidheaven: !!chartData.midheaven
+  });
 
   const formatDegrees = (value: number | undefined): string => {
     return value !== undefined ? value.toFixed(2) + '°' : 'N/A';
