@@ -507,7 +507,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Ensure birthTime defaults to noon if not provided
       const { birthDate, birthTime = '12:00', cityId } = validatedBody;
       
-      console.log(`Calculating chart with birthTime: ${birthTime || '12:00'} (default noon if empty)`);
+      console.log(`[API Calculate] Processing chart calculation with birthDate: ${birthDate}, birthTime: ${birthTime || '12:00'}, cityId: ${cityId}`);
 
       // 2. Fetch city details from database
       // Assuming 'db' is your Drizzle instance and 'cities' is your schema
@@ -522,24 +522,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .limit(1);
 
       if (!cityResult || cityResult.length === 0) {
+        console.error(`[API Calculate] City not found for cityId: ${cityId}`);
         return res.status(404).json({ error: "City not found." });
       }
       const city = cityResult[0];
-      if (!city.latitude || !city.longitude) {
-        return res.status(400).json({ error: `City '${city.name}' is missing latitude or longitude data.` });
+      console.log(`[API Calculate] Found city: ${city.name}, latitude: ${city.latitude}, longitude: ${city.longitude}, timezone: ${city.timezoneStr}`);
+      
+      if (typeof city.latitude !== 'number' || typeof city.longitude !== 'number') {
+        console.error(`[API Calculate] City '${city.name}' has invalid coordinates: latitude=${city.latitude}, longitude=${city.longitude}`);
+        return res.status(400).json({ error: `City '${city.name}' is missing or has invalid latitude or longitude data.` });
       }
       if (!city.timezoneStr) {
+        console.error(`[API Calculate] City '${city.name}' is missing timezone data`);
         return res.status(400).json({ error: `City '${city.name}' is missing timezone data.` });
       }
 
       // 3. Convert local birthDate and birthTime to UTC Date object
       const localDateTimeStr = `${birthDate}T${birthTime}`;
+      console.log(`[API Calculate] Attempting to parse local datetime: ${localDateTimeStr} with timezone: ${city.timezoneStr}`);
+      
       const luxonDateTime = DateTime.fromISO(localDateTimeStr, { zone: city.timezoneStr });
 
       if (!luxonDateTime.isValid) {
+        console.error(`[API Calculate] Invalid datetime: ${localDateTimeStr} with timezone: ${city.timezoneStr}. Reason: ${luxonDateTime.invalidReason}, Explanation: ${luxonDateTime.invalidExplanation}`);
         return res.status(400).json({ error: `Invalid date or time for the specified timezone. Reason: ${luxonDateTime.invalidReason} | ${luxonDateTime.invalidExplanation}` });
       }
-      const utcDateTime = luxonDateTime.toJSDate();
+      
+      // Convert to UTC
+      const utcDateTime = luxonDateTime.toUTC().toJSDate();
+      console.log(`[API Calculate] Converted local time to UTC: ${utcDateTime.toISOString()}`);
 
       // 4. Call calculateNatalChart
       const chartData = calculateNatalChart({

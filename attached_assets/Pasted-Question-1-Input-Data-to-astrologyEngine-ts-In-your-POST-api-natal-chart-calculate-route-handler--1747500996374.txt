@@ -1,0 +1,69 @@
+Question 1: Input Data to astrologyEngine.ts
+
+In your POST /api/natal-chart/calculate route handler (likely in server/routes.ts):
+
+a. How are you fetching latitude, longitude, and timezone_str using the cityId? Can you show the Drizzle query or database call for this?
+
+b. How are you constructing the utcDateTime object that gets passed to astrologyEngine.ts? Specifically, show the line where you use luxon (e.g., DateTime.fromISO(...).toJSDate()).
+
+Hypothesis: A common issue is if birthDate or birthTime strings are not in the exact format fromISO or other Luxon parsers expect, or if timezone_str is invalid/unrecognized by Luxon, leading to an invalid Date object.
+
+Question 2: Julian Day Calculation in astrologyEngine.ts
+
+Inside server/astrologyEngine.ts, in the calculateNatalChart function:
+
+a. What does the const luxonDateTime = DateTime.fromJSDate(utcDateTime); line produce if utcDateTime itself is invalid (e.g., if the conversion in the API route failed)?
+
+b. After you calculate year, month, day, hour, what are typical values for these right before swisseph.swe_julday() is called? (You might need to temporarily add a single log here or step through with a debugger if your environment supports it).
+
+Hypothesis: If any of these date/time components are NaN or incorrect, swe_julday will return an invalid Julian Day, causing all subsequent swisseph calculations to fail.
+
+Question 3: swisseph Function Calls and Error Handling
+
+Inside _calculatePlanetPosition in astrologyEngine.ts:
+
+You have: const calcResult = swisseph.swe_calc_ut(julDay, planetId, flags) as any;
+
+And error check: if (calcResult.rflag < 0 || typeof calcResult.longitude !== 'number' || isNaN(calcResult.longitude)) { ... }
+
+a. If this error condition is met, what exactly gets logged by console.error(errorMessage);? The specific errorMessage or rflag value would be very telling.
+
+Hypothesis: It's possible this error condition is being met for all planets, causing them all to return null. The server log showing {"planets":[], ...} suggests chartData is initialized, but the planet properties might be getting set to null inside your loop.
+
+Inside calculateNatalChart where you call swe_houses:
+
+You have: const housesResult = swisseph.swe_houses(julianDay, latitude, longitude, 'P') as any;
+
+And error check: if (housesResult.error || !housesResult.house_cusps || typeof housesResult.ascendant !== 'number' || typeof housesResult.mc !== 'number') { ... }
+
+b. If this error condition is met, what is logged by console.error('Error calculating houses:', housesResult.error || 'Unknown error');?
+
+Hypothesis: Similar to planets, if house calculation fails, ascendant, midheaven, and housesCusps would be null/undefined.
+
+Question 4: Ephemeris Path in Replit Environment
+
+You mentioned Astrology engine initialized and ephemeris path set to: /Users/carlos/Orange-ID-Template/server/ephe. This is a local macOS path.
+
+In server/astrologyEngine.ts, the line is const ephePath = path.join(process.cwd(), 'server', 'ephe');
+
+a. When running in Replit, what does process.cwd() resolve to? (You can log this once at the top of server/index.ts).
+
+b. Does the server/ephe directory (relative to that process.cwd()) actually exist in your Replit file structure and contain the .se1 files? swisseph will fail silently (return errors/NaNs) if it can't find its ephemeris files.
+
+Hypothesis: This is a very common issue when moving from local to a different environment. The path resolution might be incorrect for Replit's file system structure. A safer relative path might be path.join(__dirname, 'ephe') if astrologyEngine.ts is in the server directory and ephe is a subdirectory of server. Or, if index.ts is at the root and runs astrologyEngine.ts, then path.join(process.cwd(), 'server', 'ephe') might be okay if process.cwd() is the project root in Replit.
+
+Request for Specific Code Snippets (If you can provide them):
+
+The section of your POST /api/natal-chart/calculate route handler in server/routes.ts that:
+
+Fetches city details (lat, long, timezone_str).
+
+Converts the input birthDate and birthTime to utcDateTime using Luxon.
+
+Calls astrologyEngine.calculateNatalChart.
+
+The first few lines of server/astrologyEngine.ts where ephePath is set.
+
+The _calculatePlanetPosition function from server/astrologyEngine.ts.
+
+The part of calculateNatalChart in server/astrologyEngine.ts where swe_houses is called and its results are processed.
