@@ -1,0 +1,57 @@
+In server/astrologyEngine.ts, inside the calculateNatalChart function, there's an issue with how the results from swisseph.swe_houses are being processed.
+
+The logs show that housesResult contains a valid house array (for house cusps), a numeric ascendant, and a numeric mc. However, the if condition to check for errors is incorrectly triggering, leading to ascendant, midheaven, and housesCusps being set to null in the final chartData.
+
+Please modify the section that processes housesResult to correctly use the properties available in the housesResult object, specifically using housesResult.house for the cusps.
+
+Change this block:
+
+console.log('[astrologyEngine] calculateNatalChart: housesResult from swe_houses:', JSON.stringify(housesResult, null, 2));
+
+    if (housesResult.error || !housesResult.house_cusps || typeof housesResult.ascendant !== 'number' || typeof housesResult.mc !== 'number') {
+      console.error('[astrologyEngine] calculateNatalChart: Error calculating houses:', housesResult.error || 'Unknown houses error or data missing from housesResult');
+      chartData.ascendant = null;
+      chartData.midheaven = null;
+      chartData.housesCusps = null;
+    } else {
+      chartData.ascendant = _getLongitudeDetails(housesResult.ascendant);
+      chartData.midheaven = _getLongitudeDetails(housesResult.mc);
+      chartData.housesCusps = housesResult.house_cusps.slice(0, 12); // Problematic line
+      console.log('[astrologyEngine] Ascendant calculated:', JSON.stringify(chartData.ascendant, null, 2));
+      console.log('[astrologyEngine] Midheaven calculated:', JSON.stringify(chartData.midheaven, null, 2));
+      console.log('[astrologyEngine] House Cusps (1-12) calculated:', JSON.stringify(chartData.housesCusps, null, 2));
+    }
+Use code with caution.
+TypeScript
+To this corrected version:
+
+console.log('[astrologyEngine] calculateNatalChart: housesResult from swe_houses:', JSON.stringify(housesResult, null, 2));
+
+    // Corrected condition: Check for the actual 'house' array property and ensure asc/mc are numbers.
+    // The `swisseph` Node.js wrapper often returns the cusps in a property named 'house' or 'cusps'.
+    // Based on your logs, it appears to be 'house'.
+    if (housesResult.error || !housesResult.house || !Array.isArray(housesResult.house) || housesResult.house.length < 12 || typeof housesResult.ascendant !== 'number' || typeof housesResult.mc !== 'number') {
+      console.error('[astrologyEngine] calculateNatalChart: Error processing housesResult or essential data missing. housesResult.error:', housesResult.error, 'housesResult.house:', housesResult.house);
+      chartData.ascendant = null;
+      chartData.midheaven = null;
+      chartData.housesCusps = null;
+    } else {
+      chartData.ascendant = _getLongitudeDetails(housesResult.ascendant);
+      chartData.midheaven = _getLongitudeDetails(housesResult.mc);
+      // Use housesResult.house (which is 1-indexed for cusps 1-12 typically in swisseph output)
+      // The 'house' array often contains 13 values where house[0] is cusp 1, house[1] is cusp 2, ..., house[11] is cusp 12.
+      // Or sometimes it's 0-indexed and has 12 values.
+      // Given the log shows 12 values in housesResult.house, we can likely use it directly or slice if it has an extra.
+      // Assuming housesResult.house contains 12 cusps directly:
+      chartData.housesCusps = housesResult.house.slice(0, 12); 
+      console.log('[astrologyEngine] Ascendant calculated:', JSON.stringify(chartData.ascendant, null, 2));
+      console.log('[astrologyEngine] Midheaven calculated:', JSON.stringify(chartData.midheaven, null, 2));
+      console.log('[astrologyEngine] House Cusps (1-12) calculated:', JSON.stringify(chartData.housesCusps, null, 2));
+    }
+Use code with caution.
+TypeScript
+The key changes are:
+
+The if condition now checks !housesResult.house || !Array.isArray(housesResult.house) || housesResult.house.length < 12.
+
+The else block now uses housesResult.house.slice(0, 12) to get the cusps.

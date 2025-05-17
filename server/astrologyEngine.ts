@@ -168,13 +168,18 @@ export function calculateNatalChart(details: NatalChartDetails): ChartData {
     const housesResult = swisseph.swe_houses(julianDay, latitude, longitude, 'P') as any;
     console.log('[astrologyEngine] calculateNatalChart: housesResult from swe_houses:', JSON.stringify(housesResult, null, 2));
 
-    if (housesResult.error || !housesResult.house_cusps || typeof housesResult.ascendant !== 'number' || typeof housesResult.mc !== 'number') {
-      console.error('[astrologyEngine] calculateNatalChart: Error calculating houses:', housesResult.error || 'Unknown houses error or data missing.');
+    // Corrected condition: Check for the actual 'house' array property and ensure asc/mc are numbers
+    if (housesResult.error || !housesResult.house || !Array.isArray(housesResult.house) || housesResult.house.length < 12 || typeof housesResult.ascendant !== 'number' || typeof housesResult.mc !== 'number') {
+      console.error('[astrologyEngine] calculateNatalChart: Error processing housesResult or essential data missing. housesResult.error:', housesResult.error, 'housesResult.house:', housesResult.house);
       // chartData.ascendant, midheaven, housesCusps remain null from emptyShell
     } else {
       chartData.ascendant = _getLongitudeDetails(housesResult.ascendant);
       chartData.midheaven = _getLongitudeDetails(housesResult.mc);
-      chartData.housesCusps = housesResult.house_cusps.slice(0, 12);
+      // Use housesResult.house which contains the house cusps array
+      chartData.housesCusps = housesResult.house.slice(0, 12);
+      console.log('[astrologyEngine] Ascendant calculated:', JSON.stringify(chartData.ascendant, null, 2));
+      console.log('[astrologyEngine] Midheaven calculated:', JSON.stringify(chartData.midheaven, null, 2));
+      console.log('[astrologyEngine] House Cusps (1-12) calculated:', JSON.stringify(chartData.housesCusps, null, 2));
     }
   } catch (error: any) {
     console.error('[astrologyEngine] calculateNatalChart: UNEXPECTED ERROR during calculation:', error.message, error.stack);
