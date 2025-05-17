@@ -464,11 +464,27 @@ const NatalChartPageContent: React.FC = () => {
         <Card className="bg-black border border-gray-800">
           <CardHeader>
             <CardTitle className="text-[#F37920]">Your Natal Chart</CardTitle>
-            <CardDescription>Loading your astrological data...</CardDescription>
+            <CardDescription>
+              {calculateChartMutation.isPending 
+                ? "Calculating your astrological chart..." 
+                : isLoadingChart 
+                  ? "Loading interpretations and insights..." 
+                  : "Loading your astrological data..."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-48 flex items-center justify-center">
+            <div className="h-48 flex flex-col items-center justify-center space-y-4">
               <Loader2 className="h-8 w-8 text-[#F37920] animate-spin" />
+              {calculateChartMutation.isPending && (
+                <p className="text-sm text-gray-400 max-w-md text-center">
+                  This may take a moment as we accurately calculate the positions of celestial bodies at your time of birth.
+                </p>
+              )}
+              {isLoadingChart && (
+                <p className="text-sm text-gray-400 max-w-md text-center">
+                  Retrieving personalized interpretations for your unique astrological profile...
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
