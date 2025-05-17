@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useBedrockPassport } from "@bedrock_org/passport";
@@ -189,14 +189,31 @@ const NatalChartPageContent: React.FC = () => {
   const [cityId, setCityId] = useState<number | null>(null);
   const [chartData, setChartData] = useState<NatalChartData | null>(null);
 
-  // For Combobox
+  // For Combobox with improved search performance
   const [openCombobox, setOpenCombobox] = useState(false);
   const [selectedCityValue, setSelectedCityValue] = useState("");
-
-  const { data: cities, isLoading: isLoadingCities, error: citiesError } = useQuery<City[]>({
+  const [citySearchQuery, setCitySearchQuery] = useState("");
+  
+  // Get all cities but we'll filter them client-side for better performance
+  const { data: allCities, isLoading: isLoadingCities, error: citiesError } = useQuery<City[]>({
     queryKey: ['cities'],
     queryFn: apiClient.getCities,
   });
+  
+  // Memoize filtered cities to avoid unnecessary re-filtering on every render
+  const filteredCities = useMemo(() => {
+    if (!allCities || !citySearchQuery.trim()) {
+      return allCities?.slice(0, 50) || []; // Show only first 50 if no search query
+    }
+    
+    const lowerQuery = citySearchQuery.toLowerCase();
+    return allCities
+      .filter(city => 
+        city.name.toLowerCase().includes(lowerQuery) || 
+        city.country.toLowerCase().includes(lowerQuery)
+      )
+      .slice(0, 100); // Limit to 100 results for performance
+  }, [allCities, citySearchQuery]);
 
   const calculateChartMutation = useMutation<NatalChartData, Error, { birthDate: string; birthTime: string; cityId: number }>({
     mutationFn: (payload) => {
@@ -437,32 +454,43 @@ const NatalChartPageContent: React.FC = () => {
                     </PopoverTrigger>
                     <PopoverContent className="w-full p-0 bg-gray-800 border-gray-700">
                       <Command className="bg-gray-800">
-                        <CommandInput placeholder="Search cities..." className="text-white" />
+                        <CommandInput 
+                          placeholder="Search cities..." 
+                          className="text-white" 
+                          value={citySearchQuery}
+                          onValueChange={setCitySearchQuery}
+                        />
                         <CommandEmpty>No city found.</CommandEmpty>
                         <CommandList>
                           <CommandGroup className="max-h-60 overflow-y-auto">
-                            {cities?.map((city) => (
-                              <CommandItem
-                                key={city.id}
-                                onSelect={() => {
-                                  setCityId(city.id);
-                                  setSelectedCityValue(`${city.name}, ${city.country}`);
-                                  setOpenCombobox(false);
-                                }}
-                                className={cn(
-                                  "flex items-center text-white",
-                                  cityId === city.id ? "bg-gray-700" : ""
-                                )}
-                              >
-                                <CheckIcon
+                            {isLoadingCities ? (
+                              <div className="flex justify-center py-4">
+                                <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                              </div>
+                            ) : (
+                              filteredCities.map((city) => (
+                                <CommandItem
+                                  key={city.id}
+                                  onSelect={() => {
+                                    setCityId(city.id);
+                                    setSelectedCityValue(`${city.name}, ${city.country}`);
+                                    setOpenCombobox(false);
+                                  }}
                                   className={cn(
-                                    "mr-2 h-4 w-4",
-                                    cityId === city.id ? "opacity-100" : "opacity-0"
+                                    "flex items-center text-white",
+                                    cityId === city.id ? "bg-gray-700" : ""
                                   )}
-                                />
-                                {city.name}, {city.country}
-                              </CommandItem>
-                            ))}
+                                >
+                                  <CheckIcon
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      cityId === city.id ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {city.name}, {city.country}
+                                </CommandItem>
+                              ))
+                            )}
                           </CommandGroup>
                         </CommandList>
                       </Command>
