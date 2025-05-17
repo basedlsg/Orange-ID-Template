@@ -559,17 +559,15 @@ const NatalChartPageContent: React.FC = () => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <button
+              <Button
                 type="submit"
-                onMouseEnter={() => setIsButtonHovered(true)}
-                onMouseLeave={() => setIsButtonHovered(false)}
-                style={{ ...buttonStyle, ...(isButtonHovered ? buttonHoverStyle : {}) }}
+                className="w-full mt-4 bg-[#E67E22] hover:bg-[#D35400] text-white"
                 disabled={calculateChartMutation.isPending || !birthDate || !birthTime || !cityId}
               >
                 {calculateChartMutation.isPending ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Calculating...</>
                 ) : ( "Calculate Chart" )}
-              </button>
+              </Button>
             </form>
           </CardContent>
         </Card>
