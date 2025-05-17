@@ -1,0 +1,28 @@
+"In client/src/pages/natal-chart.tsx:
+1. In the `calculateChartMutation`'s `onSuccess` callback, MODERNIZE the log to fully expand the received data:
+   `console.log('[NatalChartPage] onSuccess - Raw data from API:', data);`
+   `console.log('[NatalChartPage] onSuccess - Stringified raw data:', JSON.stringify(data, null, 2));` // For structure
+2. Immediately AFTER `setChartData(data);` in `onSuccess`, add:
+   `console.log('[NatalChartPage] onSuccess - chartData state should be updated now. Verifying its content immediately after set... (Note: this might show the old value if accessed too soon before re-render, but useful for mutation function scope check)');`
+3. Just before the main `return (...)` statement of the `NatalChartPageContent` component, ensure this log is present and expand the object:
+   `console.log('[NatalChartPage] Rendering. Current chartToDisplayOnWheel is:', chartToDisplayOnWheel);`
+   `console.log('[NatalChartPage] Rendering. Stringified chartToDisplayOnWheel:', JSON.stringify(chartToDisplayOnWheel, null, 2));`
+   (Ensure `chartToDisplayOnWheel` is correctly derived from the `chartData` state and/or `existingChartDetailsForWheelAndSummary`).
+
+In `client/src/components/NatalChartWheel.tsx`:
+1. At the very beginning of the `NatalChartWheel` component function, add:
+   `console.log('[NatalChartWheel] PROPS Received chartData:', props.chartData);`
+   `console.log('[NatalChartWheel] PROPS Stringified chartData:', JSON.stringify(props.chartData, null, 2));`
+2. Before any drawing logic that accesses nested properties (e.g., `props.chartData.sun.longitude`), add checks and log if critical data is missing:
+   `if (!props.chartData || !props.chartData.sun) { console.error('[NatalChartWheel] Sun data missing in chartData prop!'); }`
+   (Repeat for Moon, Ascendant, housesCusps, etc., the key things it needs to draw).
+
+In `client/src/components/ChartSummary.tsx`:
+1. At the very beginning of the `ChartSummary` component function, add:
+   `console.log('[ChartSummary] PROPS Received chartData:', props.chartData);`
+   `console.log('[ChartSummary] PROPS Stringified chartData:', JSON.stringify(props.chartData, null, 2));`
+2. Before accessing nested properties to display them (e.g., `chartData.sun.sign`), add checks and log if data is missing:
+   `if (!props.chartData || !props.chartData.sun) { console.error('[ChartSummary] Sun data missing in chartData prop! Displaying N/A.'); } else { console.log('[ChartSummary] Sun data available:', props.chartData.sun); }`
+   (Repeat for other key summary points).
+
+After these logs are added, I will run the application, attempt to calculate a chart, and check the BROWSER's developer console to trace the data flow and structure."
