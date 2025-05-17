@@ -202,15 +202,19 @@ const NatalChartPageContent: React.FC = () => {
   
   // Memoize filtered cities to avoid unnecessary re-filtering on every render
   const filteredCities = useMemo(() => {
-    if (!allCities || !citySearchQuery.trim()) {
-      return allCities?.slice(0, 50) || []; // Show only first 50 if no search query
+    if (!allCities) {
+      return []; // Return empty array if no cities loaded yet
     }
     
-    const lowerQuery = citySearchQuery.toLowerCase();
+    if (!citySearchQuery.trim()) {
+      return allCities.slice(0, 50); // Show only first 50 if no search query for better performance
+    }
+    
+    const lowerQuery = citySearchQuery.toLowerCase().trim();
     return allCities
       .filter(city => 
-        city.name.toLowerCase().includes(lowerQuery) || 
-        city.country.toLowerCase().includes(lowerQuery)
+        (city.name?.toLowerCase().includes(lowerQuery)) || 
+        (city.country?.toLowerCase().includes(lowerQuery))
       )
       .slice(0, 100); // Limit to 100 results for performance
   }, [allCities, citySearchQuery]);
