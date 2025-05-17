@@ -1,0 +1,151 @@
+2025-05-17 11:26:29.12
+a8b758cd
+User
+}
+2025-05-17 11:26:29.12
+a8b758cd
+User
+Auth from query/body orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+2025-05-17 11:26:29.12
+a8b758cd
+User
+Found user by orangeId: 3
+2025-05-17 11:26:29.12
+a8b758cd
+User
+User authenticated successfully: { userId: 3, orangeId: 'rq5f1t1ysvh51esaaqlqtdh3l' }
+2025-05-17 11:26:29.12
+a8b758cd
+User
+Fetching birth data for user 3 (from orangeId: rq5f1t1ysvh51esaaqlqtdh3l)
+2025-05-17 11:26:29.12
+a8b758cd
+User
+6:26:29 PM [express] GET /api/birth-data 200 in 1ms :: {"id":3,"userId":3,"birthDate":"2000-12-31","…
+2025-05-17 11:26:29.12
+a8b758cd
+User
+6:26:29 PM [express] GET /api/interpretations 304 in 0ms :: {"id":12,"elementType":"sun_sign","key":…
+2025-05-17 11:26:29.12
+a8b758cd
+User
+Authentication request details: {
+2025-05-17 11:26:29.12
+a8b758cd
+User
+path: '/api/natal-chart',
+2025-05-17 11:26:29.12
+a8b758cd
+User
+method: 'GET',
+2025-05-17 11:26:29.12
+a8b758cd
+User
+query: { orangeId: 'rq5f1t1ysvh51esaaqlqtdh3l' },
+2025-05-17 11:26:29.12
+a8b758cd
+User
+session: { userId: undefined, orangeId: undefined }
+2025-05-17 11:26:29.12
+a8b758cd
+User
+}
+2025-05-17 11:26:29.12
+a8b758cd
+User
+Authentication request details: {
+2025-05-17 11:26:29.12
+a8b758cd
+User
+path: '/api/natal-chart',
+2025-05-17 11:26:29.12
+a8b758cd
+User
+method: 'GET',
+2025-05-17 11:26:29.12
+a8b758cd
+User
+query: { orangeId: 'rq5f1t1ysvh51esaaqlqtdh3l' },
+2025-05-17 11:26:29.12
+a8b758cd
+User
+session: Session {
+2025-05-17 11:26:29.12
+a8b758cd
+User
+cookie: {
+2025-05-17 11:26:29.12
+a8b758cd
+User
+path: '/',
+2025-05-17 11:26:29.12
+a8b758cd
+User
+_expires: 2025-06-16T18:26:29.129Z,
+2025-05-17 11:26:29.12
+a8b758cd
+User
+originalMaxAge: 2592000000,
+2025-05-17 11:26:29.12
+a8b758cd
+User
+httpOnly: true,
+2025-05-17 11:26:29.12
+a8b758cd
+User
+secure: true
+2025-05-17 11:26:29.12
+a8b758cd
+User
+}
+2025-05-17 11:26:29.12
+a8b758cd
+User
+}
+2025-05-17 11:26:29.12
+a8b758cd
+User
+}
+2025-05-17 11:26:29.12
+a8b758cd
+User
+Auth from query/body orangeId: rq5f1t1ysvh51esaaqlqtdh3l
+2025-05-17 11:26:29.12
+a8b758cd
+User
+Found user by orangeId: 3
+2025-05-17 11:26:29.12
+a8b758cd
+User
+User authenticated successfully: { userId: 3, orangeId: 'rq5f1t1ysvh51esaaqlqtdh3l' }
+2025-05-17 11:26:29.12
+a8b758cd
+User
+Fetching natal chart for user 3
+2025-05-17 11:26:29.12
+a8b758cd
+User
+No natal chart found for user 3. Client should prompt for calculation.
+2025-05-17 11:26:29.13
+a8b758cd
+User
+6:26:29 PM [express] GET /api/natal-chart 304 in 1ms
+2025-05-17 11:26:29.13
+a8b758cd
+User
+6:26:29 PM [express] GET /api/interpretations 404 in 0ms :: {"error":"Interpretation not found."}
+2025-05-17 11:26:29.13
+a8b758cd
+User
+6:26:29 PM [express] GET /api/interpretations 404 in 0ms :: {"error":"Interpretation not found."}
+2025-05-17 11:26:29.13
+a8b758cd
+User
+6:26:29 PM [express] GET /api/interpretations 304 in 1ms :: {"id":10,"elementType":"sun_sign","key":…
+
+Wrap
+
+Colors
+GEMINI_API_KEY
+••••••••
+Enable "Accessible Terminal" in Workspace Settings to use a screen reader with the shell.
