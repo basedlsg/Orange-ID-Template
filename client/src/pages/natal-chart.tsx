@@ -475,7 +475,7 @@ const NatalChartPageContent: React.FC = () => {
                   id="birthDate"
                   value={birthDate || (currentBirthData?.birthDate ? currentBirthData.birthDate.split('T')[0] : '')}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setBirthDate(e.target.value)}
-                  style={inputStyle}
+                  className="flex h-10 w-full rounded-md border border-[#444] bg-[#1e1e1e] px-3 py-2 text-sm text-[#E0E0E0] ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   required
                 />
               </div>
@@ -486,7 +486,7 @@ const NatalChartPageContent: React.FC = () => {
                   id="birthTime"
                   value={birthTime || (currentBirthData?.birthTime || '')}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setBirthTime(e.target.value)}
-                  style={inputStyle}
+                  className="flex h-10 w-full rounded-md border border-[#444] bg-[#1e1e1e] px-3 py-2 text-sm text-[#E0E0E0] ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   required
                 />
               </div>
@@ -498,8 +498,8 @@ const NatalChartPageContent: React.FC = () => {
                       variant="outline"
                       role="combobox"
                       aria-expanded={openCombobox}
-                      className="w-full justify-between"
-                      style={{...inputStyle, color: selectedCityValue || cityId ? '#E0E0E0' : '#707070' }}
+                      className="w-full justify-between h-10 rounded-md border border-[#444] bg-[#1e1e1e] px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      style={{ color: selectedCityValue || cityId ? '#E0E0E0' : '#707070' }}
                     >
                       {selectedCityValue
                         ? cities?.find((city) => city.id.toString() === selectedCityValue)?.name + ", " + cities?.find((city) => city.id.toString() === selectedCityValue)?.country
@@ -509,9 +509,12 @@ const NatalChartPageContent: React.FC = () => {
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-[#1e1e1e] border-[#444]" >
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0 bg-[#1e1e1e] border border-[#444]" >
                     <Command className="bg-[#1e1e1e]">
-                      <CommandInput placeholder="Search city..." className="h-9 text-[#E0E0E0] border-[#444] focus:ring-0 focus:border-[#E67E22]" />
+                      <CommandInput 
+                        placeholder="Search city..." 
+                        className="h-9 text-[#E0E0E0] border-[#444] focus:ring-0 focus:border-[#E67E22]"
+                      />
                       <CommandEmpty className="text-gray-400 p-2">No city found.</CommandEmpty>
                       <CommandList className="max-h-[200px] overflow-y-auto">
                         <CommandGroup>
