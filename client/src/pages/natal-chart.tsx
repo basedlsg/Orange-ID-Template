@@ -224,17 +224,25 @@ const NatalChartPageContent: React.FC = () => {
     console.log('[NatalChartPage] handleCalculateChart triggered.');
     console.log('[NatalChartPage] Form values:', { birthDate, birthTime, cityId });
 
-    if (!birthDate || !birthTime || cityId === null) {
+    if (!birthDate || cityId === null) {
       console.log('[NatalChartPage] Form validation failed. Missing data.');
       toast({
         title: "Missing Information",
-        description: "Please fill in all birth details and select a city.",
+        description: "Please provide a birth date and select a city.",
         variant: "destructive",
       });
       return;
     }
-    console.log('[NatalChartPage] Form validation passed. Calling mutation.');
-    calculateChartMutation.mutate({ birthDate, birthTime, cityId });
+    
+    // Use default time of noon (12:00) if birth time is not provided
+    const calculationTime = birthTime || '12:00';
+    console.log('[NatalChartPage] Form validation passed. Calling mutation with time:', calculationTime);
+    
+    calculateChartMutation.mutate({ 
+      birthDate, 
+      birthTime: calculationTime, 
+      cityId 
+    });
   };
 
   // Get orangeId from multiple sources for redundancy
@@ -480,14 +488,16 @@ const NatalChartPageContent: React.FC = () => {
                 />
               </div>
               <div style={inputGroupStyle}>
-                <label htmlFor="birthTime" style={labelStyle}>Birth Time:</label>
+                <div className="flex justify-between">
+                  <label htmlFor="birthTime" style={labelStyle}>Birth Time (optional):</label>
+                  <span className="text-xs text-gray-400 mt-1">Leave empty for noon (12:00 PM) chart</span>
+                </div>
                 <input
                   type="time"
                   id="birthTime"
                   value={birthTime || (currentBirthData?.birthTime || '')}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setBirthTime(e.target.value)}
                   className="flex h-10 w-full rounded-md border border-[#444] bg-[#1e1e1e] px-3 py-2 text-sm text-[#E0E0E0] ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  required
                 />
               </div>
               <div style={inputGroupStyle}>
@@ -562,7 +572,7 @@ const NatalChartPageContent: React.FC = () => {
               <Button
                 type="submit"
                 className="w-full mt-4 bg-[#E67E22] hover:bg-[#D35400] text-white"
-                disabled={calculateChartMutation.isPending || !birthDate || !birthTime || !cityId}
+                disabled={calculateChartMutation.isPending || !birthDate || !cityId}
               >
                 {calculateChartMutation.isPending ? (
                   <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Calculating...</>
