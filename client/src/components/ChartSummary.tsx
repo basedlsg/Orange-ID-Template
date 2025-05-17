@@ -39,16 +39,21 @@ const getClientAspectKey = (planet1Name: string, planet2Name: string, aspectName
 };
 
 const ChartSummary: React.FC<ChartSummaryProps> = ({ chartData, getInterpretationFn }) => {
+  // Immediately log the raw chartData to help with debugging
+  console.log('CHART_SUMMARY_DEBUG - Raw chartData:', chartData);
+  
   if (!chartData) {
     return <p style={{ color: '#E0E0E0' }}>No chart data available.</p>;
   }
   
-  // Debug log to see what's in chartData
-  console.log('ChartSummary received chartData:', {
-    ascendant: chartData.ascendant,
-    midheaven: chartData.midheaven,
-    hasAscendant: !!chartData.ascendant,
-    hasMidheaven: !!chartData.midheaven
+  console.log('CHART_SUMMARY_DEBUG - Specific properties:', {
+    ascendantType: typeof chartData.ascendant,
+    midheavenType: typeof chartData.midheaven,
+    ascendantValue: chartData.ascendant,
+    midheavenValue: chartData.midheaven,
+    ascendantSign: chartData.ascendant?.sign,
+    midheavenSign: chartData.midheaven?.sign,
+    ascendantDegree: chartData.ascendant?.degree
   });
 
   const formatDegrees = (value: number | undefined): string => {
